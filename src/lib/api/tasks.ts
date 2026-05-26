@@ -1,9 +1,21 @@
 import { api } from "./client";
 import type { Task, PaginatedResponse } from "@/types";
 
+function toSnake(payload: Partial<Task>) {
+  return {
+    title: payload.title,
+    description: payload.description ?? null,
+    priority: payload.priority ?? 2,
+    completed: payload.completed,
+    due_date: payload.dueDate ?? null,
+    is_recurring: payload.isRecurring ?? false,
+    recurrence: payload.recurrence ?? null,
+  };
+}
+
 export interface TaskFilters {
   completed?: boolean;
-  priority?: string;
+  priority?: 1 | 2 | 3;
   due_before?: string;
   due_after?: string;
   search?: string;
@@ -15,9 +27,12 @@ export interface TaskFilters {
 
 export const tasksApi = {
   getAll: async (filters?: TaskFilters): Promise<PaginatedResponse<Task>> => {
-    const { data } = await api.get<PaginatedResponse<Task>>("/tasks/", {
+    const { data } = await api.get<Task[] | PaginatedResponse<Task>>("/tasks/", {
       params: filters,
     });
+    if (Array.isArray(data)) {
+      return { items: data, total: data.length, skip: 0, limit: data.length };
+    }
     return data;
   },
 
@@ -26,15 +41,13 @@ export const tasksApi = {
     return data;
   },
 
-  create: async (
-    payload: Partial<Task>
-  ): Promise<Task> => {
-    const { data } = await api.post<Task>("/tasks/", payload);
+  create: async (payload: Partial<Task>): Promise<Task> => {
+    const { data } = await api.post<Task>("/tasks/", toSnake(payload));
     return data;
   },
 
   update: async (id: string, payload: Partial<Task>): Promise<Task> => {
-    const { data } = await api.patch<Task>(`/tasks/${id}`, payload);
+    const { data } = await api.patch<Task>(`/tasks/${id}`, toSnake(payload));
     return data;
   },
 

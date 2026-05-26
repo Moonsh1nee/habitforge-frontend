@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -14,6 +15,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers["retry-after"] ?? "60";
+      toast.error(`Слишком много запросов. Подождите ${retryAfter}с`);
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
       try {

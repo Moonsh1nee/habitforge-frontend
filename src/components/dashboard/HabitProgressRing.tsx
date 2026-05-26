@@ -4,15 +4,15 @@ import { motion } from "motion/react";
 import { ProgressRing } from "@/components/shared/ProgressRing";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { useLogHabit } from "@/lib/hooks/useHabits";
-import type { Habit } from "@/types";
+import type { HabitToday } from "@/types";
 
 interface HabitProgressRingProps {
-  habits: (Habit & { completedToday: boolean })[];
+  habits: HabitToday[];
 }
 
 export function HabitProgressRing({ habits }: HabitProgressRingProps) {
   const logHabit = useLogHabit();
-  const completed = habits.filter((h) => h.completedToday).length;
+  const completed = habits.filter((h) => h.completed_today).length;
 
   return (
     <GlassCard>
@@ -30,19 +30,19 @@ export function HabitProgressRing({ habits }: HabitProgressRingProps) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            onClick={() => !habit.completedToday && logHabit.mutate({ id: habit.id })}
+            onClick={() => !habit.completed_today && logHabit.mutate({ id: habit.id })}
             className="flex flex-col items-center gap-1.5 group"
-            disabled={habit.completedToday}
+            disabled={habit.completed_today}
           >
             <ProgressRing
-              value={habit.completedToday ? 100 : 0}
+              value={habit.completed_today ? 100 : 0}
               size={52}
               strokeWidth={4}
-              color={habit.completedToday ? "var(--color-success)" : "var(--color-primary)"}
-              label={habit.completedToday ? "✓" : "○"}
+              color={habit.completed_today ? "var(--color-success)" : habit.color}
+              label={habit.completed_today ? "✓" : (habit.icon ?? "○")}
             />
             <span className="text-[10px] text-muted max-w-[52px] truncate text-center">
-              {habit.name}
+              {habit.title}
             </span>
           </motion.button>
         ))}

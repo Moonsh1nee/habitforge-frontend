@@ -3,7 +3,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 import { authApi } from "@/lib/api/auth";
+import { api } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 export function useMe() {
@@ -62,6 +64,40 @@ export function useLogout() {
     onSettled: () => {
       clear();
       router.push("/login");
+    },
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      api.post("/auth/forgot-password", { email }),
+    onSuccess: () =>
+      toast.success("Если email зарегистрирован, письмо отправлено"),
+    onError: () =>
+      // Намеренно одинаковый ответ — не раскрываем существование аккаунта
+      toast.success("Если email зарегистрирован, письмо отправлено"),
+  });
+}
+
+export function useResetPassword() {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: ({
+      token,
+      new_password,
+    }: {
+      token: string;
+      new_password: string;
+    }) => api.post("/auth/reset-password", { token, new_password }),
+    onSuccess: () => {
+      toast.success("Пароль обновлён");
+      router.push("/login");
+    },
+    onError: (error: AxiosError) => {
+      if (error.response?.status === 400)
+        toast.error("Ссылка истекла или недействительна. Запросите новую.");
+      else toast.error("Ошибка сброса пароля");
     },
   });
 }

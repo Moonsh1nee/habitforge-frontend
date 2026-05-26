@@ -33,9 +33,9 @@ export function HabitCalendar({ habitId }: HabitCalendarProps) {
 
   const calendarData = (() => {
     const map = new Map<string, number>();
-    logs?.forEach((log) => {
+    (logs ?? []).forEach((log) => {
       const key = log.date.split("T")[0];
-      map.set(key, (map.get(key) ?? 0) + log.count);
+      map.set(key, (map.get(key) ?? 0) + (log.completed ? 1 : 0));
     });
     return Array.from(map.entries()).map(([date, count]) => ({
       date,
@@ -61,23 +61,23 @@ export function HabitCalendar({ habitId }: HabitCalendarProps) {
           <div className="glass p-3 text-center">
             <Flame size={16} className="text-warning mx-auto mb-1" />
             <div className="text-lg font-bold text-text">
-              <AnimatedNumber value={stats.currentStreak} />
+              <AnimatedNumber value={stats.current_streak} />
             </div>
             <p className="text-[10px] text-muted">Текущий стрик</p>
           </div>
           <div className="glass p-3 text-center">
             <TrendingUp size={16} className="text-primary mx-auto mb-1" />
             <div className="text-lg font-bold text-text">
-              <AnimatedNumber value={stats.longestStreak} />
+              <AnimatedNumber value={stats.longest_streak} />
             </div>
             <p className="text-[10px] text-muted">Лучший стрик</p>
           </div>
           <div className="glass p-3 text-center">
             <Calendar size={16} className="text-accent mx-auto mb-1" />
             <div className="text-lg font-bold text-text">
-              <AnimatedNumber value={Math.round(stats.completionRate * 100)} suffix="%" />
+              <AnimatedNumber value={stats.total_completed} />
             </div>
-            <p className="text-[10px] text-muted">Выполнение</p>
+            <p className="text-[10px] text-muted">Всего выполнено</p>
           </div>
         </div>
       )}

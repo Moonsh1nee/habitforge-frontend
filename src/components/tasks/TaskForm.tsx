@@ -39,22 +39,20 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
     defaultValues: task
       ? {
           title: task.title,
-          description: task.description,
+          description: task.description ?? undefined,
           priority: task.priority,
-          status: task.status,
           dueDate: task.dueDate?.split("T")[0],
+          isRecurring: task.isRecurring,
+          recurrence: task.recurrence ?? undefined,
         }
-      : { priority: "medium", status: "todo" },
+      : { priority: 2, isRecurring: false },
   });
 
   const onSubmit = (data: TaskInput) => {
     if (task) {
-      updateTask.mutate(
-        { id: task.id, payload: data },
-        { onSuccess }
-      );
+      updateTask.mutate({ id: task.id, payload: data as Partial<Task> }, { onSuccess });
     } else {
-      createTask.mutate(data, { onSuccess });
+      createTask.mutate(data as Partial<Task>, { onSuccess });
     }
   };
 
@@ -86,17 +84,16 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
         <div className="space-y-2">
           <Label className="text-text/80">Приоритет</Label>
           <Select
-            defaultValue={watch("priority")}
-            onValueChange={(v) => setValue("priority", v as TaskInput["priority"])}
+            defaultValue={String(watch("priority") ?? 2)}
+            onValueChange={(v) => setValue("priority", Number(v ?? "2") as TaskInput["priority"])}
           >
             <SelectTrigger className="bg-white/5 border-border text-text">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#13131a] border-border">
-              <SelectItem value="low">Низкий</SelectItem>
-              <SelectItem value="medium">Средний</SelectItem>
-              <SelectItem value="high">Высокий</SelectItem>
-              <SelectItem value="critical">Критический</SelectItem>
+              <SelectItem value="1">Высокий</SelectItem>
+              <SelectItem value="2">Средний</SelectItem>
+              <SelectItem value="3">Низкий</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -1,22 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { User, Lock, MessageSquare, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  User,
+  Lock,
+  MessageSquare,
+  Database,
+  Loader2,
+  Upload,
+  Plus,
+  Trash2,
+  Bell,
+  ToggleLeft,
+  ToggleRight,
+  Download,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { usersApi } from "@/lib/api/users";
+import { telegramApi, type Reminder } from "@/lib/api/telegram";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatDate } from "@/lib/utils";
 import type { User as UserType } from "@/types";
 
-function ProfileForm({ user }: { user: UserType }) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+// ─── Profile Tab ────────────────────────────────────────────────────────────
+
+function ProfileTab({ user }: { user: UserType }) {
   const qc = useQueryClient();
-  const setUser = useAuthStore((s) => s.setUser);
+  const { setUser } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const update = useMutation({
     mutationFn: (payload: Partial<UserType>) => usersApi.updateMe(payload),
@@ -28,6 +74,28 @@ function ProfileForm({ user }: { user: UserType }) {
     onError: () => toast.error("Ошибка обновления профиля"),
   });
 
+  const uploadAvatar = useMutation({
+    mutationFn: (file: File) => usersApi.uploadAvatar(file),
+    onSuccess: (res) => {
+      setUser({ ...user, avatarUrl: res.avatarUrl });
+      qc.invalidateQueries({ queryKey: ["me"] });
+      setPreview(null);
+      toast.success("Аватар обновлён");
+    },
+    onError: () => toast.error("Ошибка загрузки аватара"),
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    uploadAvatar.mutate(file);
+  };
+
+  const avatarSrc =
+    preview ??
+    (user.avatarUrl ? `${API_URL}${user.avatarUrl}` : null);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -36,84 +104,127 @@ function ProfileForm({ user }: { user: UserType }) {
       lastName: fd.get("lastName") as string,
       username: fd.get("username") as string,
       bio: fd.get("bio") as string,
-      timezone: fd.get("timezone") as string,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+    <GlassCard>
+      {/* Avatar */}
+      <div className="flex items-center gap-5 mb-6 pb-6 border-b border-border">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="relative group shrink-0"
+          title="Изменить аватар"
+        >
+          <div className="w-20 h-20 rounded-2xl overflow-hidden gradient-primary flex items-center justify-center">
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-white text-3xl font-bold">
+                {user.firstName?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {uploadAvatar.isPending ? (
+              <Loader2 size={18} className="text-white animate-spin" />
+            ) : (
+              <Upload size={18} className="text-white" />
+            )}
+          </div>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        <div>
+          <p className="font-semibold text-text">{user.firstName}</p>
+          <p className="text-sm text-muted">@{user.username}</p>
+          <p className="text-xs text-muted mt-1">
+            Нажмите на аватар для замены
+          </p>
+        </div>
+      </div>
+
+      {/* Profile form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-text/80">Имя</Label>
+            <Input
+              name="firstName"
+              defaultValue={user.firstName}
+              className="bg-white/5 border-border text-text"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-text/80">Фамилия</Label>
+            <Input
+              name="lastName"
+              defaultValue={user.lastName ?? ""}
+              className="bg-white/5 border-border text-text"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <Label className="text-text/80">Имя</Label>
+          <Label className="text-text/80">Юзернейм</Label>
           <Input
-            name="firstName"
-            defaultValue={user.firstName}
+            name="username"
+            defaultValue={user.username ?? ""}
             className="bg-white/5 border-border text-text"
           />
         </div>
+
         <div className="space-y-2">
-          <Label className="text-text/80">Фамилия</Label>
+          <Label className="text-text/80">Email</Label>
           <Input
-            name="lastName"
-            defaultValue={user.lastName ?? ""}
-            className="bg-white/5 border-border text-text"
+            value={user.email ?? ""}
+            disabled
+            className="bg-white/5 border-border text-muted opacity-60 cursor-not-allowed"
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-text/80">Юзернейм</Label>
-        <Input
-          name="username"
-          defaultValue={user.username}
-          className="bg-white/5 border-border text-text"
-        />
-      </div>
+        <div className="space-y-2">
+          <Label className="text-text/80">О себе</Label>
+          <Textarea
+            name="bio"
+            defaultValue={user.bio ?? ""}
+            placeholder="Расскажите о себе..."
+            className="bg-white/5 border-border text-text resize-none"
+            rows={3}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label className="text-text/80">Email</Label>
-        <Input
-          value={user.email}
-          disabled
-          className="bg-white/5 border-border text-muted opacity-60 cursor-not-allowed"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-text/80">О себе</Label>
-        <Textarea
-          name="bio"
-          defaultValue={user.bio ?? ""}
-          placeholder="Расскажите о себе..."
-          className="bg-white/5 border-border text-text resize-none"
-          rows={3}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-text/80">Часовой пояс</Label>
-        <Input
-          name="timezone"
-          defaultValue={user.timezone ?? "Europe/Moscow"}
-          placeholder="Europe/Moscow"
-          className="bg-white/5 border-border text-text"
-        />
-      </div>
-
-      <Button
-        type="submit"
-        disabled={update.isPending}
-        className="gradient-primary text-white"
-      >
-        {update.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
-        Сохранить
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          disabled={update.isPending}
+          className="gradient-primary text-white"
+        >
+          {update.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
+          Сохранить
+        </Button>
+      </form>
+    </GlassCard>
   );
 }
 
-function PasswordForm() {
-  const change = useMutation({
+// ─── Security Tab ────────────────────────────────────────────────────────────
+
+function SecurityTab() {
+  const router = useRouter();
+  const { clear } = useAuthStore();
+  const [deletePassword, setDeletePassword] = useState("");
+
+  const changePassword = useMutation({
     mutationFn: ({
       current,
       next,
@@ -125,57 +236,416 @@ function PasswordForm() {
     onError: () => toast.error("Неверный текущий пароль"),
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const deleteAccount = useMutation({
+    mutationFn: (password: string) => usersApi.deleteAccount(password),
+    onSuccess: () => {
+      clear();
+      router.push("/login");
+      toast.success("Аккаунт удалён");
+    },
+    onError: () => toast.error("Неверный пароль"),
+  });
+
+  const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const current = fd.get("current") as string;
     const next = fd.get("new") as string;
     const confirm = fd.get("confirm") as string;
     if (next !== confirm) {
       toast.error("Пароли не совпадают");
       return;
     }
-    change.mutate({ current, next });
+    changePassword.mutate({ current: fd.get("current") as string, next });
+  };
+
+  return (
+    <div className="space-y-6">
+      <GlassCard>
+        <h3 className="font-semibold text-text mb-4">Смена пароля</h3>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          {[
+            { name: "current", label: "Текущий пароль" },
+            { name: "new", label: "Новый пароль" },
+            { name: "confirm", label: "Подтвердите пароль" },
+          ].map(({ name, label }) => (
+            <div key={name} className="space-y-2">
+              <Label className="text-text/80">{label}</Label>
+              <Input
+                name={name}
+                type="password"
+                placeholder="••••••••"
+                className="bg-white/5 border-border text-text"
+              />
+            </div>
+          ))}
+          <Button
+            type="submit"
+            disabled={changePassword.isPending}
+            className="gradient-primary text-white"
+          >
+            {changePassword.isPending && (
+              <Loader2 size={16} className="animate-spin mr-2" />
+            )}
+            Изменить пароль
+          </Button>
+        </form>
+      </GlassCard>
+
+      {/* Danger Zone */}
+      <GlassCard className="border-danger/20">
+        <h3 className="font-semibold text-danger mb-2">Danger Zone</h3>
+        <p className="text-sm text-muted mb-4">
+          Удаление аккаунта необратимо. Все данные будут уничтожены.
+        </p>
+        <AlertDialog>
+          <AlertDialogTrigger
+            render={
+              <Button variant="destructive" className="bg-danger/20 text-danger hover:bg-danger/30 border border-danger/30">
+                Удалить аккаунт
+              </Button>
+            }
+          />
+          <AlertDialogContent className="bg-[#13131a] border-border">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-text">
+                Удалить аккаунт?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-muted">
+                Это действие нельзя отменить. Все ваши данные (задачи, привычки,
+                дневник, тренировки) будут удалены навсегда.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2 py-2">
+              <Label className="text-text/80">Введите текущий пароль для подтверждения</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="bg-white/5 border-border text-text"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="bg-white/5 border-border text-text hover:bg-white/10">
+                Отмена
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteAccount.mutate(deletePassword)}
+                disabled={!deletePassword || deleteAccount.isPending}
+                className="bg-danger text-white hover:bg-danger/80"
+              >
+                {deleteAccount.isPending ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : null}
+                Удалить навсегда
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </GlassCard>
+    </div>
+  );
+}
+
+// ─── Telegram Tab ────────────────────────────────────────────────────────────
+
+function ReminderForm({ onSuccess }: { onSuccess: () => void }) {
+  const qc = useQueryClient();
+  const [type, setType] = useState("custom");
+  const create = useMutation({
+    mutationFn: (p: Partial<Reminder>) => telegramApi.createReminder(p),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["telegram-reminders"] });
+      toast.success("Напоминание создано");
+      onSuccess();
+    },
+    onError: () => toast.error("Ошибка создания напоминания"),
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    create.mutate({
+      title: fd.get("title") as string,
+      type,
+      message: fd.get("message") as string,
+      cronExpression: fd.get("cron") as string,
+      isActive: true,
+    });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {[
-        { name: "current", label: "Текущий пароль" },
-        { name: "new", label: "Новый пароль" },
-        { name: "confirm", label: "Подтвердите пароль" },
-      ].map(({ name, label }) => (
-        <div key={name} className="space-y-2">
-          <Label className="text-text/80">{label}</Label>
-          <Input
-            name={name}
-            type="password"
-            placeholder="••••••••"
-            className="bg-white/5 border-border text-text"
-          />
-        </div>
-      ))}
-      <Button
-        type="submit"
-        disabled={change.isPending}
-        className="gradient-primary text-white"
-      >
-        {change.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
-        Изменить пароль
+      <div className="space-y-2">
+        <Label className="text-text/80">Название</Label>
+        <Input name="title" placeholder="Утренняя медитация" className="bg-white/5 border-border text-text" />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-text/80">Тип</Label>
+        <Select value={type} onValueChange={(v) => setType(v ?? "custom")}>
+          <SelectTrigger className="bg-white/5 border-border text-text">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-[#13131a] border-border">
+            <SelectItem value="habit">Привычка</SelectItem>
+            <SelectItem value="task">Задача</SelectItem>
+            <SelectItem value="custom">Произвольное</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-text/80">Сообщение</Label>
+        <Textarea name="message" placeholder="Текст напоминания..." className="bg-white/5 border-border text-text resize-none" rows={2} />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-text/80">
+          Cron-расписание
+          <span className="text-muted text-xs ml-2">например: 0 9 * * 1-5</span>
+        </Label>
+        <Input name="cron" placeholder="0 9 * * *" className="bg-white/5 border-border text-text font-mono text-sm" />
+      </div>
+      <Button type="submit" disabled={create.isPending} className="w-full gradient-primary text-white">
+        {create.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
+        Создать напоминание
       </Button>
     </form>
   );
 }
 
+function TelegramTab() {
+  const qc = useQueryClient();
+  const [reminderOpen, setReminderOpen] = useState(false);
+
+  const { data: link } = useQuery({
+    queryKey: ["telegram-link"],
+    queryFn: telegramApi.getLink,
+  });
+
+  const { data: reminders } = useQuery({
+    queryKey: ["telegram-reminders"],
+    queryFn: telegramApi.getReminders,
+  });
+
+  const unlink = useMutation({
+    mutationFn: telegramApi.unlink,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["telegram-link"] });
+      toast.success("Telegram отвязан");
+    },
+  });
+
+  const toggleReminder = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      telegramApi.updateReminder(id, { isActive }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["telegram-reminders"] }),
+  });
+
+  const deleteReminder = useMutation({
+    mutationFn: (id: string) => telegramApi.deleteReminder(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["telegram-reminders"] });
+      toast.success("Напоминание удалено");
+    },
+  });
+
+  return (
+    <div className="space-y-5">
+      {/* Link status */}
+      <GlassCard>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#229ED9]/20 flex items-center justify-center">
+            <MessageSquare size={20} className="text-[#229ED9]" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-text">Telegram-бот</h3>
+            <p className="text-xs text-muted">
+              {link?.isActive
+                ? `Привязан${link.username ? ` (@${link.username})` : ""}`
+                : "Не привязан"}
+            </p>
+          </div>
+          <div className={`ml-auto w-2 h-2 rounded-full ${link?.isActive ? "bg-success" : "bg-muted"}`} />
+        </div>
+        {link?.isActive ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => unlink.mutate()}
+            disabled={unlink.isPending}
+            className="border-danger/40 text-danger hover:bg-danger/10"
+          >
+            Отвязать
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.info("Напишите /start боту и следуйте инструкциям")}
+            className="border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9]/10"
+          >
+            Привязать
+          </Button>
+        )}
+      </GlassCard>
+
+      {/* Reminders */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-text flex items-center gap-2">
+            <Bell size={16} className="text-primary" />
+            Напоминания
+          </h3>
+          <Button
+            size="sm"
+            onClick={() => setReminderOpen(true)}
+            className="gradient-primary text-white gap-1.5"
+          >
+            <Plus size={14} />
+            Добавить
+          </Button>
+        </div>
+
+        {!reminders || reminders.length === 0 ? (
+          <p className="text-sm text-muted text-center py-6 glass rounded-xl">
+            Нет напоминаний
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {reminders.map((r) => (
+              <div key={r.id} className="glass p-4 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text">{r.title}</p>
+                  <p className="text-xs text-muted font-mono mt-0.5">{r.cronExpression}</p>
+                  {r.lastSentAt && (
+                    <p className="text-xs text-muted mt-1">
+                      Отправлено: {formatDate(r.lastSentAt, "d MMM, HH:mm")}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => toggleReminder.mutate({ id: r.id, isActive: !r.isActive })}
+                    className={r.isActive ? "text-primary" : "text-muted"}
+                  >
+                    {r.isActive ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
+                  </button>
+                  <button
+                    onClick={() => deleteReminder.mutate(r.id)}
+                    className="text-muted hover:text-danger transition-colors"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
+        <DialogContent className="bg-[#13131a] border-border">
+          <DialogHeader>
+            <DialogTitle className="text-text">Новое напоминание</DialogTitle>
+          </DialogHeader>
+          <ReminderForm onSuccess={() => setReminderOpen(false)} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Data Tab ────────────────────────────────────────────────────────────────
+
+function DataTab({ user }: { user: UserType }) {
+  const { setUser } = useAuthStore();
+  const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
+
+  const updateTimezone = useMutation({
+    mutationFn: (timezone: string) => usersApi.updateMe({ timezone }),
+    onSuccess: (data) => {
+      setUser(data);
+      toast.success("Часовой пояс обновлён");
+    },
+  });
+
+  const handleExport = async (format: "json" | "csv") => {
+    setExporting(format);
+    try {
+      const blob = await usersApi.exportData(format);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `habitforge-export.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Ошибка экспорта данных");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleTimezoneSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    updateTimezone.mutate(fd.get("timezone") as string);
+  };
+
+  return (
+    <div className="space-y-5">
+      <GlassCard>
+        <h3 className="font-semibold text-text mb-4">Часовой пояс</h3>
+        <form onSubmit={handleTimezoneSubmit} className="flex gap-3">
+          <Input
+            name="timezone"
+            defaultValue={user.timezone ?? "Europe/Moscow"}
+            placeholder="Europe/Moscow"
+            className="bg-white/5 border-border text-text flex-1"
+          />
+          <Button type="submit" disabled={updateTimezone.isPending} className="gradient-primary text-white">
+            Сохранить
+          </Button>
+        </form>
+      </GlassCard>
+
+      <GlassCard>
+        <h3 className="font-semibold text-text mb-2">Экспорт данных</h3>
+        <p className="text-sm text-muted mb-5">
+          Скачайте все свои данные в удобном формате.
+        </p>
+        <div className="flex gap-3">
+          {(["json", "csv"] as const).map((fmt) => (
+            <Button
+              key={fmt}
+              variant="outline"
+              onClick={() => handleExport(fmt)}
+              disabled={exporting !== null}
+              className="border-border text-text hover:bg-white/5 gap-2"
+            >
+              {exporting === fmt ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Download size={15} />
+              )}
+              Экспорт {fmt.toUpperCase()}
+            </Button>
+          ))}
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
-
   if (!user) return null;
 
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold">
+        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold">
           {user.firstName?.[0]?.toUpperCase()}
         </div>
         <div>
@@ -186,54 +656,38 @@ export default function ProfilePage() {
 
       <Tabs defaultValue="profile">
         <TabsList className="bg-white/5 border border-border">
-          <TabsTrigger value="profile" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+          <TabsTrigger value="profile" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
             <User size={14} />
             Профиль
           </TabsTrigger>
-          <TabsTrigger value="password" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+          <TabsTrigger value="security" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
             <Lock size={14} />
-            Пароль
+            Безопасность
           </TabsTrigger>
-          <TabsTrigger value="telegram" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+          <TabsTrigger value="telegram" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
             <MessageSquare size={14} />
             Telegram
+          </TabsTrigger>
+          <TabsTrigger value="data" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+            <Database size={14} />
+            Данные
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="mt-4">
-          <GlassCard>
-            <ProfileForm user={user} />
-          </GlassCard>
+          <ProfileTab user={user} />
         </TabsContent>
 
-        <TabsContent value="password" className="mt-4">
-          <GlassCard>
-            <PasswordForm />
-          </GlassCard>
+        <TabsContent value="security" className="mt-4">
+          <SecurityTab />
         </TabsContent>
 
         <TabsContent value="telegram" className="mt-4">
-          <GlassCard>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#229ED9]/20 flex items-center justify-center">
-                <MessageSquare size={20} className="text-[#229ED9]" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-text">Telegram-бот</h3>
-                <p className="text-xs text-muted">Получайте напоминания и статистику</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted mb-4">
-              Привяжите Telegram-аккаунт чтобы получать напоминания о привычках и задачах прямо в мессенджере.
-            </p>
-            <Button
-              variant="outline"
-              className="border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9]/10"
-              onClick={() => toast.info("Функция в разработке")}
-            >
-              Привязать Telegram
-            </Button>
-          </GlassCard>
+          <TelegramTab />
+        </TabsContent>
+
+        <TabsContent value="data" className="mt-4">
+          <DataTab user={user} />
         </TabsContent>
       </Tabs>
     </div>

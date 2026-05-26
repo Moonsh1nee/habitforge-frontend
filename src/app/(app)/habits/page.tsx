@@ -119,7 +119,7 @@ export default function HabitsPage() {
                         selectedHabit.color ?? "var(--color-primary)",
                     }}
                   />
-                  {selectedHabit.name}
+                  {selectedHabit.title}
                 </SheetTitle>
               </SheetHeader>
               <HabitCalendar habitId={selectedHabit.id} />

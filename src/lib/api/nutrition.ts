@@ -1,15 +1,13 @@
 import { api } from "./client";
-import type { FoodLog, NutritionPlan, NutritionSummary } from "@/types";
+import type { FoodLog, NutritionPlan, DailySummary } from "@/types";
 
 export const nutritionApi = {
   getPlans: async (): Promise<NutritionPlan[]> => {
     const { data } = await api.get<NutritionPlan[]>("/nutrition/plans");
-    return data;
+    return Array.isArray(data) ? data : [];
   },
 
-  createPlan: async (
-    payload: Partial<NutritionPlan>
-  ): Promise<NutritionPlan> => {
+  createPlan: async (payload: Partial<NutritionPlan>): Promise<NutritionPlan> => {
     const { data } = await api.post<NutritionPlan>("/nutrition/plans", payload);
     return data;
   },
@@ -22,7 +20,7 @@ export const nutritionApi = {
     limit?: number;
   }): Promise<FoodLog[]> => {
     const { data } = await api.get<FoodLog[]>("/nutrition/logs", { params });
-    return data;
+    return Array.isArray(data) ? data : [];
   },
 
   createLog: async (payload: Partial<FoodLog>): Promise<FoodLog> => {
@@ -39,19 +37,8 @@ export const nutritionApi = {
     await api.delete(`/nutrition/logs/${id}`);
   },
 
-  getSummary: async (date: string): Promise<NutritionSummary> => {
-    const { data } = await api.get<NutritionSummary>(
-      "/nutrition/logs/summary",
-      { params: { date } }
-    );
-    return data;
-  },
-
-  getStats: async (params: {
-    start: string;
-    end: string;
-  }): Promise<{ date: string; calories: number; protein: number }[]> => {
-    const { data } = await api.get("/nutrition/stats", { params });
+  getSummary: async (date: string): Promise<DailySummary> => {
+    const { data } = await api.get<DailySummary>("/nutrition/logs/summary", { params: { date } });
     return data;
   },
 };

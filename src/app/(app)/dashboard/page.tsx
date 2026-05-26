@@ -53,7 +53,10 @@ export default function DashboardPage() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           <motion.div variants={item} className="lg:col-span-2">
-            <TodayCard tasks={today?.tasks ?? []} />
+            <TodayCard
+              pending={today?.tasks_pending ?? []}
+              overdue={today?.tasks_overdue ?? []}
+            />
           </motion.div>
 
           <motion.div variants={item}>
@@ -61,28 +64,28 @@ export default function DashboardPage() {
           </motion.div>
 
           <motion.div variants={item}>
-            <MacroBar nutrition={today?.nutrition} />
+            <MacroBar calories={today?.nutrition_calories ?? 0} />
           </motion.div>
 
-          {today?.journal && (
+          {today?.journal_entry && (
             <motion.div variants={item} className="glass p-6">
               <h3 className="font-semibold text-text mb-3">Дневник сегодня</h3>
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {today.journal.mood ?? "—"}
+                    {today.journal_entry.mood ?? "—"}
                   </div>
                   <p className="text-xs text-muted">Настроение</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-accent">
-                    {today.journal.energy ?? "—"}
+                    {today.journal_entry.energy ?? "—"}
                   </div>
                   <p className="text-xs text-muted">Энергия</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-warning">
-                    {today.journal.sleepHours ?? "—"}
+                    {today.journal_entry.sleepHours ?? "—"}
                   </div>
                   <p className="text-xs text-muted">Сон (ч)</p>
                 </div>

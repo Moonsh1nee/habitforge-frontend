@@ -1,8 +1,13 @@
+"use client";
+
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  useRealtimeEvents();
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />

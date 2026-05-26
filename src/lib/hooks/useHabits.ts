@@ -61,8 +61,8 @@ export function useUpdateHabit() {
 export function useLogHabit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, date, notes }: { id: string; date?: string; notes?: string }) =>
-      habitsApi.logCompletion(id, date, 1, notes),
+    mutationFn: ({ id, date, note }: { id: string; date?: string; note?: string }) =>
+      habitsApi.logCompletion(id, date, note),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: ["habits"] });
       qc.invalidateQueries({ queryKey: ["habits", id, "logs"] });

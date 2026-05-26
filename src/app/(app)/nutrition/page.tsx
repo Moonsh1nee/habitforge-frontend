@@ -125,6 +125,11 @@ export default function NutritionPage() {
     queryFn: () => nutritionApi.getSummary(today),
   });
 
+  const { data: logs = [] } = useQuery({
+    queryKey: ["nutrition", "logs", today],
+    queryFn: () => nutritionApi.getLogs({ date: today }),
+  });
+
   const deleteLog = useMutation({
     mutationFn: (id: string) => nutritionApi.deleteLog(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["nutrition"] }),
@@ -132,9 +137,9 @@ export default function NutritionPage() {
 
   const macros = summary
     ? [
-        { name: "Белки", value: summary.protein ?? 0, color: MACRO_COLORS[1] },
-        { name: "Углеводы", value: summary.carbs ?? 0, color: MACRO_COLORS[2] },
-        { name: "Жиры", value: summary.fat ?? 0, color: MACRO_COLORS[3] },
+        { name: "Белки", value: summary.total_protein ?? 0, color: MACRO_COLORS[1] },
+        { name: "Углеводы", value: summary.total_carbs ?? 0, color: MACRO_COLORS[2] },
+        { name: "Жиры", value: summary.total_fat ?? 0, color: MACRO_COLORS[3] },
       ]
     : [];
 
@@ -184,7 +189,7 @@ export default function NutritionPage() {
           <div className="flex-1 grid grid-cols-2 gap-4">
             <div className="text-center">
               <AnimatedNumber
-                value={summary.calories}
+                value={summary.total_calories}
                 className="text-3xl font-bold text-warning"
               />
               <p className="text-xs text-muted">ккал</p>
@@ -202,14 +207,14 @@ export default function NutritionPage() {
       )}
 
       <div className="space-y-3">
-        {!summary?.entries?.length ? (
+        {!logs.length ? (
           <EmptyState
             icon={<Apple />}
             title="Нет записей питания"
             description="Добавьте первый приём пищи"
           />
         ) : (
-          summary.entries.map((entry, i) => (
+          logs.map((entry, i) => (
             <motion.div
               key={entry.id}
               initial={{ opacity: 0, y: 8 }}

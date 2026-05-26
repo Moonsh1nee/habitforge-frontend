@@ -29,16 +29,19 @@ export function getGreeting(name: string): string {
   return `Добрый вечер, ${name}`;
 }
 
-export function getPriorityColor(priority: string): string {
+export function getPriorityColor(priority: number): string {
   switch (priority) {
-    case "critical":
-      return "text-danger border-danger/30 bg-danger/10";
-    case "high":
-      return "text-warning border-warning/30 bg-warning/10";
-    case "medium":
-      return "text-accent border-accent/30 bg-accent/10";
-    default:
-      return "text-muted border-border bg-surface";
+    case 1: return "text-warning border-warning/30 bg-warning/10";
+    case 2: return "text-accent border-accent/30 bg-accent/10";
+    default: return "text-muted border-border bg-surface";
+  }
+}
+
+export function getPriorityLabel(priority: number): string {
+  switch (priority) {
+    case 1: return "Высокий";
+    case 2: return "Средний";
+    default: return "Низкий";
   }
 }
 

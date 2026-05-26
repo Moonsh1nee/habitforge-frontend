@@ -29,20 +29,20 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
     resolver: zodResolver(habitSchema),
     defaultValues: habit
       ? {
-          name: habit.name,
-          description: habit.description,
+          title: habit.title,
+          description: habit.description ?? undefined,
           frequency: habit.frequency,
-          targetCount: habit.targetCount,
-          color: habit.color,
+          targetPerWeek: habit.targetPerWeek ?? undefined,
+          color: habit.color ?? undefined,
         }
-      : { frequency: "daily", targetCount: 1 },
+      : { frequency: "daily" },
   });
 
   const onSubmit = (data: HabitInput) => {
     if (habit) {
-      updateHabit.mutate({ id: habit.id, payload: data }, { onSuccess });
+      updateHabit.mutate({ id: habit.id, payload: data as Partial<Habit> }, { onSuccess });
     } else {
-      createHabit.mutate(data, { onSuccess });
+      createHabit.mutate(data as Partial<Habit>, { onSuccess });
     }
   };
 
@@ -53,10 +53,10 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
         <Input
           placeholder="Например: Медитация"
           className="bg-white/5 border-border text-text placeholder:text-muted"
-          {...register("name")}
+          {...register("title")}
         />
-        {errors.name && (
-          <p className="text-danger text-xs">{errors.name.message}</p>
+        {errors.title && (
+          <p className="text-danger text-xs">{errors.title.message}</p>
         )}
       </div>
 
@@ -81,12 +81,13 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-text/80">Цель (раз/день)</Label>
+          <Label className="text-text/80">Цель (раз/неделю)</Label>
           <Input
             type="number"
             min={1}
+            placeholder="7"
             className="bg-white/5 border-border text-text"
-            {...register("targetCount", { valueAsNumber: true })}
+            {...register("targetPerWeek", { valueAsNumber: true })}
           />
         </div>
       </div>

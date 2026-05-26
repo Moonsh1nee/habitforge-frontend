@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { JournalEntry, JournalStats } from "@/types";
+import type { DailyEntry, JournalStats } from "@/types";
 
 export const journalApi = {
   getEntries: async (params?: {
@@ -7,33 +7,23 @@ export const journalApi = {
     end?: string;
     skip?: number;
     limit?: number;
-  }): Promise<JournalEntry[]> => {
-    const { data } = await api.get<JournalEntry[]>("/journal/entries", {
-      params,
-    });
+  }): Promise<DailyEntry[]> => {
+    const { data } = await api.get<DailyEntry[]>("/journal/entries", { params });
+    return Array.isArray(data) ? data : [];
+  },
+
+  getEntry: async (date: string): Promise<DailyEntry> => {
+    const { data } = await api.get<DailyEntry>(`/journal/entries/${date}`);
     return data;
   },
 
-  getEntry: async (date: string): Promise<JournalEntry> => {
-    const { data } = await api.get<JournalEntry>(`/journal/entries/${date}`);
+  createEntry: async (payload: Partial<DailyEntry>): Promise<DailyEntry> => {
+    const { data } = await api.post<DailyEntry>("/journal/entries", payload);
     return data;
   },
 
-  createEntry: async (
-    payload: Partial<JournalEntry>
-  ): Promise<JournalEntry> => {
-    const { data } = await api.post<JournalEntry>("/journal/entries", payload);
-    return data;
-  },
-
-  updateEntry: async (
-    date: string,
-    payload: Partial<JournalEntry>
-  ): Promise<JournalEntry> => {
-    const { data } = await api.patch<JournalEntry>(
-      `/journal/entries/${date}`,
-      payload
-    );
+  updateEntry: async (date: string, payload: Partial<DailyEntry>): Promise<DailyEntry> => {
+    const { data } = await api.patch<DailyEntry>(`/journal/entries/${date}`, payload);
     return data;
   },
 
@@ -41,10 +31,7 @@ export const journalApi = {
     await api.delete(`/journal/entries/${date}`);
   },
 
-  getStats: async (params: {
-    start: string;
-    end: string;
-  }): Promise<JournalStats> => {
+  getStats: async (params?: { start?: string; end?: string }): Promise<JournalStats> => {
     const { data } = await api.get<JournalStats>("/journal/stats", { params });
     return data;
   },

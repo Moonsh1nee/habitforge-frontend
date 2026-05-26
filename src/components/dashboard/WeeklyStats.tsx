@@ -3,52 +3,41 @@
 import { GlassCard } from "@/components/shared/GlassCard";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
 import { Flame, CheckSquare, Dumbbell, Smile } from "lucide-react";
-import type { DashboardWeek } from "@/types";
+import type { WeekStats } from "@/types";
 
 interface WeeklyStatsProps {
-  week?: DashboardWeek;
+  week?: WeekStats;
 }
 
 export function WeeklyStats({ week }: WeeklyStatsProps) {
   if (!week) return null;
 
-  const tasksCompleted = week.tasks?.completed ?? 0;
-  const tasksTotal = week.tasks?.total ?? 0;
-  const habits = week.habits ?? [];
-  const avgHabitRate =
-    habits.length > 0
-      ? Math.round(
-          habits.reduce((acc, h) => acc + (h.completionRate ?? 0), 0) /
-            habits.length
-        )
-      : 0;
-
   const stats = [
     {
       icon: CheckSquare,
       label: "Задачи",
-      value: tasksCompleted,
-      suffix: `/${tasksTotal}`,
+      value: week.tasks_completed ?? 0,
+      suffix: `/${week.tasks_total ?? 0}`,
       color: "text-primary",
     },
     {
       icon: Flame,
       label: "Привычки",
-      value: avgHabitRate,
+      value: week.habits_completion_rate ?? 0,
       suffix: "%",
       color: "text-warning",
     },
     {
       icon: Dumbbell,
       label: "Тренировки",
-      value: week.workouts ?? 0,
+      value: week.workouts_count ?? 0,
       suffix: " раз",
       color: "text-accent",
     },
     {
       icon: Smile,
       label: "Настроение",
-      value: week.journal?.avgMood ?? 0,
+      value: week.avg_mood ?? 0,
       suffix: "/10",
       color: "text-success",
       decimals: 1,

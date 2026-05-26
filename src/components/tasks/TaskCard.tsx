@@ -4,16 +4,9 @@ import { motion } from "motion/react";
 import { Calendar, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { cn, formatDate, isOverdue, getPriorityColor } from "@/lib/utils";
+import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
 import { useUpdateTask, useDeleteTask } from "@/lib/hooks/useTasks";
 import type { Task } from "@/types";
-
-const priorityLabel: Record<string, string> = {
-  low: "Низкий",
-  medium: "Средний",
-  high: "Высокий",
-  critical: "Критический",
-};
 
 interface TaskCardProps {
   task: Task;
@@ -22,15 +15,14 @@ interface TaskCardProps {
 export function TaskCard({ task }: TaskCardProps) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
-  const overdue = task.dueDate && isOverdue(task.dueDate) && task.status !== "done";
+  const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
 
   const toggleDone = () => {
     updateTask.mutate({
       id: task.id,
       payload: {
-        status: task.status === "done" ? "todo" : "done",
-        completedAt:
-          task.status === "done" ? undefined : new Date().toISOString(),
+        completed: !task.completed,
+        completedAt: !task.completed ? new Date().toISOString() : null,
       },
     });
   };
@@ -45,7 +37,7 @@ export function TaskCard({ task }: TaskCardProps) {
     >
       <div className="flex items-start gap-3">
         <Checkbox
-          checked={task.status === "done"}
+          checked={task.completed}
           onCheckedChange={toggleDone}
           className="mt-0.5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
         />
@@ -54,9 +46,7 @@ export function TaskCard({ task }: TaskCardProps) {
           <p
             className={cn(
               "text-sm font-medium transition-all",
-              task.status === "done"
-                ? "line-through text-muted"
-                : "text-text"
+              task.completed ? "line-through text-muted" : "text-text"
             )}
           >
             {task.title}
@@ -73,7 +63,7 @@ export function TaskCard({ task }: TaskCardProps) {
               variant="outline"
               className={cn("text-[10px] px-1.5 py-0", getPriorityColor(task.priority))}
             >
-              {priorityLabel[task.priority]}
+              {getPriorityLabel(task.priority)}
             </Badge>
 
             {task.dueDate && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Flame, CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Habit } from "@/types";
 
@@ -24,10 +24,10 @@ export function HabitCard({ habit, onLog, onClick }: HabitCardProps) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
           <div
-            className="w-3 h-3 rounded-full flex-shrink-0"
+            className="w-3 h-3 rounded-full shrink-0"
             style={{ background: habit.color ?? "var(--color-primary)" }}
           />
-          <h3 className="font-semibold text-text text-sm">{habit.name}</h3>
+          <h3 className="font-semibold text-text text-sm">{habit.title}</h3>
         </div>
 
         <motion.button
@@ -37,7 +37,7 @@ export function HabitCard({ habit, onLog, onClick }: HabitCardProps) {
             if (!done) onLog();
           }}
           className={cn(
-            "flex-shrink-0 transition-colors",
+            "shrink-0 transition-colors",
             done ? "text-success" : "text-muted hover:text-primary"
           )}
         >
@@ -49,9 +49,11 @@ export function HabitCard({ habit, onLog, onClick }: HabitCardProps) {
         <p className="text-xs text-muted mb-3 line-clamp-2">{habit.description}</p>
       )}
 
-      <div className="flex items-center gap-1.5 text-xs text-warning">
-        <Flame size={12} />
-        <span>{habit.streak ?? 0} дней подряд</span>
+      <div className="flex items-center gap-1.5 text-xs text-muted">
+        <span className="capitalize">{habit.frequency}</span>
+        {habit.targetPerWeek && (
+          <span>· {habit.targetPerWeek}×/нед</span>
+        )}
       </div>
     </motion.div>
   );

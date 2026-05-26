@@ -5,6 +5,7 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import { useLogout } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 
 export function Topbar() {
   const user = useAuthStore((s) => s.user);
@@ -17,6 +18,8 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <GlobalSearch />
+
         <button className="text-muted hover:text-text transition-colors p-1.5 rounded-lg hover:bg-white/5">
           <Bell size={18} />
         </button>

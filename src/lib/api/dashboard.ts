@@ -1,14 +1,14 @@
 import { api } from "./client";
-import type { DashboardToday, DashboardWeek } from "@/types";
+import type { TodayDashboard, WeekStats } from "@/types";
 
 export const dashboardApi = {
-  getToday: async (): Promise<DashboardToday> => {
-    const { data } = await api.get<DashboardToday>("/dashboard/today");
+  getToday: async (): Promise<TodayDashboard> => {
+    const { data } = await api.get<TodayDashboard>("/dashboard/today");
     return data;
   },
 
-  getWeek: async (): Promise<DashboardWeek> => {
-    const { data } = await api.get<DashboardWeek>("/dashboard/week");
+  getWeek: async (): Promise<WeekStats> => {
+    const { data } = await api.get<WeekStats>("/dashboard/week");
     return data;
   },
 };
