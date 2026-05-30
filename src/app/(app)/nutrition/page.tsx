@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { Plus, Apple, Trash2 } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { nutritionApi } from "@/lib/api/nutrition";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -158,32 +158,30 @@ export default function NutritionPage() {
 
       {summary && (
         <GlassCard className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-40 h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={macros}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={45}
-                  outerRadius={65}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {macros.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "#13131a",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 8,
-                    color: "#f1f5f9",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="w-40 h-40 shrink-0">
+            <PieChart width={160} height={160}>
+              <Pie
+                data={macros}
+                cx={80}
+                cy={80}
+                innerRadius={45}
+                outerRadius={65}
+                dataKey="value"
+                strokeWidth={0}
+              >
+                {macros.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  background: "#13131a",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 8,
+                  color: "#f1f5f9",
+                }}
+              />
+            </PieChart>
           </div>
 
           <div className="flex-1 grid grid-cols-2 gap-4">

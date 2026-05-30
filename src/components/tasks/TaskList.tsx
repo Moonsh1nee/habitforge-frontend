@@ -8,9 +8,10 @@ import type { Task } from "@/types";
 
 interface TaskListProps {
   tasks: Task[];
+  onEdit: (task: Task) => void;
 }
 
-export function TaskList({ tasks }: TaskListProps) {
+export function TaskList({ tasks, onEdit }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <EmptyState
@@ -25,7 +26,7 @@ export function TaskList({ tasks }: TaskListProps) {
     <div className="space-y-2">
       <AnimatePresence initial={false}>
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onEdit={onEdit} />
         ))}
       </AnimatePresence>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Calendar, Trash2 } from "lucide-react";
+import { Calendar, Pencil, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
@@ -10,9 +10,10 @@ import type { Task } from "@/types";
 
 interface TaskCardProps {
   task: Task;
+  onEdit: (task: Task) => void;
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, onEdit }: TaskCardProps) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
@@ -80,12 +81,20 @@ export function TaskCard({ task }: TaskCardProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => deleteTask.mutate(task.id)}
-          className="opacity-0 group-hover:opacity-100 text-muted hover:text-danger transition-all p-1"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+          <button
+            onClick={() => onEdit(task)}
+            className="text-muted hover:text-primary transition-colors p-1"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            onClick={() => deleteTask.mutate(task.id)}
+            className="text-muted hover:text-danger transition-colors p-1"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
     </motion.div>
   );

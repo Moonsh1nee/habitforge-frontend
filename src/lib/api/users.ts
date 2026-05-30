@@ -11,7 +11,12 @@ export const usersApi = {
     return data;
   },
 
-  updateMe: async (payload: Partial<User>): Promise<User> => {
+  updateMe: async (payload: {
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+    timezone?: string;
+  }): Promise<User> => {
     const { data } = await api.patch<User>("/users/me", payload);
     return data;
   },

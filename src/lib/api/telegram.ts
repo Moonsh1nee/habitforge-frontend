@@ -1,28 +1,27 @@
 import { api } from "./client";
+import type { TelegramLink } from "@/types";
+
+export type { TelegramLink };
 
 export interface Reminder {
   id: string;
   type: string;
   title: string;
-  message: string;
+  message: string | null;
   cronExpression: string;
   isActive: boolean;
-  lastSentAt?: string;
+  lastSentAt: string | null;
   createdAt?: string;
 }
 
-export interface TelegramLinkStatus {
-  chatId?: number;
-  username?: string;
-  isActive: boolean;
-  linkedAt?: string;
-}
-
 export const telegramApi = {
-  getLink: async (): Promise<TelegramLinkStatus> =>
+  getLink: async (): Promise<TelegramLink> =>
     api.get("/telegram/link").then((r) => r.data),
 
-  link: async (code: string): Promise<TelegramLinkStatus> =>
+  getLinkCode: async (): Promise<{ code: string }> =>
+    api.post("/telegram/link/code").then((r) => r.data),
+
+  link: async (code: string): Promise<TelegramLink> =>
     api.post("/telegram/link", { code }).then((r) => r.data),
 
   unlink: async (): Promise<void> => {
@@ -30,7 +29,7 @@ export const telegramApi = {
   },
 
   getReminders: async (): Promise<Reminder[]> =>
-    api.get("/telegram/reminders").then((r) => r.data),
+    api.get("/telegram/reminders", { params: { active_only: false } }).then((r) => r.data),
 
   createReminder: async (payload: Partial<Reminder>): Promise<Reminder> =>
     api.post("/telegram/reminders", payload).then((r) => r.data),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   User,
@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -51,8 +50,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { User as UserType } from "@/types";
+import type { AxiosError } from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -65,7 +65,8 @@ function ProfileTab({ user }: { user: UserType }) {
   const [preview, setPreview] = useState<string | null>(null);
 
   const update = useMutation({
-    mutationFn: (payload: Partial<UserType>) => usersApi.updateMe(payload),
+    mutationFn: (payload: { firstName?: string; lastName?: string; bio?: string; timezone?: string }) =>
+      usersApi.updateMe(payload),
     onSuccess: (data) => {
       setUser(data);
       qc.invalidateQueries({ queryKey: ["me"] });
@@ -102,8 +103,8 @@ function ProfileTab({ user }: { user: UserType }) {
     update.mutate({
       firstName: fd.get("firstName") as string,
       lastName: fd.get("lastName") as string,
-      username: fd.get("username") as string,
       bio: fd.get("bio") as string,
+      timezone: fd.get("timezone") as string,
     });
   };
 
@@ -178,9 +179,9 @@ function ProfileTab({ user }: { user: UserType }) {
         <div className="space-y-2">
           <Label className="text-text/80">Юзернейм</Label>
           <Input
-            name="username"
-            defaultValue={user.username ?? ""}
-            className="bg-white/5 border-border text-text"
+            value={user.username ?? ""}
+            disabled
+            className="bg-white/5 border-border text-muted opacity-60 cursor-not-allowed"
           />
         </div>
 
@@ -202,6 +203,17 @@ function ProfileTab({ user }: { user: UserType }) {
             className="bg-white/5 border-border text-text resize-none"
             rows={3}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-text/80">Часовой пояс</Label>
+          <Input
+            name="timezone"
+            defaultValue={user.timezone ?? "Europe/Moscow"}
+            placeholder="Europe/Moscow"
+            className="bg-white/5 border-border text-text"
+          />
+          <p className="text-xs text-muted">IANA timezone: Europe/Moscow, UTC, America/New_York</p>
         </div>
 
         <Button
@@ -415,15 +427,33 @@ function ReminderForm({ onSuccess }: { onSuccess: () => void }) {
 function TelegramTab() {
   const qc = useQueryClient();
   const [reminderOpen, setReminderOpen] = useState(false);
+  const [linkCode, setLinkCode] = useState<string | null>(null);
+  const [linkCodeOpen, setLinkCodeOpen] = useState(false);
 
-  const { data: link } = useQuery({
+  const { data: link, error: linkError } = useQuery({
     queryKey: ["telegram-link"],
     queryFn: telegramApi.getLink,
+    throwOnError: false,
+    retry: false,
   });
+
+  // 404 means not linked — expected state, not an error
+  const isLinked = link?.isActive === true;
+  const hasFetchError =
+    !!linkError && (linkError as AxiosError).response?.status !== 404;
 
   const { data: reminders } = useQuery({
     queryKey: ["telegram-reminders"],
     queryFn: telegramApi.getReminders,
+  });
+
+  const getLinkCode = useMutation({
+    mutationFn: telegramApi.getLinkCode,
+    onSuccess: ({ code }) => {
+      setLinkCode(code);
+      setLinkCodeOpen(true);
+    },
+    onError: () => toast.error("Не удалось получить код привязки"),
   });
 
   const unlink = useMutation({
@@ -459,14 +489,16 @@ function TelegramTab() {
           <div>
             <h3 className="font-semibold text-text">Telegram-бот</h3>
             <p className="text-xs text-muted">
-              {link?.isActive
-                ? `Привязан${link.username ? ` (@${link.username})` : ""}`
-                : "Не привязан"}
+              {isLinked
+                ? `Привязан${link?.username ? ` (@${link.username})` : ""}`
+                : hasFetchError
+                  ? "Ошибка загрузки"
+                  : "Не привязан"}
             </p>
           </div>
-          <div className={`ml-auto w-2 h-2 rounded-full ${link?.isActive ? "bg-success" : "bg-muted"}`} />
+          <div className={`ml-auto w-2 h-2 rounded-full ${isLinked ? "bg-success" : "bg-muted"}`} />
         </div>
-        {link?.isActive ? (
+        {isLinked ? (
           <Button
             variant="outline"
             size="sm"
@@ -480,13 +512,57 @@ function TelegramTab() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => toast.info("Напишите /start боту и следуйте инструкциям")}
+            onClick={() => getLinkCode.mutate()}
+            disabled={getLinkCode.isPending}
             className="border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9]/10"
           >
-            Привязать
+            {getLinkCode.isPending ? "Получаем код..." : "Привязать"}
           </Button>
         )}
       </GlassCard>
+
+      {/* Link code dialog */}
+      {linkCodeOpen && linkCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass p-6 rounded-2xl max-w-sm w-full mx-4 space-y-4">
+            <h3 className="font-semibold text-text text-lg">Привязка Telegram</h3>
+            <ol className="text-sm text-muted space-y-2 list-decimal list-inside">
+              <li>Откройте нашего Telegram-бота</li>
+              <li>Отправьте команду <span className="text-text font-mono">/start</span></li>
+              <li>Введите код ниже в ответ на запрос бота</li>
+            </ol>
+            <div className="bg-white/5 rounded-xl p-4 text-center">
+              <p className="text-xs text-muted mb-1">Ваш код</p>
+              <p className="text-3xl font-mono font-bold text-primary tracking-widest">{linkCode}</p>
+              <p className="text-xs text-muted mt-2">Действителен 15 минут</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  navigator.clipboard.writeText(linkCode);
+                  toast.success("Код скопирован");
+                }}
+              >
+                Скопировать
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1 gradient-primary text-white"
+                onClick={() => {
+                  setLinkCodeOpen(false);
+                  setLinkCode(null);
+                  qc.invalidateQueries({ queryKey: ["telegram-link"] });
+                }}
+              >
+                Готово
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reminders */}
       <div>
@@ -638,14 +714,26 @@ function DataTab({ user }: { user: UserType }) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
+type SettingsTab = "profile" | "security" | "telegram" | "data";
+
+const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
+  { id: "profile", label: "Профиль", icon: User },
+  { id: "security", label: "Безопасность", icon: Lock },
+  { id: "telegram", label: "Telegram", icon: MessageSquare },
+  { id: "data", label: "Данные", icon: Database },
+];
+
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold">
+        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">
           {user.firstName?.[0]?.toUpperCase()}
         </div>
         <div>
@@ -654,42 +742,35 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <Tabs defaultValue="profile">
-        <TabsList className="bg-white/5 border border-border">
-          <TabsTrigger value="profile" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-            <User size={14} />
-            Профиль
-          </TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-            <Lock size={14} />
-            Безопасность
-          </TabsTrigger>
-          <TabsTrigger value="telegram" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-            <MessageSquare size={14} />
-            Telegram
-          </TabsTrigger>
-          <TabsTrigger value="data" className="gap-1.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-            <Database size={14} />
-            Данные
-          </TabsTrigger>
-        </TabsList>
+      {/* Settings layout: fixed left nav + content */}
+      <div className="flex gap-6 items-start">
+        {/* Left nav — fixed width, never shifts */}
+        <nav className="w-44 shrink-0 space-y-0.5">
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all text-left",
+                activeTab === id
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "text-muted hover:text-text hover:bg-white/5"
+              )}
+            >
+              <Icon size={15} className="shrink-0" />
+              {label}
+            </button>
+          ))}
+        </nav>
 
-        <TabsContent value="profile" className="mt-4">
-          <ProfileTab user={user} />
-        </TabsContent>
-
-        <TabsContent value="security" className="mt-4">
-          <SecurityTab />
-        </TabsContent>
-
-        <TabsContent value="telegram" className="mt-4">
-          <TelegramTab />
-        </TabsContent>
-
-        <TabsContent value="data" className="mt-4">
-          <DataTab user={user} />
-        </TabsContent>
-      </Tabs>
+        {/* Content — fills remaining space */}
+        <div className="flex-1 min-w-0">
+          {activeTab === "profile" && <ProfileTab user={user} />}
+          {activeTab === "security" && <SecurityTab />}
+          {activeTab === "telegram" && <TelegramTab />}
+          {activeTab === "data" && <DataTab user={user} />}
+        </div>
+      </div>
     </div>
   );
 }

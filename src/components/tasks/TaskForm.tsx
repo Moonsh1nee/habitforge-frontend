@@ -84,7 +84,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
         <div className="space-y-2">
           <Label className="text-text/80">Приоритет</Label>
           <Select
-            defaultValue={String(watch("priority") ?? 2)}
+            value={String(watch("priority") ?? 2)}
             onValueChange={(v) => setValue("priority", Number(v ?? "2") as TaskInput["priority"])}
           >
             <SelectTrigger className="bg-white/5 border-border text-text">

@@ -16,7 +16,8 @@ export const registerSchema = z
     password: z
       .string()
       .min(8, "Минимум 8 символов")
-      .regex(/\d/, "Пароль должен содержать хотя бы одну цифру"),
+      .regex(/\d/, "Нужна хотя бы одна цифра")
+      .regex(/[A-Z]/, "Нужна хотя бы одна заглавная буква"),
     confirmPassword: z.string(),
   })
   .refine((d) => d.password === d.confirmPassword, {
@@ -36,7 +37,8 @@ export const resetPasswordSchema = z
     new_password: z
       .string()
       .min(8, "Минимум 8 символов")
-      .regex(/\d/, "Пароль должен содержать хотя бы одну цифру"),
+      .regex(/\d/, "Нужна хотя бы одна цифра")
+      .regex(/[A-Z]/, "Нужна хотя бы одна заглавная буква"),
     confirm_password: z.string(),
   })
   .refine((d) => d.new_password === d.confirm_password, {

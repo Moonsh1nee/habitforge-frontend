@@ -4,9 +4,9 @@ import type { Task, PaginatedResponse } from "@/types";
 function toSnake(payload: Partial<Task>) {
   return {
     title: payload.title,
-    description: payload.description ?? null,
+    ...(payload.description !== undefined && { description: payload.description }),
     priority: payload.priority ?? 2,
-    completed: payload.completed,
+    ...(payload.completed !== undefined && { completed: payload.completed }),
     due_date: payload.dueDate ?? null,
     is_recurring: payload.isRecurring ?? false,
     recurrence: payload.recurrence ?? null,

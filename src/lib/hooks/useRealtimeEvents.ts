@@ -22,18 +22,26 @@ export function useRealtimeEvents() {
       }, 30_000);
     };
 
-    ws.onmessage = (event) => {
-      if (event.data === "pong") return;
+    ws.onmessage = (e) => {
+      if (e.data === "pong") return;
       try {
-        const { event: type } = JSON.parse(event.data as string);
-        if (typeof type === "string") {
-          if (type.startsWith("task_")) qc.invalidateQueries({ queryKey: ["tasks"] });
-          if (type.startsWith("habit_")) qc.invalidateQueries({ queryKey: ["habits"] });
-          if (type === "dashboard_updated") qc.invalidateQueries({ queryKey: ["dashboard"] });
+        const { type } = JSON.parse(e.data as string) as { type: string };
+        switch (type) {
+          case "task.updated":
+          case "task.deleted":
+            qc.invalidateQueries({ queryKey: ["tasks"] });
+            qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
+            break;
+          case "habit.checked":
+            qc.invalidateQueries({ queryKey: ["habits"] });
+            qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
+            break;
+          case "journal.updated":
+          case "nutrition.logged":
+            qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
+            break;
         }
-      } catch {
-        // ignore malformed messages
-      }
+      } catch { /* ignore malformed */ }
     };
 
     ws.onclose = () => clearInterval(pingInterval);
