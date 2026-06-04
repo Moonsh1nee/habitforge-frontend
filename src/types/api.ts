@@ -269,6 +269,52 @@ export interface TelegramLink {
   linkedAt: string;
 }
 
+// ─── Finance ──────────────────────────────────────────────────────────────────
+
+export type TransactionType = "income" | "expense";
+
+export interface FinanceCategory {
+  id:        string;
+  userId:    string;
+  name:      string;
+  icon:      string | null;
+  color:     string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FinanceTransaction {
+  id:          string;
+  userId:      string;
+  categoryId:  string | null;
+  type:        TransactionType;
+  amount:      number;
+  description: string | null;
+  date:        string;
+  createdAt:   string;
+  updatedAt:   string;
+}
+
+export interface CategorySummary {
+  categoryId:    string | null;
+  categoryName:  string;
+  categoryIcon:  string | null;
+  categoryColor: string | null;
+  type:          TransactionType;
+  total:         number;
+  count:         number;
+}
+
+export interface FinanceSummary {
+  period_start:       string;
+  period_end:         string;
+  total_income:       number;
+  total_expense:      number;
+  balance:            number;
+  transactions_count: number;
+  by_category:        CategorySummary[];
+}
+
 // ─── Pagination ───────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {

@@ -119,25 +119,25 @@ export default function TasksPage() {
         )}
       </div>
 
-      {/* Filters + Sort */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Completion tabs */}
-        <Tabs value={completedFilter} onValueChange={(v) => setCompletedFilter(v as CompletedFilter)}>
-          <TabsList className="bg-white/5 border border-border h-8">
-            {(["all", "todo", "done"] as const).map((v) => (
-              <TabsTrigger
-                key={v}
-                value={v}
-                className="text-xs h-6 data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-              >
-                {v === "all" ? "Все" : v === "todo" ? "Активные" : "Выполненные"}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+      {/* Row 1: Completion tabs */}
+      <Tabs value={completedFilter} onValueChange={(v) => setCompletedFilter(v as CompletedFilter)}>
+        <TabsList className="bg-transparent p-0 gap-1 h-auto">
+          {(["all", "todo", "done"] as const).map((v) => (
+            <TabsTrigger
+              key={v}
+              value={v}
+              className="px-4 py-1.5 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_var(--color-primary-glow)] hover:text-text"
+            >
+              {v === "all" ? "Все" : v === "todo" ? "Активные" : "Выполненные"}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
+      {/* Row 2: Priority chips + sort */}
+      <div className="flex items-center gap-2 flex-wrap">
         {/* Priority chips */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {PRIORITY_CHIPS.map(({ label, value }) => (
             <button
               key={label}
@@ -159,7 +159,7 @@ export default function TasksPage() {
         <div className="ml-auto flex items-center gap-2">
           {/* Sort by */}
           <Select value={orderBy} onValueChange={(v) => setOrderBy(v as OrderBy)}>
-            <SelectTrigger className="bg-white/5 border-border text-text text-xs h-8 w-44">
+            <SelectTrigger className="bg-white/5 border-border text-text text-xs h-8 w-36 sm:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#13131a] border-border">
@@ -169,7 +169,7 @@ export default function TasksPage() {
             </SelectContent>
           </Select>
 
-          {/* Sort direction toggle */}
+          {/* Sort direction */}
           <button
             onClick={() => setOrderDir((d) => (d === "asc" ? "desc" : "asc"))}
             title={orderDir === "asc" ? "По возрастанию" : "По убыванию"}

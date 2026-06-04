@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { Plus, Apple, Trash2 } from "lucide-react";
+import { Plus, Apple, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { addDays, format, isToday, parseISO } from "date-fns";
+import { ru } from "date-fns/locale";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { nutritionApi } from "@/lib/api/nutrition";
 import { GlassCard } from "@/components/shared/GlassCard";
@@ -37,7 +39,7 @@ const mealLabels: Record<MealType, string> = {
   snack: "Перекус",
 };
 
-function AddFoodForm({ onSuccess }: { onSuccess: () => void }) {
+function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void }) {
   const [mealType, setMealType] = useState<MealType>("breakfast");
   const qc = useQueryClient();
   const create = useMutation({
@@ -49,11 +51,11 @@ function AddFoodForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>, date: string) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     create.mutate({
-      date: getTodayString(),
+      date,
       mealType,
       name: fd.get("name") as string,
       calories: Number(fd.get("calories")),
@@ -64,7 +66,7 @@ function AddFoodForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={(e) => handleSubmit(e, date)} className="space-y-4">
       <div className="space-y-2">
         <Label className="text-text/80">Название</Label>
         <Input
@@ -117,17 +119,22 @@ function AddFoodForm({ onSuccess }: { onSuccess: () => void }) {
 
 export default function NutritionPage() {
   const [addOpen, setAddOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(getTodayString());
   const qc = useQueryClient();
   const today = getTodayString();
 
+  const shiftDate = (days: number) => {
+    setSelectedDate((d) => format(addDays(parseISO(d), days), "yyyy-MM-dd"));
+  };
+
   const { data: summary } = useQuery({
-    queryKey: ["nutrition", "summary", today],
-    queryFn: () => nutritionApi.getSummary(today),
+    queryKey: ["nutrition", "summary", selectedDate],
+    queryFn: () => nutritionApi.getSummary(selectedDate),
   });
 
   const { data: logs = [] } = useQuery({
-    queryKey: ["nutrition", "logs", today],
-    queryFn: () => nutritionApi.getLogs({ date: today }),
+    queryKey: ["nutrition", "logs", selectedDate],
+    queryFn: () => nutritionApi.getLogs({ date: selectedDate }),
   });
 
   const deleteLog = useMutation({
@@ -147,13 +154,45 @@ export default function NutritionPage() {
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-text">Питание</h1>
-        <Button
-          onClick={() => setAddOpen(true)}
-          className="gradient-primary text-white gap-2"
-        >
+        <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
           <Plus size={16} />
           Добавить еду
         </Button>
+      </div>
+
+      {/* Date navigation */}
+      <div className="flex items-center justify-center gap-3">
+        <button
+          onClick={() => shiftDate(-1)}
+          className="p-2 rounded-lg border border-border text-muted hover:text-text hover:border-primary/40 transition-all"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div className="text-center min-w-40">
+          <p className="text-sm font-medium text-text capitalize">
+            {isToday(parseISO(selectedDate))
+              ? "Сегодня"
+              : format(parseISO(selectedDate), "d MMMM", { locale: ru })}
+          </p>
+          <p className="text-xs text-muted">
+            {format(parseISO(selectedDate), "EEEE", { locale: ru })}
+          </p>
+        </div>
+        <button
+          onClick={() => shiftDate(1)}
+          disabled={selectedDate >= today}
+          className="p-2 rounded-lg border border-border text-muted hover:text-text hover:border-primary/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronRight size={16} />
+        </button>
+        {selectedDate !== today && (
+          <button
+            onClick={() => setSelectedDate(today)}
+            className="text-xs text-primary hover:text-primary/80 transition-colors ml-1"
+          >
+            Сегодня
+          </button>
+        )}
       </div>
 
       {summary && (
@@ -247,7 +286,7 @@ export default function NutritionPage() {
           <DialogHeader>
             <DialogTitle className="text-text">Добавить еду</DialogTitle>
           </DialogHeader>
-          <AddFoodForm onSuccess={() => setAddOpen(false)} />
+          <AddFoodForm date={selectedDate} onSuccess={() => setAddOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Repeat2 } from "lucide-react";
 import { motion } from "motion/react";
-import { useHabits, useLogHabit } from "@/lib/hooks/useHabits";
+import { useHabits, useLogHabit, useDeleteHabit } from "@/lib/hooks/useHabits";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { HabitForm } from "@/components/habits/HabitForm";
 import { HabitCalendar } from "@/components/habits/HabitCalendar";
@@ -32,8 +32,11 @@ const item = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
 export default function HabitsPage() {
   const [formOpen, setFormOpen] = useState(false);
+  const [editHabit, setEditHabit] = useState<Habit | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+
   const logHabit = useLogHabit();
+  const deleteHabit = useDeleteHabit();
 
   const { data, isLoading } = useHabits({ archived: false });
   const habits = data?.items ?? [];
@@ -45,10 +48,7 @@ export default function HabitsPage() {
           <h1 className="text-2xl font-bold text-text">Привычки</h1>
           <p className="text-sm text-muted mt-0.5">{habits.length} привычек</p>
         </div>
-        <Button
-          onClick={() => setFormOpen(true)}
-          className="gradient-primary text-white gap-2"
-        >
+        <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white gap-2">
           <Plus size={16} />
           Новая привычка
         </Button>
@@ -62,10 +62,7 @@ export default function HabitsPage() {
           title="Нет привычек"
           description="Создайте первую привычку для отслеживания прогресса"
           action={
-            <Button
-              onClick={() => setFormOpen(true)}
-              className="gradient-primary text-white"
-            >
+            <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white">
               Создать привычку
             </Button>
           }
@@ -83,13 +80,15 @@ export default function HabitsPage() {
                 habit={habit}
                 onLog={() => logHabit.mutate({ id: habit.id })}
                 onClick={() => setSelectedHabit(habit)}
+                onEdit={(h) => setEditHabit(h)}
+                onDelete={(id) => deleteHabit.mutate(id)}
               />
             </motion.div>
           ))}
         </motion.div>
       )}
 
-      {/* Create habit dialog */}
+      {/* Create dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="bg-[#13131a] border-border">
           <DialogHeader>
@@ -99,11 +98,20 @@ export default function HabitsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Habit detail sheet */}
-      <Sheet
-        open={!!selectedHabit}
-        onOpenChange={(o) => !o && setSelectedHabit(null)}
-      >
+      {/* Edit dialog */}
+      <Dialog open={!!editHabit} onOpenChange={(o) => !o && setEditHabit(null)}>
+        <DialogContent className="bg-[#13131a] border-border">
+          <DialogHeader>
+            <DialogTitle className="text-text">Редактировать привычку</DialogTitle>
+          </DialogHeader>
+          {editHabit && (
+            <HabitForm habit={editHabit} onSuccess={() => setEditHabit(null)} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Detail sheet */}
+      <Sheet open={!!selectedHabit} onOpenChange={(o) => !o && setSelectedHabit(null)}>
         <SheetContent
           side="right"
           className="bg-[#13131a] border-border w-full sm:max-w-lg overflow-y-auto"
@@ -112,13 +120,14 @@ export default function HabitsPage() {
             <>
               <SheetHeader className="mb-6">
                 <SheetTitle className="text-text flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      background:
-                        selectedHabit.color ?? "var(--color-primary)",
-                    }}
-                  />
+                  {selectedHabit.icon ? (
+                    <span>{selectedHabit.icon}</span>
+                  ) : (
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ background: selectedHabit.color ?? "var(--color-primary)" }}
+                    />
+                  )}
                   {selectedHabit.title}
                 </SheetTitle>
               </SheetHeader>

@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { WorkoutPlan, WorkoutLog, PlanExercise, ExerciseLog } from "@/types";
+import type { WorkoutPlan, WorkoutPlanWithExercises, WorkoutLog, WorkoutLogWithExercises, PlanExercise, ExerciseLog } from "@/types";
 
 export const workoutsApi = {
   getPlans: async (): Promise<WorkoutPlan[]> => {
@@ -7,8 +7,8 @@ export const workoutsApi = {
     return data;
   },
 
-  getPlan: async (id: string): Promise<WorkoutPlan> => {
-    const { data } = await api.get<WorkoutPlan>(`/workouts/plans/${id}`);
+  getPlan: async (id: string): Promise<WorkoutPlanWithExercises> => {
+    const { data } = await api.get<WorkoutPlanWithExercises>(`/workouts/plans/${id}`);
     return data;
   },
 
@@ -53,8 +53,8 @@ export const workoutsApi = {
     return data;
   },
 
-  getLog: async (id: string): Promise<WorkoutLog> => {
-    const { data } = await api.get<WorkoutLog>(`/workouts/logs/${id}`);
+  getLog: async (id: string): Promise<WorkoutLogWithExercises> => {
+    const { data } = await api.get<WorkoutLogWithExercises>(`/workouts/logs/${id}`);
     return data;
   },
 

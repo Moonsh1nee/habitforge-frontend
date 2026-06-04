@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import Link from "next/link";
 import { useDashboardToday, useDashboardWeek } from "@/lib/hooks/useDashboard";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { TodayCard } from "@/components/dashboard/TodayCard";
@@ -53,55 +54,65 @@ export default function DashboardPage() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           <motion.div variants={item} className="lg:col-span-2">
-            <TodayCard
-              pending={today?.tasks_pending ?? []}
-              overdue={today?.tasks_overdue ?? []}
-            />
+            <Link href="/tasks" className="block">
+              <TodayCard
+                pending={today?.tasks_pending ?? []}
+                overdue={today?.tasks_overdue ?? []}
+              />
+            </Link>
           </motion.div>
 
           <motion.div variants={item}>
-            <HabitProgressRing habits={today?.habits ?? []} />
+            <Link href="/habits" className="block">
+              <HabitProgressRing habits={today?.habits ?? []} />
+            </Link>
           </motion.div>
 
           <motion.div variants={item}>
-            <MacroBar calories={today?.nutrition_calories ?? 0} />
+            <Link href="/nutrition" className="block">
+              <MacroBar calories={today?.nutrition_calories ?? 0} />
+            </Link>
           </motion.div>
 
           {today?.journal_entry && (
-            <motion.div variants={item} className="glass p-6">
-              <h3 className="font-semibold text-text mb-3">Дневник сегодня</h3>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {today.journal_entry.mood ?? "—"}
+            <motion.div variants={item}>
+              <Link href="/journal" className="block glass p-6 hover:border-primary/30 transition-colors">
+                <h3 className="font-semibold text-text mb-3">Дневник сегодня</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {today.journal_entry.mood ?? "—"}
+                    </div>
+                    <p className="text-xs text-muted">Настроение</p>
                   </div>
-                  <p className="text-xs text-muted">Настроение</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-accent">
-                    {today.journal_entry.energy ?? "—"}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-accent">
+                      {today.journal_entry.energy ?? "—"}
+                    </div>
+                    <p className="text-xs text-muted">Энергия</p>
                   </div>
-                  <p className="text-xs text-muted">Энергия</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-warning">
-                    {today.journal_entry.sleepHours ?? "—"}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-warning">
+                      {today.journal_entry.sleepHours ?? "—"}
+                    </div>
+                    <p className="text-xs text-muted">Сон (ч)</p>
                   </div>
-                  <p className="text-xs text-muted">Сон (ч)</p>
                 </div>
-              </div>
+              </Link>
             </motion.div>
           )}
 
           {today?.workout && (
-            <motion.div variants={item} className="glass p-6">
-              <h3 className="font-semibold text-text mb-2">Тренировка</h3>
-              <p className="text-3xl font-bold text-success">
-                {today.workout.durationMinutes} мин
-              </p>
-              <p className="text-xs text-muted mt-1">
-                {today.workout.notes ?? "Без заметок"}
-              </p>
+            <motion.div variants={item}>
+              <Link href="/workouts" className="block glass p-6 hover:border-primary/30 transition-colors">
+                <h3 className="font-semibold text-text mb-2">Тренировка</h3>
+                <p className="text-3xl font-bold text-success">
+                  {today.workout.durationMinutes} мин
+                </p>
+                <p className="text-xs text-muted mt-1">
+                  {today.workout.notes ?? "Без заметок"}
+                </p>
+              </Link>
             </motion.div>
           )}
 

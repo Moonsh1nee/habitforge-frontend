@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth.schema";
 import { useRegister } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,15 @@ import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
   const registerMutation = useRegister();
+
+  const pwChecks = [
+    { label: "Минимум 8 символов", ok: password.length >= 8 },
+    { label: "Есть цифра", ok: /\d/.test(password) },
+    { label: "Есть заглавная буква", ok: /[A-Z]/.test(password) },
+  ];
+  const pwStrength = pwChecks.filter((c) => c.ok).length;
 
   const {
     register,
@@ -87,10 +96,10 @@ export default function RegisterPage() {
           <div className="relative">
             <Input
               type={showPassword ? "text" : "password"}
-              placeholder="Минимум 8 символов с цифрой"
+              placeholder="Минимум 8 символов"
               autoComplete="new-password"
               className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary pr-10"
-              {...register("password")}
+              {...register("password", { onChange: (e) => setPassword(e.target.value) })}
             />
             <button
               type="button"
@@ -100,6 +109,33 @@ export default function RegisterPage() {
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+
+          {/* Strength indicator */}
+          {password.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 flex-1 rounded-full transition-all duration-300",
+                      i < pwStrength
+                        ? pwStrength === 1 ? "bg-danger" : pwStrength === 2 ? "bg-warning" : "bg-success"
+                        : "bg-white/10"
+                    )}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                {pwChecks.map(({ label, ok }) => (
+                  <span key={label} className={cn("text-[11px] transition-colors", ok ? "text-success" : "text-muted")}>
+                    {ok ? "✓" : "·"} {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {errors.password && (
             <p className="text-danger text-xs">{errors.password.message}</p>
           )}

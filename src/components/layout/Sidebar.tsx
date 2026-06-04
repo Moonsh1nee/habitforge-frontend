@@ -4,16 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
-  LayoutDashboard,
-  CheckSquare,
-  Repeat2,
-  Dumbbell,
-  Apple,
-  BookOpen,
-  User,
-  Zap,
+  LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
+  Apple, BookOpen, User, Zap, Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
@@ -21,16 +16,17 @@ const navItems = [
   { href: "/habits", icon: Repeat2, label: "Привычки" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
+  { href: "/finance", icon: Wallet, label: "Финансы" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
   { href: "/profile", icon: User, label: "Профиль" },
 ];
 
-export function Sidebar() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-full flex flex-col border-r border-border bg-surface/30 backdrop-blur-xl shrink-0">
-      <div className="flex items-center gap-2 px-6 py-5 border-b border-border">
+    <>
+      <div className="flex items-center gap-2 px-6 py-5 border-b border-border shrink-0">
         <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
           <Zap size={16} className="text-white" />
         </div>
@@ -41,7 +37,7 @@ export function Sidebar() {
         {navItems.map(({ href, icon: Icon, label }) => {
           const active = pathname.startsWith(href);
           return (
-            <Link key={href} href={href}>
+            <Link key={href} href={href} onClick={onNavigate}>
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -66,6 +62,32 @@ export function Sidebar() {
           );
         })}
       </nav>
-    </aside>
+    </>
+  );
+}
+
+interface SidebarProps {
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
+  return (
+    <>
+      {/* Mobile — Sheet */}
+      <Sheet open={mobileOpen} onOpenChange={(o) => !o && onMobileClose()}>
+        <SheetContent
+          side="left"
+          className="p-0 w-64 bg-background border-border flex flex-col"
+        >
+          <SidebarContent onNavigate={onMobileClose} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop — always visible */}
+      <aside className="hidden md:flex w-64 h-full flex-col border-r border-border bg-surface/30 backdrop-blur-xl shrink-0">
+        <SidebarContent />
+      </aside>
+    </>
   );
 }
