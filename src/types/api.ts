@@ -13,13 +13,7 @@ export interface User {
   updatedAt: string;
 }
 
-export interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-}
-
-export interface AuthResponse extends AuthTokens {
+export interface AuthResponse {
   user: User;
 }
 

@@ -9,22 +9,22 @@ import { api } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 export function useMe() {
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const user = useAuthStore((s) => s.user);
   return useQuery({
     queryKey: ["me"],
     queryFn: authApi.me,
-    enabled: !!accessToken,
+    enabled: !user, // only fetch if we don't have user in memory yet
+    retry: false,
   });
 }
 
 export function useLogin() {
   const router = useRouter();
-  const { setTokens, setUser } = useAuthStore();
+  const { setUser } = useAuthStore();
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authApi.login(email, password),
     onSuccess: (data) => {
-      setTokens(data.access_token, data.refresh_token);
       setUser(data.user);
       router.push("/dashboard");
     },
@@ -34,7 +34,7 @@ export function useLogin() {
 
 export function useRegister() {
   const router = useRouter();
-  const { setTokens, setUser } = useAuthStore();
+  const { setUser } = useAuthStore();
   return useMutation({
     mutationFn: ({
       email,
@@ -48,7 +48,6 @@ export function useRegister() {
       firstName: string;
     }) => authApi.register(email, password, username, firstName),
     onSuccess: (data) => {
-      setTokens(data.access_token, data.refresh_token);
       setUser(data.user);
       router.push("/dashboard");
     },

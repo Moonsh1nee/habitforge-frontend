@@ -5,11 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 export function useRealtimeEvents() {
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const user = useAuthStore((s) => s.user);
   const qc = useQueryClient();
 
   useEffect(() => {
-    if (!accessToken) return;
+    if (!user) return;
 
     let ws: WebSocket;
     let pingInterval: ReturnType<typeof setInterval>;
@@ -21,7 +21,9 @@ export function useRealtimeEvents() {
       if (destroyed) return;
 
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
-      ws = new WebSocket(`${wsUrl}/ws/events?token=${accessToken}`);
+      // Cookies are sent automatically by the browser on WS upgrade (HTTP standard).
+      // No token query param needed when using HttpOnly cookies.
+      ws = new WebSocket(`${wsUrl}/ws/events`);
 
       ws.onopen = () => {
         retries = 0;
@@ -50,13 +52,18 @@ export function useRealtimeEvents() {
               break;
             case "nutrition.logged":
               qc.invalidateQueries({ queryKey: ["nutrition"] });
+              qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "finance.updated":
-              qc.invalidateQueries({ queryKey: ["finance"] });
+              qc.invalidateQueries({ queryKey: ["finance-categories"] });
+              qc.invalidateQueries({ queryKey: ["finance-transactions"] });
+              qc.invalidateQueries({ queryKey: ["finance-summary"] });
+              qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "workout.updated":
-              qc.invalidateQueries({ queryKey: ["workouts"] });
+              qc.invalidateQueries({ queryKey: ["workout-plans"] });
+              qc.invalidateQueries({ queryKey: ["workout-logs"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
           }
@@ -81,5 +88,5 @@ export function useRealtimeEvents() {
       clearTimeout(retryTimeout);
       ws?.close();
     };
-  }, [accessToken, qc]);
+  }, [user, qc]);
 }

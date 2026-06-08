@@ -1,5 +1,9 @@
 import { api } from "./client";
-import type { AuthResponse, AuthTokens, User } from "@/types";
+import type { User } from "@/types";
+
+export interface AuthResponse {
+  user: User;
+}
 
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
@@ -31,13 +35,6 @@ export const authApi = {
 
   logoutAll: async (): Promise<void> => {
     await api.post("/auth/logout/all");
-  },
-
-  refresh: async (refreshToken: string): Promise<AuthTokens> => {
-    const { data } = await api.post<AuthTokens>("/auth/refresh", {
-      refresh_token: refreshToken,
-    });
-    return data;
   },
 
   me: async (): Promise<User> => {
