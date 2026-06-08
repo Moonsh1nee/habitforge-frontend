@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { FoodLog, NutritionPlan, DailySummary } from "@/types";
+import type { FoodLog, NutritionPlan, MealTemplate, DailySummary } from "@/types";
 
 export const nutritionApi = {
   getPlans: async (): Promise<NutritionPlan[]> => {
@@ -40,5 +40,33 @@ export const nutritionApi = {
   getSummary: async (date: string): Promise<DailySummary> => {
     const { data } = await api.get<DailySummary>("/nutrition/logs/summary", { params: { date } });
     return data;
+  },
+
+  updatePlan: async (id: string, payload: Partial<NutritionPlan>): Promise<NutritionPlan> => {
+    const { data } = await api.patch<NutritionPlan>(`/nutrition/plans/${id}`, payload);
+    return data;
+  },
+
+  deletePlan: async (id: string): Promise<void> => {
+    await api.delete(`/nutrition/plans/${id}`);
+  },
+
+  getPlanMeals: async (planId: string): Promise<MealTemplate[]> => {
+    const { data } = await api.get<MealTemplate[]>(`/nutrition/plans/${planId}/meals`);
+    return Array.isArray(data) ? data : [];
+  },
+
+  addPlanMeal: async (planId: string, payload: Partial<MealTemplate>): Promise<MealTemplate> => {
+    const { data } = await api.post<MealTemplate>(`/nutrition/plans/${planId}/meals`, payload);
+    return data;
+  },
+
+  updatePlanMeal: async (planId: string, mealId: string, payload: Partial<MealTemplate>): Promise<MealTemplate> => {
+    const { data } = await api.patch<MealTemplate>(`/nutrition/plans/${planId}/meals/${mealId}`, payload);
+    return data;
+  },
+
+  deletePlanMeal: async (planId: string, mealId: string): Promise<void> => {
+    await api.delete(`/nutrition/plans/${planId}/meals/${mealId}`);
   },
 };

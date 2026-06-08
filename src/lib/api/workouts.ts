@@ -88,4 +88,36 @@ export const workoutsApi = {
     );
     return data;
   },
+
+  updatePlanExercise: async (
+    planId: string,
+    exerciseId: string,
+    payload: Partial<PlanExercise>
+  ): Promise<PlanExercise> => {
+    const { data } = await api.patch<PlanExercise>(
+      `/workouts/plans/${planId}/exercises/${exerciseId}`,
+      payload
+    );
+    return data;
+  },
+
+  deletePlanExercise: async (planId: string, exerciseId: string): Promise<void> => {
+    await api.delete(`/workouts/plans/${planId}/exercises/${exerciseId}`);
+  },
+
+  updateLogExercise: async (
+    logId: string,
+    exerciseId: string,
+    payload: Partial<ExerciseLog>
+  ): Promise<ExerciseLog> => {
+    const { data } = await api.patch<ExerciseLog>(
+      `/workouts/logs/${logId}/exercises/${exerciseId}`,
+      payload
+    );
+    return data;
+  },
+
+  deleteLogExercise: async (logId: string, exerciseId: string): Promise<void> => {
+    await api.delete(`/workouts/logs/${logId}/exercises/${exerciseId}`);
+  },
 };

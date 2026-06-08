@@ -166,6 +166,19 @@ export interface FoodLog {
   createdAt: string;
 }
 
+export interface MealTemplate {
+  id: string;
+  planId: string;
+  name: string;
+  mealType: MealType;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  notes: string | null;
+  createdAt: string;
+}
+
 export interface DailySummary {
   date: string;
   total_calories: number;
@@ -243,15 +256,20 @@ export interface WeekStats {
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export interface SearchResultItem {
-  type: "task" | "habit" | "journal";
+  type: "task" | "habit" | "journal" | "finance_transaction" | "finance_category";
   id: string;
   title: string;
   description?: string | null;
+  // task-specific
   completed?: boolean;
   priority?: TaskPriority;
   dueDate?: string | null;
+  // journal-specific
   date?: string;
   notes?: string;
+  // finance_transaction-specific
+  amount?: number | null;
+  transactionType?: TransactionType | null;
 }
 
 export interface SearchResponse {

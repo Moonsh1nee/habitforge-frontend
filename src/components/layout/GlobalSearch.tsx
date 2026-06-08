@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Search, CheckSquare, Repeat2, BookOpen } from "lucide-react";
+import { Search, CheckSquare, Repeat2, BookOpen, Wallet, Tag } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -19,12 +19,16 @@ const TYPE_ICON = {
   task: <CheckSquare size={14} className="shrink-0" />,
   habit: <Repeat2 size={14} className="shrink-0" />,
   journal: <BookOpen size={14} className="shrink-0" />,
+  finance_transaction: <Wallet size={14} className="shrink-0" />,
+  finance_category: <Tag size={14} className="shrink-0" />,
 };
 
 const TYPE_LABEL = {
   task: "Задачи",
   habit: "Привычки",
   journal: "Журнал",
+  finance_transaction: "Транзакции",
+  finance_category: "Категории",
 };
 
 export function GlobalSearch() {
@@ -85,7 +89,7 @@ export function GlobalSearch() {
       <CommandDialog open={open} onOpenChange={setOpen}>
         <Command>
           <CommandInput
-            placeholder="Поиск задач, привычек, записей..."
+            placeholder="Поиск задач, привычек, записей, финансов..."
             value={query}
             onValueChange={setQuery}
           />
@@ -96,7 +100,7 @@ export function GlobalSearch() {
             {debouncedQuery.length < 2 && (
               <CommandEmpty>Введите минимум 2 символа</CommandEmpty>
             )}
-            {(["task", "habit", "journal"] as const).map((type) => {
+            {(["task", "habit", "journal", "finance_transaction", "finance_category"] as const).map((type) => {
               const items = grouped[type];
               if (!items?.length) return null;
               return (

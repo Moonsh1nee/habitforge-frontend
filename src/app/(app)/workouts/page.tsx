@@ -9,6 +9,8 @@ import {
   useWorkoutPlans, useWorkoutPlan, useWorkoutLogs, useWorkoutLog,
   useCreatePlan, useUpdatePlan, useDeletePlan,
   useAddExercise, useCreateLog, useUpdateLog, useDeleteLog, useAddExerciseLog,
+  useUpdatePlanExercise, useDeletePlanExercise,
+  useUpdateLogExercise, useDeleteLogExercise,
 } from "@/lib/hooks/useWorkouts";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -21,7 +23,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn, formatDate } from "@/lib/utils";
-import type { WorkoutPlan, WorkoutLog, PlanExercise } from "@/types";
+import type { WorkoutPlan, WorkoutLog, PlanExercise, ExerciseLog } from "@/types";
+
+// ─── Inline exercise editor ───────────────────────────────────────────────────
+
+type ExerciseLike = Pick<PlanExercise, "name" | "muscleGroup" | "sets" | "repsPerSet" | "weightKg">;
+
+function EditExerciseInline({
+  exercise,
+  onSave,
+  onCancel,
+}: {
+  exercise: ExerciseLike;
+  onSave: (payload: Partial<ExerciseLike>) => void;
+  onCancel: () => void;
+}) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    onSave({
+      name: fd.get("name") as string,
+      muscleGroup: (fd.get("muscleGroup") as string) || undefined,
+      sets: Number(fd.get("sets")) || undefined,
+      repsPerSet: Number(fd.get("reps")) || undefined,
+      weightKg: Number(fd.get("weight")) || undefined,
+    });
+  };
+  return (
+    <form onSubmit={handleSubmit} className="bg-white/3 rounded-lg p-3 space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Input name="name" defaultValue={exercise.name} required placeholder="Упражнение" className="bg-white/5 border-border text-text h-8 text-xs" />
+        <Input name="muscleGroup" defaultValue={exercise.muscleGroup ?? ""} placeholder="Группа мышц" className="bg-white/5 border-border text-text h-8 text-xs" />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <Input name="sets" type="number" min={1} defaultValue={exercise.sets ?? ""} placeholder="Подходы" className="bg-white/5 border-border text-text h-8 text-xs" />
+        <Input name="reps" type="number" min={1} defaultValue={exercise.repsPerSet ?? ""} placeholder="Повт" className="bg-white/5 border-border text-text h-8 text-xs" />
+        <Input name="weight" type="number" min={0} step={0.5} defaultValue={exercise.weightKg ?? ""} placeholder="Кг" className="bg-white/5 border-border text-text h-8 text-xs" />
+      </div>
+      <div className="flex gap-2 pt-1">
+        <Button type="submit" size="sm" className="gradient-primary text-white h-7 text-xs px-3">Сохранить</Button>
+        <button type="button" onClick={onCancel} className="text-xs text-muted hover:text-text">Отмена</button>
+      </div>
+    </form>
+  );
+}
 
 // ─── Log Form ─────────────────────────────────────────────────────────────────
 
@@ -204,9 +249,11 @@ function LogCard({ log }: { log: WorkoutLog }) {
   const [expanded, setExpanded] = useState(false);
   const [exOpen, setExOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [editExId, setEditExId] = useState<string | null>(null);
   const deleteLog = useDeleteLog();
+  const updateLogEx = useUpdateLogExercise();
+  const deleteLogEx = useDeleteLogExercise();
 
-  // Fetch full log with exercises only when expanded
   const { data: fullLog } = useWorkoutLog(expanded ? log.id : "");
   const exercises = fullLog?.exercises ?? [];
 
@@ -259,30 +306,52 @@ function LogCard({ log }: { log: WorkoutLog }) {
                 Упражнения {exercises.length > 0 && `(${exercises.length})`}
               </p>
 
-              {/* Exercise list */}
               {exercises.length > 0 && (
                 <div className="space-y-2">
-                  {exercises.map((ex) => (
-                    <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2">
-                      <div>
-                        <span className="text-text font-medium">{ex.name}</span>
-                        {ex.muscleGroup && (
-                          <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
-                        )}
+                  {exercises.map((ex) =>
+                    editExId === ex.id ? (
+                      <EditExerciseInline
+                        key={ex.id}
+                        exercise={ex}
+                        onSave={(payload) =>
+                          updateLogEx.mutate(
+                            { logId: log.id, exerciseId: ex.id, payload: payload as Partial<ExerciseLog> },
+                            { onSuccess: () => setEditExId(null) }
+                          )
+                        }
+                        onCancel={() => setEditExId(null)}
+                      />
+                    ) : (
+                      <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/ex">
+                        <div>
+                          <span className="text-text font-medium">{ex.name}</span>
+                          {ex.muscleGroup && (
+                            <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted shrink-0">
+                            {[
+                              ex.sets && `${ex.sets} п`,
+                              ex.repsPerSet && `${ex.repsPerSet} повт`,
+                              ex.weightKg && `${ex.weightKg} кг`,
+                            ].filter(Boolean).join(" · ")}
+                          </span>
+                          <div className="opacity-0 group-hover/ex:opacity-100 flex gap-0.5 transition-all">
+                            <button onClick={() => setEditExId(ex.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
+                              <Pencil size={11} />
+                            </button>
+                            <button onClick={() => deleteLogEx.mutate({ logId: log.id, exerciseId: ex.id })} className="p-0.5 text-muted hover:text-danger transition-colors">
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted shrink-0">
-                        {[
-                          ex.sets && `${ex.sets} п`,
-                          ex.repsPerSet && `${ex.repsPerSet} повт`,
-                          ex.weightKg && `${ex.weightKg} кг`,
-                        ].filter(Boolean).join(" · ")}
-                      </span>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
 
-              {/* Add exercise form */}
               {exOpen ? (
                 <>
                   <ExerciseForm logId={log.id} onSuccess={() => setExOpen(false)} />
@@ -320,9 +389,11 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
   const [expanded, setExpanded] = useState(false);
   const [exOpen, setExOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [editExId, setEditExId] = useState<string | null>(null);
   const deletePlan = useDeletePlan();
+  const updatePlanEx = useUpdatePlanExercise();
+  const deletePlanEx = useDeletePlanExercise();
 
-  // Fetch full plan with exercises only when expanded
   const { data: fullPlan } = useWorkoutPlan(expanded ? plan.id : "");
   const exercises = fullPlan?.exercises ?? [];
 
@@ -362,30 +433,52 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
                 Упражнения {exercises.length > 0 && `(${exercises.length})`}
               </p>
 
-              {/* Exercise list */}
               {exercises.length > 0 && (
                 <div className="space-y-2">
-                  {exercises.map((ex) => (
-                    <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2">
-                      <div>
-                        <span className="text-text font-medium">{ex.name}</span>
-                        {ex.muscleGroup && (
-                          <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
-                        )}
+                  {exercises.map((ex) =>
+                    editExId === ex.id ? (
+                      <EditExerciseInline
+                        key={ex.id}
+                        exercise={ex}
+                        onSave={(payload) =>
+                          updatePlanEx.mutate(
+                            { planId: plan.id, exerciseId: ex.id, payload: payload as Partial<PlanExercise> },
+                            { onSuccess: () => setEditExId(null) }
+                          )
+                        }
+                        onCancel={() => setEditExId(null)}
+                      />
+                    ) : (
+                      <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/ex">
+                        <div>
+                          <span className="text-text font-medium">{ex.name}</span>
+                          {ex.muscleGroup && (
+                            <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted shrink-0">
+                            {[
+                              ex.sets && `${ex.sets} п`,
+                              ex.repsPerSet && `${ex.repsPerSet} повт`,
+                              ex.weightKg && `${ex.weightKg} кг`,
+                            ].filter(Boolean).join(" · ")}
+                          </span>
+                          <div className="opacity-0 group-hover/ex:opacity-100 flex gap-0.5 transition-all">
+                            <button onClick={() => setEditExId(ex.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
+                              <Pencil size={11} />
+                            </button>
+                            <button onClick={() => deletePlanEx.mutate({ planId: plan.id, exerciseId: ex.id })} className="p-0.5 text-muted hover:text-danger transition-colors">
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted shrink-0">
-                        {[
-                          ex.sets && `${ex.sets} п`,
-                          ex.repsPerSet && `${ex.repsPerSet} повт`,
-                          ex.weightKg && `${ex.weightKg} кг`,
-                        ].filter(Boolean).join(" · ")}
-                      </span>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
 
-              {/* Add exercise form */}
               {exOpen ? (
                 <>
                   <ExerciseForm planId={plan.id} onSuccess={() => setExOpen(false)} />
@@ -486,7 +579,6 @@ export default function WorkoutsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Log dialog */}
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="bg-[#13131a] border-border">
           <DialogHeader>
@@ -496,7 +588,6 @@ export default function WorkoutsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Plan dialog */}
       <Dialog open={planOpen} onOpenChange={setPlanOpen}>
         <DialogContent className="bg-[#13131a] border-border">
           <DialogHeader>

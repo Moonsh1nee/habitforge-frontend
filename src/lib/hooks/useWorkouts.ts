@@ -140,3 +140,55 @@ export function useAddExerciseLog() {
     onError: () => toast.error("Ошибка добавления упражнения"),
   });
 }
+
+export function useUpdatePlanExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, exerciseId, payload }: { planId: string; exerciseId: string; payload: Partial<PlanExercise> }) =>
+      workoutsApi.updatePlanExercise(planId, exerciseId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workout-plans"] });
+      toast.success("Упражнение обновлено");
+    },
+    onError: () => toast.error("Ошибка обновления упражнения"),
+  });
+}
+
+export function useDeletePlanExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, exerciseId }: { planId: string; exerciseId: string }) =>
+      workoutsApi.deletePlanExercise(planId, exerciseId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workout-plans"] });
+      toast.success("Упражнение удалено");
+    },
+    onError: () => toast.error("Ошибка удаления упражнения"),
+  });
+}
+
+export function useUpdateLogExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ logId, exerciseId, payload }: { logId: string; exerciseId: string; payload: Partial<ExerciseLog> }) =>
+      workoutsApi.updateLogExercise(logId, exerciseId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workout-logs"] });
+      toast.success("Упражнение обновлено");
+    },
+    onError: () => toast.error("Ошибка обновления упражнения"),
+  });
+}
+
+export function useDeleteLogExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ logId, exerciseId }: { logId: string; exerciseId: string }) =>
+      workoutsApi.deleteLogExercise(logId, exerciseId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workout-logs"] });
+      toast.success("Упражнение удалено");
+    },
+    onError: () => toast.error("Ошибка удаления упражнения"),
+  });
+}

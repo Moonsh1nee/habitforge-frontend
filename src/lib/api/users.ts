@@ -44,7 +44,7 @@ export const usersApi = {
 
   deleteAccount: async (currentPassword: string): Promise<void> => {
     await api.delete("/users/me", {
-      data: { currentPassword, newPassword: currentPassword },
+      data: { currentPassword },
     });
   },
 };

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { usersApi } from "@/lib/api/users";
+import { authApi } from "@/lib/api/auth";
 import { telegramApi, type Reminder } from "@/lib/api/telegram";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -236,6 +237,16 @@ function SecurityTab() {
   const { clear } = useAuthStore();
   const [deletePassword, setDeletePassword] = useState("");
 
+  const logoutAll = useMutation({
+    mutationFn: authApi.logoutAll,
+    onSuccess: () => {
+      clear();
+      router.push("/login");
+      toast.success("Выполнен выход на всех устройствах");
+    },
+    onError: () => toast.error("Ошибка выхода"),
+  });
+
   const changePassword = useMutation({
     mutationFn: ({
       current,
@@ -301,6 +312,23 @@ function SecurityTab() {
             Изменить пароль
           </Button>
         </form>
+      </GlassCard>
+
+      {/* Logout all devices */}
+      <GlassCard>
+        <h3 className="font-semibold text-text mb-2">Активные сессии</h3>
+        <p className="text-sm text-muted mb-4">
+          Выйти из аккаунта на всех устройствах, включая текущее.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => logoutAll.mutate()}
+          disabled={logoutAll.isPending}
+          className="border-border text-text hover:bg-white/5 gap-2"
+        >
+          {logoutAll.isPending && <Loader2 size={15} className="animate-spin" />}
+          Выйти на всех устройствах
+        </Button>
       </GlassCard>
 
       {/* Danger Zone */}
