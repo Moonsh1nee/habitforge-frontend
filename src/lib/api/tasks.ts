@@ -1,18 +1,6 @@
 import { api } from "./client";
 import type { Task, PaginatedResponse } from "@/types";
 
-function toSnake(payload: Partial<Task>) {
-  return {
-    title: payload.title,
-    ...(payload.description !== undefined && { description: payload.description }),
-    priority: payload.priority ?? 2,
-    ...(payload.completed !== undefined && { completed: payload.completed }),
-    due_date: payload.dueDate ?? null,
-    is_recurring: payload.isRecurring ?? false,
-    recurrence: payload.recurrence ?? null,
-  };
-}
-
 export interface TaskFilters {
   completed?: boolean;
   priority?: 1 | 2 | 3;
@@ -42,12 +30,28 @@ export const tasksApi = {
   },
 
   create: async (payload: Partial<Task>): Promise<Task> => {
-    const { data } = await api.post<Task>("/tasks/", toSnake(payload));
+    const { data } = await api.post<Task>("/tasks/", {
+      title: payload.title,
+      ...(payload.description !== undefined && { description: payload.description }),
+      priority: payload.priority ?? 2,
+      ...(payload.completed !== undefined && { completed: payload.completed }),
+      dueDate: payload.dueDate ?? null,
+      isRecurring: payload.isRecurring ?? false,
+      recurrence: payload.recurrence ?? null,
+    });
     return data;
   },
 
   update: async (id: string, payload: Partial<Task>): Promise<Task> => {
-    const { data } = await api.patch<Task>(`/tasks/${id}`, toSnake(payload));
+    const { data } = await api.patch<Task>(`/tasks/${id}`, {
+      ...(payload.title !== undefined && { title: payload.title }),
+      ...(payload.description !== undefined && { description: payload.description }),
+      ...(payload.priority !== undefined && { priority: payload.priority }),
+      ...(payload.completed !== undefined && { completed: payload.completed }),
+      ...(payload.dueDate !== undefined && { dueDate: payload.dueDate }),
+      ...(payload.isRecurring !== undefined && { isRecurring: payload.isRecurring }),
+      ...(payload.recurrence !== undefined && { recurrence: payload.recurrence }),
+    });
     return data;
   },
 

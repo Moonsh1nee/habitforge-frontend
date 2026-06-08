@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { usersApi } from "@/lib/api/users";
 import { authApi } from "@/lib/api/auth";
+import { mediaUrl } from "@/lib/api/client";
 import { telegramApi, type Reminder } from "@/lib/api/telegram";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -54,8 +55,6 @@ import {
 import { cn, formatDate } from "@/lib/utils";
 import type { User as UserType } from "@/types";
 import type { AxiosError } from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 // ─── Profile Tab ────────────────────────────────────────────────────────────
 
@@ -94,9 +93,7 @@ function ProfileTab({ user }: { user: UserType }) {
     uploadAvatar.mutate(file);
   };
 
-  const avatarSrc =
-    preview ??
-    (user.avatarUrl ? `${API_URL}${user.avatarUrl}` : null);
+  const avatarSrc = preview ?? mediaUrl(user.avatarUrl);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

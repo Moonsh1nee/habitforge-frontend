@@ -2,7 +2,9 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const mediaUrl = (path: string | null | undefined): string | null =>
+  path ? `${API_URL}${path}` : null;
 
 export const api = axios.create({ baseURL: API_URL });
 
@@ -36,6 +38,7 @@ api.interceptors.response.use(
             })
             .then(({ data }) => {
               useAuthStore.getState().setTokens(data.access_token, data.refresh_token);
+              if (data.user) useAuthStore.getState().setUser(data.user);
               return data.access_token as string;
             })
             .finally(() => {
