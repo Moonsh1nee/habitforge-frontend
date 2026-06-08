@@ -19,7 +19,7 @@ export function MacroBar({ calories = 0, targets }: MacroBarProps) {
         <div>
           <div className="flex justify-between text-xs mb-1">
             <span className="text-muted">Калории</span>
-            <span className="text-text/80">
+            <span>
               <AnimatedNumber value={calories} decimals={0} suffix={` / ${target} ккал`} />
             </span>
           </div>

@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-text/80">
+          <Label htmlFor="email">
             Email
           </Label>
           <Input
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
-            className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+           
             {...register("email")}
           />
           {errors.email && (

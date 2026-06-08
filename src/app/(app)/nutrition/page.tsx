@@ -44,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { SelectOption } from "@/components/shared/SelectOption";
 import { getTodayString } from "@/lib/utils";
 import type { MealType, NutritionPlan, MealTemplate } from "@/types";
 
@@ -53,6 +54,13 @@ const mealLabels: Record<MealType, string> = {
   lunch: "Обед",
   dinner: "Ужин",
   snack: "Перекус",
+};
+
+const mealIcons: Record<MealType, string> = {
+  breakfast: "🌅",
+  lunch: "🍽️",
+  dinner: "🌙",
+  snack: "🍎",
 };
 
 // ─── Add Food Form ────────────────────────────────────────────────────────────
@@ -81,23 +89,22 @@ function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text/80">Название</Label>
+        <Label>Название</Label>
         <Input
           name="name"
           placeholder="Куриная грудка"
           required
-          className="bg-white/5 border-border text-text"
         />
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">Приём пищи</Label>
+        <Label>Приём пищи</Label>
         <Select value={mealType} onValueChange={(v) => setMealType(v as MealType)}>
-          <SelectTrigger className="bg-white/5 border-border text-text">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#13131a] border-border">
-            {Object.entries(mealLabels).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v}</SelectItem>
+          <SelectContent>
+            {(Object.entries(mealLabels) as [MealType, string][]).map(([k, v]) => (
+              <SelectOption key={k} value={k} label={v} icon={mealIcons[k]} />
             ))}
           </SelectContent>
         </Select>
@@ -106,14 +113,13 @@ function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void 
         {[["calories", "Калории"], ["protein", "Белки (г)"], ["carbs", "Углеводы (г)"], ["fat", "Жиры (г)"]].map(
           ([name, label]) => (
             <div key={name} className="space-y-2">
-              <Label className="text-text/80 text-xs">{label}</Label>
+              <Label className="text-xs">{label}</Label>
               <Input
                 name={name}
                 type="number"
                 min={0}
                 step={0.1}
                 defaultValue={0}
-                className="bg-white/5 border-border text-text"
               />
             </div>
           )
@@ -156,12 +162,12 @@ function PlanForm({ plan, onSuccess }: { plan?: NutritionPlan; onSuccess: () => 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text/80">Название</Label>
-        <Input name="name" required defaultValue={plan?.name ?? ""} placeholder="Набор массы" className="bg-white/5 border-border text-text" />
+        <Label>Название</Label>
+        <Input name="name" required defaultValue={plan?.name ?? ""} placeholder="Набор массы" />
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">Описание</Label>
-        <Textarea name="description" defaultValue={plan?.description ?? ""} placeholder="Необязательно" rows={2} className="bg-white/5 border-border text-text resize-none" />
+        <Label>Описание</Label>
+        <Textarea name="description" defaultValue={plan?.description ?? ""} placeholder="Необязательно" rows={2} className="resize-none" />
       </div>
       <p className="text-xs text-muted font-medium uppercase tracking-wide pt-1">Цели по макронутриентам</p>
       <div className="grid grid-cols-2 gap-3">
@@ -174,8 +180,8 @@ function PlanForm({ plan, onSuccess }: { plan?: NutritionPlan; onSuccess: () => 
           ] as [string, string, number | null | undefined][]
         ).map(([name, label, val]) => (
           <div key={name} className="space-y-1.5">
-            <Label className="text-text/80 text-xs">{label}</Label>
-            <Input name={name} type="number" min={0} step={1} defaultValue={val ?? ""} placeholder="—" className="bg-white/5 border-border text-text" />
+            <Label className="text-xs">{label}</Label>
+            <Input name={name} type="number" min={0} step={1} defaultValue={val ?? ""} placeholder="—" />
           </div>
         ))}
       </div>
@@ -226,18 +232,18 @@ function MealTemplateForm({
     <form onSubmit={handleSubmit} className="bg-white/3 rounded-xl p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Название</Label>
-          <Input name="name" required defaultValue={meal?.name ?? ""} placeholder="Омлет" className="bg-white/5 border-border text-text h-8 text-sm" />
+          <Label className="text-xs">Название</Label>
+          <Input name="name" required defaultValue={meal?.name ?? ""} placeholder="Омлет" className="h-8 text-sm" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Приём пищи</Label>
+          <Label className="text-xs">Приём пищи</Label>
           <Select value={mealType} onValueChange={(v) => setMealType(v as MealType)}>
-            <SelectTrigger className="bg-white/5 border-border text-text h-8 text-sm">
+            <SelectTrigger size="sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#13131a] border-border">
-              {Object.entries(mealLabels).map(([k, v]) => (
-                <SelectItem key={k} value={k} className="text-sm">{v}</SelectItem>
+            <SelectContent>
+              {(Object.entries(mealLabels) as [MealType, string][]).map(([k, v]) => (
+                <SelectOption key={k} value={k} label={v} icon={mealIcons[k]} />
               ))}
             </SelectContent>
           </Select>
@@ -254,13 +260,13 @@ function MealTemplateForm({
         ).map(([name, label, val]) => (
           <div key={name} className="space-y-1">
             <Label className="text-muted text-[10px]">{label}</Label>
-            <Input name={name} type="number" min={0} step={0.1} defaultValue={val ?? ""} placeholder="0" className="bg-white/5 border-border text-text h-7 text-xs" />
+            <Input name={name} type="number" min={0} step={0.1} defaultValue={val ?? ""} placeholder="0" className="h-7 text-xs" />
           </div>
         ))}
       </div>
       <div className="space-y-1.5">
-        <Label className="text-text/80 text-xs">Заметки</Label>
-        <Input name="notes" defaultValue={meal?.notes ?? ""} placeholder="Необязательно" className="bg-white/5 border-border text-text h-8 text-sm" />
+        <Label className="text-xs">Заметки</Label>
+        <Input name="notes" defaultValue={meal?.notes ?? ""} placeholder="Необязательно" className="h-8 text-sm" />
       </div>
       <div className="flex gap-2 pt-1">
         <Button type="submit" size="sm" disabled={isPending} className="gradient-primary text-white h-7 text-xs px-3">
@@ -393,9 +399,9 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
       </AnimatePresence>
 
       <Dialog open={editPlanOpen} onOpenChange={setEditPlanOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Редактировать план</DialogTitle>
+            <DialogTitle>Редактировать план</DialogTitle>
           </DialogHeader>
           <PlanForm plan={plan} onSuccess={() => setEditPlanOpen(false)} />
         </DialogContent>
@@ -608,9 +614,9 @@ export default function NutritionPage() {
 
       {/* Add food dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Добавить еду</DialogTitle>
+            <DialogTitle>Добавить еду</DialogTitle>
           </DialogHeader>
           <AddFoodForm date={selectedDate} onSuccess={() => setAddOpen(false)} />
         </DialogContent>
@@ -618,9 +624,9 @@ export default function NutritionPage() {
 
       {/* Create plan dialog */}
       <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Новый план питания</DialogTitle>
+            <DialogTitle>Новый план питания</DialogTitle>
           </DialogHeader>
           <PlanForm onSuccess={() => setPlanOpen(false)} />
         </DialogContent>

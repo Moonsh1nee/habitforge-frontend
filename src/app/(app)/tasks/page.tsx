@@ -107,7 +107,7 @@ export default function TasksPage() {
           placeholder="Поиск задач..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-white/5 border-border text-text placeholder:text-muted pl-9 pr-9"
+          className="pl-9 pr-9"
         />
         {search && (
           <button
@@ -159,10 +159,10 @@ export default function TasksPage() {
         <div className="ml-auto flex items-center gap-2">
           {/* Sort by */}
           <Select value={orderBy} onValueChange={(v) => setOrderBy(v as OrderBy)}>
-            <SelectTrigger className="bg-white/5 border-border text-text text-xs h-8 w-36 sm:w-44">
+            <SelectTrigger size="sm" className="w-36 sm:w-44">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#13131a] border-border">
+            <SelectContent>
               <SelectItem value="createdAt">По дате создания</SelectItem>
               <SelectItem value="dueDate">По дедлайну</SelectItem>
               <SelectItem value="priority">По приоритету</SelectItem>
@@ -200,9 +200,9 @@ export default function TasksPage() {
 
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Новая задача</DialogTitle>
+            <DialogTitle>Новая задача</DialogTitle>
           </DialogHeader>
           <TaskForm onSuccess={() => setCreateOpen(false)} />
         </DialogContent>
@@ -210,9 +210,9 @@ export default function TasksPage() {
 
       {/* Edit dialog */}
       <Dialog open={!!editTask} onOpenChange={(o) => !o && setEditTask(null)}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Редактировать задачу</DialogTitle>
+            <DialogTitle>Редактировать задачу</DialogTitle>
           </DialogHeader>
           {editTask && <TaskForm task={editTask} onSuccess={() => setEditTask(null)} />}
         </DialogContent>

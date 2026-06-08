@@ -159,59 +159,56 @@ function ProfileTab({ user }: { user: UserType }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-text/80">Имя</Label>
+            <Label>Имя</Label>
             <Input
               name="firstName"
               defaultValue={user.firstName}
-              className="bg-white/5 border-border text-text"
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-text/80">Фамилия</Label>
+            <Label>Фамилия</Label>
             <Input
               name="lastName"
               defaultValue={user.lastName ?? ""}
-              className="bg-white/5 border-border text-text"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Юзернейм</Label>
+          <Label>Юзернейм</Label>
           <Input
             value={user.username ?? ""}
             disabled
-            className="bg-white/5 border-border text-muted opacity-60 cursor-not-allowed"
+            className="opacity-60 cursor-not-allowed"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Email</Label>
+          <Label>Email</Label>
           <Input
             value={user.email ?? ""}
             disabled
-            className="bg-white/5 border-border text-muted opacity-60 cursor-not-allowed"
+            className="opacity-60 cursor-not-allowed"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">О себе</Label>
+          <Label>О себе</Label>
           <Textarea
             name="bio"
             defaultValue={user.bio ?? ""}
             placeholder="Расскажите о себе..."
-            className="bg-white/5 border-border text-text resize-none"
+            className="resize-none"
             rows={3}
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Часовой пояс</Label>
+          <Label>Часовой пояс</Label>
           <Input
             name="timezone"
             defaultValue={user.timezone ?? "Europe/Moscow"}
             placeholder="Europe/Moscow"
-            className="bg-white/5 border-border text-text"
           />
           <p className="text-xs text-muted">IANA timezone: Europe/Moscow, UTC, America/New_York</p>
         </div>
@@ -291,12 +288,11 @@ function SecurityTab() {
             { name: "confirm", label: "Подтвердите пароль" },
           ].map(({ name, label }) => (
             <div key={name} className="space-y-2">
-              <Label className="text-text/80">{label}</Label>
+              <Label>{label}</Label>
               <Input
                 name={name}
                 type="password"
                 placeholder="••••••••"
-                className="bg-white/5 border-border text-text"
               />
             </div>
           ))}
@@ -344,9 +340,9 @@ function SecurityTab() {
               </Button>
             }
           />
-          <AlertDialogContent className="bg-[#13131a] border-border">
+          <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-text">
+              <AlertDialogTitle>
                 Удалить аккаунт?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-muted">
@@ -355,17 +351,16 @@ function SecurityTab() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-2 py-2">
-              <Label className="text-text/80">Введите текущий пароль для подтверждения</Label>
+              <Label>Введите текущий пароль для подтверждения</Label>
               <Input
                 type="password"
                 placeholder="••••••••"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                className="bg-white/5 border-border text-text"
               />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-border text-text hover:bg-white/10">
+              <AlertDialogCancel>
                 Отмена
               </AlertDialogCancel>
               <AlertDialogAction
@@ -416,16 +411,16 @@ function ReminderForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text/80">Название</Label>
-        <Input name="title" placeholder="Утренняя медитация" className="bg-white/5 border-border text-text" />
+        <Label>Название</Label>
+        <Input name="title" placeholder="Утренняя медитация" />
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">Тип</Label>
+        <Label>Тип</Label>
         <Select value={type} onValueChange={(v) => setType(v ?? "custom")}>
-          <SelectTrigger className="bg-white/5 border-border text-text">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#13131a] border-border">
+          <SelectContent>
             <SelectItem value="habit">Привычка</SelectItem>
             <SelectItem value="task">Задача</SelectItem>
             <SelectItem value="custom">Произвольное</SelectItem>
@@ -433,15 +428,15 @@ function ReminderForm({ onSuccess }: { onSuccess: () => void }) {
         </Select>
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">Сообщение</Label>
-        <Textarea name="message" placeholder="Текст напоминания..." className="bg-white/5 border-border text-text resize-none" rows={2} />
+        <Label>Сообщение</Label>
+        <Textarea name="message" placeholder="Текст напоминания..." className="resize-none" rows={2} />
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">
+        <Label>
           Cron-расписание
           <span className="text-muted text-xs ml-2">например: 0 9 * * 1-5</span>
         </Label>
-        <Input name="cron" placeholder="0 9 * * *" className="bg-white/5 border-border text-text font-mono text-sm" />
+        <Input name="cron" placeholder="0 9 * * *" className="font-mono text-sm" />
       </div>
       <Button type="submit" disabled={create.isPending} className="w-full gradient-primary text-white">
         {create.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
@@ -646,9 +641,9 @@ function TelegramTab() {
       </div>
 
       <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Новое напоминание</DialogTitle>
+            <DialogTitle>Новое напоминание</DialogTitle>
           </DialogHeader>
           <ReminderForm onSuccess={() => setReminderOpen(false)} />
         </DialogContent>
@@ -703,7 +698,7 @@ function DataTab({ user }: { user: UserType }) {
             name="timezone"
             defaultValue={user.timezone ?? "Europe/Moscow"}
             placeholder="Europe/Moscow"
-            className="bg-white/5 border-border text-text flex-1"
+            className="flex-1"
           />
           <Button type="submit" disabled={updateTimezone.isPending} className="gradient-primary text-white">
             Сохранить

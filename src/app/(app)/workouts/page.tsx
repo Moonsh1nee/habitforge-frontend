@@ -20,6 +20,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn, formatDate } from "@/lib/utils";
@@ -52,13 +53,13 @@ function EditExerciseInline({
   return (
     <form onSubmit={handleSubmit} className="bg-white/3 rounded-lg p-3 space-y-2">
       <div className="grid grid-cols-2 gap-2">
-        <Input name="name" defaultValue={exercise.name} required placeholder="Упражнение" className="bg-white/5 border-border text-text h-8 text-xs" />
-        <Input name="muscleGroup" defaultValue={exercise.muscleGroup ?? ""} placeholder="Группа мышц" className="bg-white/5 border-border text-text h-8 text-xs" />
+        <Input name="name" defaultValue={exercise.name} required placeholder="Упражнение" className="h-8 text-xs" />
+        <Input name="muscleGroup" defaultValue={exercise.muscleGroup ?? ""} placeholder="Группа мышц" className="h-8 text-xs" />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <Input name="sets" type="number" min={1} defaultValue={exercise.sets ?? ""} placeholder="Подходы" className="bg-white/5 border-border text-text h-8 text-xs" />
-        <Input name="reps" type="number" min={1} defaultValue={exercise.repsPerSet ?? ""} placeholder="Повт" className="bg-white/5 border-border text-text h-8 text-xs" />
-        <Input name="weight" type="number" min={0} step={0.5} defaultValue={exercise.weightKg ?? ""} placeholder="Кг" className="bg-white/5 border-border text-text h-8 text-xs" />
+        <Input name="sets" type="number" min={1} defaultValue={exercise.sets ?? ""} placeholder="Подходы" className="h-8 text-xs" />
+        <Input name="reps" type="number" min={1} defaultValue={exercise.repsPerSet ?? ""} placeholder="Повт" className="h-8 text-xs" />
+        <Input name="weight" type="number" min={0} step={0.5} defaultValue={exercise.weightKg ?? ""} placeholder="Кг" className="h-8 text-xs" />
       </div>
       <div className="flex gap-2 pt-1">
         <Button type="submit" size="sm" className="gradient-primary text-white h-7 text-xs px-3">Сохранить</Button>
@@ -102,33 +103,30 @@ function LogForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-text/80">Дата</Label>
-          <Input
+          <Label>Дата</Label>
+          <DatePicker
             name="date"
-            type="date"
             defaultValue={log?.date ?? new Date().toISOString().split("T")[0]}
-            className="bg-white/5 border-border text-text"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-text/80">Длительность (мин)</Label>
+          <Label>Длительность (мин)</Label>
           <Input
             name="duration"
             type="number"
             min={1}
             defaultValue={log?.durationMinutes ?? ""}
             placeholder="60"
-            className="bg-white/5 border-border text-text"
           />
         </div>
       </div>
       <div className="space-y-2">
-        <Label className="text-text/80">Заметки</Label>
+        <Label>Заметки</Label>
         <Textarea
           name="notes"
           defaultValue={log?.notes ?? ""}
           placeholder="Как прошла тренировка?"
-          className="bg-white/5 border-border text-text resize-none"
+          className="resize-none"
           rows={3}
         />
       </div>
@@ -172,26 +170,26 @@ function ExerciseForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Упражнение</Label>
-          <Input name="name" required placeholder="Жим лёжа" className="bg-white/5 border-border text-text h-9" />
+          <Label className="text-xs">Упражнение</Label>
+          <Input name="name" required placeholder="Жим лёжа" className="h-9" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Группа мышц</Label>
-          <Input name="muscleGroup" placeholder="Грудь" className="bg-white/5 border-border text-text h-9" />
+          <Label className="text-xs">Группа мышц</Label>
+          <Input name="muscleGroup" placeholder="Грудь" className="h-9" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Подходы</Label>
-          <Input name="sets" type="number" min={1} placeholder="3" className="bg-white/5 border-border text-text h-9" />
+          <Label className="text-xs">Подходы</Label>
+          <Input name="sets" type="number" min={1} placeholder="3" className="h-9" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Повторения</Label>
-          <Input name="reps" type="number" min={1} placeholder="10" className="bg-white/5 border-border text-text h-9" />
+          <Label className="text-xs">Повторения</Label>
+          <Input name="reps" type="number" min={1} placeholder="10" className="h-9" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-text/80 text-xs">Вес (кг)</Label>
-          <Input name="weight" type="number" min={0} step={0.5} placeholder="60" className="bg-white/5 border-border text-text h-9" />
+          <Label className="text-xs">Вес (кг)</Label>
+          <Input name="weight" type="number" min={0} step={0.5} placeholder="60" className="h-9" />
         </div>
       </div>
       <Button type="submit" disabled={isPending} size="sm" className="w-full gradient-primary text-white">
@@ -223,17 +221,17 @@ function PlanForm({ plan, onSuccess }: { plan?: WorkoutPlan; onSuccess: () => vo
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text/80">Название</Label>
-        <Input name="name" required defaultValue={plan?.name ?? ""} placeholder="Силовая A" className="bg-white/5 border-border text-text" />
+        <Label>Название</Label>
+        <Input name="name" required defaultValue={plan?.name ?? ""} placeholder="Силовая A" />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-text/80">Дней в неделю</Label>
-          <Input name="days" type="number" min={1} max={7} defaultValue={plan?.daysPerWeek ?? ""} placeholder="3" className="bg-white/5 border-border text-text" />
+          <Label>Дней в неделю</Label>
+          <Input name="days" type="number" min={1} max={7} defaultValue={plan?.daysPerWeek ?? ""} placeholder="3" />
         </div>
         <div className="space-y-2">
-          <Label className="text-text/80">Описание</Label>
-          <Input name="description" defaultValue={plan?.description ?? ""} placeholder="Необязательно" className="bg-white/5 border-border text-text" />
+          <Label>Описание</Label>
+          <Input name="description" defaultValue={plan?.description ?? ""} placeholder="Необязательно" />
         </div>
       </div>
       <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white">
@@ -372,9 +370,9 @@ function LogCard({ log }: { log: WorkoutLog }) {
       </AnimatePresence>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Редактировать тренировку</DialogTitle>
+            <DialogTitle>Редактировать тренировку</DialogTitle>
           </DialogHeader>
           <LogForm log={log} plans={[]} onSuccess={() => setEditOpen(false)} />
         </DialogContent>
@@ -499,9 +497,9 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
       </AnimatePresence>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Редактировать план</DialogTitle>
+            <DialogTitle>Редактировать план</DialogTitle>
           </DialogHeader>
           <PlanForm plan={plan} onSuccess={() => setEditOpen(false)} />
         </DialogContent>
@@ -580,18 +578,18 @@ export default function WorkoutsPage() {
       </Tabs>
 
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Записать тренировку</DialogTitle>
+            <DialogTitle>Записать тренировку</DialogTitle>
           </DialogHeader>
           <LogForm plans={plans ?? []} onSuccess={() => setLogOpen(false)} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Новый план</DialogTitle>
+            <DialogTitle>Новый план</DialogTitle>
           </DialogHeader>
           <PlanForm onSuccess={() => setPlanOpen(false)} />
         </DialogContent>

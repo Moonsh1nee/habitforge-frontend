@@ -5,7 +5,10 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Pencil, X, CalendarRange,
 } from "lucide-react";
-import { format } from "date-fns";
+import {
+  addDays, endOfMonth, endOfYear, format, parseISO,
+  startOfMonth, startOfWeek, startOfYear,
+} from "date-fns";
 import { ru } from "date-fns/locale";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import {
@@ -23,9 +26,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { SelectOption } from "@/components/shared/SelectOption";
 import { cn, getTodayString } from "@/lib/utils";
 import type { TransactionType, FinanceCategory, FinanceTransaction } from "@/types";
 
@@ -36,6 +41,22 @@ type SummaryMode = "period" | "range";
 const PERIOD_LABELS: Record<Period, string> = {
   day: "День", week: "Неделя", month: "Месяц", year: "Год",
 };
+
+function getPeriodDateRange(period: Period, refDate: string): { start: string; end: string } {
+  const ref = parseISO(refDate);
+  switch (period) {
+    case "day":
+      return { start: refDate, end: refDate };
+    case "week": {
+      const start = startOfWeek(ref, { weekStartsOn: 1 });
+      return { start: format(start, "yyyy-MM-dd"), end: format(addDays(start, 6), "yyyy-MM-dd") };
+    }
+    case "month":
+      return { start: format(startOfMonth(ref), "yyyy-MM-dd"), end: format(endOfMonth(ref), "yyyy-MM-dd") };
+    case "year":
+      return { start: format(startOfYear(ref), "yyyy-MM-dd"), end: format(endOfYear(ref), "yyyy-MM-dd") };
+  }
+}
 
 // ─── Emoji Picker ─────────────────────────────────────────────────────────────
 
@@ -87,7 +108,7 @@ function EmojiPicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-12 z-50 w-72 rounded-xl border border-border bg-[#13131a] shadow-2xl p-3 space-y-3 max-h-72 overflow-y-auto">
+        <div className="absolute left-0 top-12 z-50 w-72 rounded-xl border border-border bg-popover/95 shadow-2xl backdrop-blur-xl p-3 space-y-3 max-h-72 overflow-y-auto scrollbar-thin">
           {/* Clear option */}
           <button
             type="button"
@@ -154,9 +175,9 @@ function AddTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="bg-[#13131a] border-border">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-text">Новая транзакция</DialogTitle>
+          <DialogTitle>Новая транзакция</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-2">
@@ -180,7 +201,7 @@ function AddTransactionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Сумма</Label>
+            <Label>Сумма</Label>
             <Input
               name="amount"
               type="number"
@@ -188,44 +209,33 @@ function AddTransactionDialog({
               step={0.01}
               required
               placeholder="0.00"
-              className="bg-white/5 border-border text-text text-lg"
+              className="text-lg"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Категория</Label>
+            <Label>Категория</Label>
             <Select name="categoryId">
-              <SelectTrigger className="bg-white/5 border-border text-text">
+              <SelectTrigger>
                 <SelectValue placeholder="Без категории" />
               </SelectTrigger>
-              <SelectContent className="bg-[#13131a] border-border">
+              <SelectContent>
                 <SelectItem value="">Без категории</SelectItem>
                 {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.icon} {c.name}
-                  </SelectItem>
+                  <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Описание</Label>
-            <Input
-              name="description"
-              placeholder="Необязательно"
-              className="bg-white/5 border-border text-text"
-            />
+            <Label>Описание</Label>
+            <Input name="description" placeholder="Необязательно" />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Дата</Label>
-            <Input
-              name="date"
-              type="date"
-              defaultValue={getTodayString()}
-              className="bg-white/5 border-border text-text"
-            />
+            <Label>Дата</Label>
+            <DatePicker name="date" defaultValue={getTodayString()} />
           </div>
 
           <Button
@@ -275,9 +285,9 @@ function EditTransactionDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="bg-[#13131a] border-border">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-text">Редактировать транзакцию</DialogTitle>
+          <DialogTitle>Редактировать транзакцию</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-2">
@@ -301,7 +311,7 @@ function EditTransactionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Сумма</Label>
+            <Label>Сумма</Label>
             <Input
               name="amount"
               type="number"
@@ -309,45 +319,37 @@ function EditTransactionDialog({
               step={0.01}
               required
               defaultValue={transaction.amount}
-              className="bg-white/5 border-border text-text text-lg"
+              className="text-lg"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Категория</Label>
+            <Label>Категория</Label>
             <Select name="categoryId" defaultValue={transaction.categoryId ?? ""}>
-              <SelectTrigger className="bg-white/5 border-border text-text">
+              <SelectTrigger>
                 <SelectValue placeholder="Без категории" />
               </SelectTrigger>
-              <SelectContent className="bg-[#13131a] border-border">
+              <SelectContent>
                 <SelectItem value="">Без категории</SelectItem>
                 {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.icon} {c.name}
-                  </SelectItem>
+                  <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Описание</Label>
+            <Label>Описание</Label>
             <Input
               name="description"
               placeholder="Необязательно"
               defaultValue={transaction.description ?? ""}
-              className="bg-white/5 border-border text-text"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-text/80">Дата</Label>
-            <Input
-              name="date"
-              type="date"
-              defaultValue={transaction.date}
-              className="bg-white/5 border-border text-text"
-            />
+            <Label>Дата</Label>
+            <DatePicker name="date" defaultValue={transaction.date} />
           </div>
 
           <Button
@@ -441,22 +443,22 @@ function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
 
       {/* Add dialog */}
       <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setAddIcon(null); } }}>
-        <DialogContent className="bg-[#13131a] border-border">
-          <DialogHeader><DialogTitle className="text-text">Новая категория</DialogTitle></DialogHeader>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Новая категория</DialogTitle></DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-2">
-                <Label className="text-text/80">Название</Label>
-                <Input name="name" required placeholder="Еда" className="bg-white/5 border-border text-text" />
+                <Label>Название</Label>
+                <Input name="name" required placeholder="Еда" />
               </div>
               <div className="space-y-2">
-                <Label className="text-text/80">Иконка</Label>
+                <Label>Иконка</Label>
                 <EmojiPicker value={addIcon} onChange={setAddIcon} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-text/80">Цвет</Label>
-              <Input name="color" type="color" defaultValue="#6366f1" className="bg-white/5 border-border h-10 cursor-pointer" />
+              <Label>Цвет</Label>
+              <Input name="color" type="color" defaultValue="#6366f1" className="h-10 cursor-pointer" />
             </div>
             <Button type="submit" disabled={createCat.isPending} className="w-full gradient-primary text-white">
               Создать
@@ -467,23 +469,23 @@ function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
 
       {/* Edit dialog */}
       <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
-        <DialogContent className="bg-[#13131a] border-border">
-          <DialogHeader><DialogTitle className="text-text">Редактировать категорию</DialogTitle></DialogHeader>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Редактировать категорию</DialogTitle></DialogHeader>
           {editTarget && (
             <form onSubmit={handleEdit} className="space-y-4">
               <div className="flex items-end gap-3">
                 <div className="flex-1 space-y-2">
-                  <Label className="text-text/80">Название</Label>
-                  <Input name="name" required defaultValue={editTarget.name} className="bg-white/5 border-border text-text" />
+                  <Label>Название</Label>
+                  <Input name="name" required defaultValue={editTarget.name} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-text/80">Иконка</Label>
+                  <Label>Иконка</Label>
                   <EmojiPicker value={editIcon} onChange={setEditIcon} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-text/80">Цвет</Label>
-                <Input name="color" type="color" defaultValue={editTarget.color} className="bg-white/5 border-border h-10 cursor-pointer" />
+                <Label>Цвет</Label>
+                <Input name="color" type="color" defaultValue={editTarget.color} className="h-10 cursor-pointer" />
               </div>
               <Button type="submit" disabled={updateCat.isPending} className="w-full gradient-primary text-white">
                 Сохранить
@@ -517,9 +519,16 @@ export default function FinancePage() {
       ? { start: rangeStart, end: rangeEnd }
       : { period, date: today };
 
+  const transactionDateRange =
+    summaryMode === "range"
+      ? { start: rangeStart, end: rangeEnd }
+      : getPeriodDateRange(period, today);
+
   const { data: summary } = useFinanceSummary(summaryParams);
   const { data: categories = [] } = useCategories();
   const { data: transactions = [] } = useTransactions({
+    start: transactionDateRange.start,
+    end: transactionDateRange.end,
     ...(txFilter !== "all" ? { type: txFilter as TransactionType } : {}),
     ...(catFilter !== "all" ? { category_id: catFilter } : {}),
     limit: 50,
@@ -572,18 +581,19 @@ export default function FinancePage() {
           </Tabs>
         ) : (
           <div className="flex items-center gap-2">
-            <Input
-              type="date"
+            <DatePicker
               value={rangeStart}
-              onChange={(e) => setRangeStart(e.target.value)}
-              className="bg-white/5 border-border text-text h-8 text-sm w-36"
+              onChange={setRangeStart}
+              max={rangeEnd}
+              className="w-44"
             />
             <span className="text-muted text-sm">—</span>
-            <Input
-              type="date"
+            <DatePicker
               value={rangeEnd}
-              onChange={(e) => setRangeEnd(e.target.value)}
-              className="bg-white/5 border-border text-text h-8 text-sm w-36"
+              onChange={setRangeEnd}
+              min={rangeStart}
+              max={today}
+              className="w-44"
             />
           </div>
         )}
@@ -704,15 +714,13 @@ export default function FinancePage() {
 
           {/* Category filter */}
           <Select value={catFilter} onValueChange={(v) => setCatFilter(v ?? "all")}>
-            <SelectTrigger className="w-40 bg-white/5 border-border text-text text-sm h-8">
+            <SelectTrigger className="w-48" size="sm">
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
-            <SelectContent className="bg-[#13131a] border-border">
+            <SelectContent>
               <SelectItem value="all">Все категории</SelectItem>
               {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.icon} {c.name}
-                </SelectItem>
+                <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
               ))}
             </SelectContent>
           </Select>

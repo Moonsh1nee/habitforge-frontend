@@ -54,10 +54,10 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-text/80">Имя</Label>
+            <Label>Имя</Label>
             <Input
               placeholder="Иван"
-              className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+             
               {...register("firstName")}
             />
             {errors.firstName && (
@@ -65,10 +65,10 @@ export default function RegisterPage() {
             )}
           </div>
           <div className="space-y-2">
-            <Label className="text-text/80">Юзернейм</Label>
+            <Label>Юзернейм</Label>
             <Input
               placeholder="ivan_dev"
-              className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+             
               {...register("username")}
             />
             {errors.username && (
@@ -78,12 +78,12 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Email</Label>
+          <Label>Email</Label>
           <Input
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
-            className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+           
             {...register("email")}
           />
           {errors.email && (
@@ -92,13 +92,13 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Пароль</Label>
+          <Label>Пароль</Label>
           <div className="relative">
             <Input
               type={showPassword ? "text" : "password"}
               placeholder="Минимум 8 символов"
               autoComplete="new-password"
-              className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary pr-10"
+              className="pr-10"
               {...register("password", { onChange: (e) => setPassword(e.target.value) })}
             />
             <button
@@ -142,12 +142,12 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Подтвердите пароль</Label>
+          <Label>Подтвердите пароль</Label>
           <Input
             type="password"
             placeholder="••••••••"
             autoComplete="new-password"
-            className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+           
             {...register("confirmPassword")}
           />
           {errors.confirmPassword && (

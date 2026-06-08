@@ -7,6 +7,7 @@ import { taskSchema, type TaskInput } from "@/lib/schemas/task.schema";
 import { useCreateTask, useUpdateTask } from "@/lib/hooks/useTasks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -59,38 +60,29 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text/80">Название</Label>
-        <Input
-          placeholder="Что нужно сделать?"
-          className="bg-white/5 border-border text-text placeholder:text-muted"
-          {...register("title")}
-        />
+        <Label>Название</Label>
+        <Input placeholder="Что нужно сделать?" {...register("title")} />
         {errors.title && (
           <p className="text-danger text-xs">{errors.title.message}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label className="text-text/80">Описание</Label>
-        <Textarea
-          placeholder="Подробности..."
-          className="bg-white/5 border-border text-text placeholder:text-muted resize-none"
-          rows={3}
-          {...register("description")}
-        />
+        <Label>Описание</Label>
+        <Textarea placeholder="Подробности..." className="resize-none" rows={3} {...register("description")} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-text/80">Приоритет</Label>
+          <Label>Приоритет</Label>
           <Select
             value={String(watch("priority") ?? 2)}
             onValueChange={(v) => setValue("priority", Number(v ?? "2") as TaskInput["priority"])}
           >
-            <SelectTrigger className="bg-white/5 border-border text-text">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#13131a] border-border">
+            <SelectContent>
               <SelectItem value="1">Высокий</SelectItem>
               <SelectItem value="2">Средний</SelectItem>
               <SelectItem value="3">Низкий</SelectItem>
@@ -99,11 +91,10 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Дедлайн</Label>
-          <Input
-            type="date"
-            className="bg-white/5 border-border text-text"
-            {...register("dueDate")}
+          <Label>Дедлайн</Label>
+          <DatePicker
+            value={watch("dueDate") ?? ""}
+            onChange={(v) => setValue("dueDate", v || undefined)}
           />
         </div>
       </div>

@@ -57,13 +57,13 @@ function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
-          <Label className="text-text/80">Новый пароль</Label>
+          <Label>Новый пароль</Label>
           <div className="relative">
             <Input
               type={showPassword ? "text" : "password"}
               placeholder="Минимум 8 символов с цифрой"
               autoComplete="new-password"
-              className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary pr-10"
+              className="pr-10"
               {...register("new_password")}
             />
             <button
@@ -80,12 +80,12 @@ function ResetPasswordForm() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-text/80">Подтвердите пароль</Label>
+          <Label>Подтвердите пароль</Label>
           <Input
             type="password"
             placeholder="••••••••"
             autoComplete="new-password"
-            className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+           
             {...register("confirm_password")}
           />
           {errors.confirm_password && (

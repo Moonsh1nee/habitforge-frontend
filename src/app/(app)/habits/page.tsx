@@ -90,9 +90,9 @@ export default function HabitsPage() {
 
       {/* Create dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Новая привычка</DialogTitle>
+            <DialogTitle>Новая привычка</DialogTitle>
           </DialogHeader>
           <HabitForm onSuccess={() => setFormOpen(false)} />
         </DialogContent>
@@ -100,9 +100,9 @@ export default function HabitsPage() {
 
       {/* Edit dialog */}
       <Dialog open={!!editHabit} onOpenChange={(o) => !o && setEditHabit(null)}>
-        <DialogContent className="bg-[#13131a] border-border">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-text">Редактировать привычку</DialogTitle>
+            <DialogTitle>Редактировать привычку</DialogTitle>
           </DialogHeader>
           {editHabit && (
             <HabitForm habit={editHabit} onSuccess={() => setEditHabit(null)} />
@@ -114,12 +114,12 @@ export default function HabitsPage() {
       <Sheet open={!!selectedHabit} onOpenChange={(o) => !o && setSelectedHabit(null)}>
         <SheetContent
           side="right"
-          className="bg-[#13131a] border-border w-full sm:max-w-lg overflow-y-auto"
+          className="w-full sm:max-w-lg overflow-y-auto scrollbar-thin"
         >
           {selectedHabit && (
             <>
               <SheetHeader className="mb-6">
-                <SheetTitle className="text-text flex items-center gap-2">
+                <SheetTitle className="flex items-center gap-2 text-lg font-semibold">
                   {selectedHabit.icon ? (
                     <span>{selectedHabit.icon}</span>
                   ) : (

@@ -38,7 +38,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-text/80">
+          <Label htmlFor="email">
             Email
           </Label>
           <Input
@@ -46,7 +46,7 @@ export default function LoginPage() {
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
-            className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary"
+           
             {...register("email")}
           />
           {errors.email && (
@@ -55,7 +55,7 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-text/80">
+          <Label htmlFor="password">
             Пароль
           </Label>
           <div className="relative">
@@ -64,7 +64,7 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="current-password"
-              className="bg-white/5 border-border text-text placeholder:text-muted focus-visible:ring-primary pr-10"
+              className="pr-10"
               {...register("password")}
             />
             <button

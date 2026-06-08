@@ -54,7 +54,7 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
       {sliders.map(({ label, value, setter, max = 10, color }) => (
         <div key={label} className="space-y-2">
           <div className="flex justify-between items-center">
-            <Label className="text-text/80 text-sm">{label}</Label>
+            <Label className="text-sm">{label}</Label>
             <span className="text-sm font-bold" style={{ color }}>
               {value}/{max}
             </span>
@@ -71,14 +71,13 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
       ))}
 
       <div className="space-y-2">
-        <Label className="text-text/80 text-sm">Вес (кг)</Label>
+        <Label className="text-sm">Вес (кг)</Label>
         <Input
           name="weight"
           type="number"
           step={0.1}
           placeholder="70.5"
           defaultValue={existing?.weight ?? ""}
-          className="bg-white/5 border-border text-text"
         />
       </div>
 
@@ -88,12 +87,12 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
         { name: "notes", label: "Заметки" },
       ].map(({ name, label }) => (
         <div key={name} className="space-y-2">
-          <Label className="text-text/80 text-sm">{label}</Label>
+          <Label className="text-sm">{label}</Label>
           <Textarea
             name={name}
             placeholder={`${label}...`}
             defaultValue={(existing?.[name as "wins" | "improvements" | "notes"] as string | undefined) ?? ""}
-            className="bg-white/5 border-border text-text resize-none"
+            className="resize-none"
             rows={2}
           />
         </div>

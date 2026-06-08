@@ -61,7 +61,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               }
             />
 
-            <DropdownMenuContent align="end" className="w-52 bg-[#13131a] border-border">
+            <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-muted/70 text-xs font-normal truncate px-3 py-2">
                   {user.email ?? user.username ?? "—"}

@@ -25,7 +25,7 @@
   --foreground: #f1f5f9;
   --card: rgba(255, 255, 255, 0.04);
   --card-foreground: #f1f5f9;
-  --popover: #13131a;
+  --popover: rgba(19, 19, 26, 0.96);
   --popover-foreground: #f1f5f9;
   --primary: #7c3aed;
   --primary-foreground: #ffffff;
@@ -56,10 +56,11 @@ body {
 @layer utilities {
   .glass {
     background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   }
 
   .glass-hover {
@@ -94,6 +95,47 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124, 58, 237, 0.35) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.35);
+    border-radius: 999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 58, 237, 0.55);
+  }
+}
+
+/* Native date/time inputs — dark theme baseline */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  filter: invert(0.85) sepia(0.2) saturate(2) hue-rotate(220deg);
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="time"]:hover::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 0.9;
 }
 
 @keyframes float {

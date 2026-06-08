@@ -90,10 +90,10 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       {/* Title + Icon */}
       <div className="flex gap-3">
         <div className="space-y-2 flex-1">
-          <Label className="text-text/80">Название</Label>
+          <Label>Название</Label>
           <Input
             placeholder="Например: Медитация"
-            className="bg-white/5 border-border text-text placeholder:text-muted"
+           
             {...register("title")}
           />
           {errors.title && (
@@ -101,11 +101,11 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
           )}
         </div>
         <div className="space-y-2 w-20">
-          <Label className="text-text/80">Иконка</Label>
+          <Label>Иконка</Label>
           <Input
             placeholder="🏃"
             maxLength={2}
-            className="bg-white/5 border-border text-text text-center text-lg"
+            className="text-center text-lg"
             {...register("icon")}
           />
         </div>
@@ -113,10 +113,10 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
 
       {/* Description */}
       <div className="space-y-2">
-        <Label className="text-text/80">Описание</Label>
+        <Label>Описание</Label>
         <Textarea
           placeholder="Зачем эта привычка?"
-          className="bg-white/5 border-border text-text placeholder:text-muted resize-none"
+          className="resize-none"
           rows={2}
           {...register("description")}
         />
@@ -125,15 +125,15 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       {/* Color + Frequency */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-text/80">Цвет</Label>
+          <Label>Цвет</Label>
           <Input
             type="color"
-            className="bg-white/5 border-border h-10 cursor-pointer"
+            className="h-10 cursor-pointer"
             {...register("color")}
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-text/80">Частота</Label>
+          <Label>Частота</Label>
           <Select
             value={frequency ?? "daily"}
             onValueChange={(v) => {
@@ -142,10 +142,10 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
               setValue("weekdays", undefined);
             }}
           >
-            <SelectTrigger className="bg-white/5 border-border text-text">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#13131a] border-border">
+            <SelectContent>
               <SelectItem value="daily">Ежедневно</SelectItem>
               <SelectItem value="weekly">Раз в неделю</SelectItem>
               <SelectItem value="weekdays">По дням</SelectItem>
@@ -157,13 +157,13 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       {/* targetPerWeek — only for weekly */}
       {frequency === "weekly" && (
         <div className="space-y-2">
-          <Label className="text-text/80">Цель (раз в неделю)</Label>
+          <Label>Цель (раз в неделю)</Label>
           <Input
             type="number"
             min={1}
             max={7}
             placeholder="3"
-            className="bg-white/5 border-border text-text"
+           
             {...register("targetPerWeek", { valueAsNumber: true })}
           />
           {errors.targetPerWeek && (
@@ -175,7 +175,7 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       {/* Weekday picker — only for weekdays */}
       {frequency === "weekdays" && (
         <div className="space-y-2">
-          <Label className="text-text/80">Дни недели</Label>
+          <Label>Дни недели</Label>
           <div className="flex gap-1.5">
             {WEEKDAYS.map(({ value, label }) => (
               <button
@@ -186,7 +186,7 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
                   "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all border",
                   selectedWeekdays.includes(value)
                     ? "bg-primary/20 border-primary/60 text-primary"
-                    : "bg-white/5 border-border text-muted hover:text-text"
+                    : "border-border text-muted hover:bg-white/8 hover:text-text"
                 )}
               >
                 {label}
