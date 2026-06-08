@@ -1,41 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { format, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
 import { BookOpen } from "lucide-react";
-import { journalApi } from "@/lib/api/journal";
+import { useJournalEntry, useJournalEntries, useSaveJournalEntry } from "@/lib/hooks/useJournal";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+
 import { cn, getTodayString, getMoodColor } from "@/lib/utils";
 import type { DailyEntry } from "@/types";
 
 // ─── Entry Form ───────────────────────────────────────────────────────────────
 
 function EntryForm({ date, existing }: { date: string; existing: DailyEntry | null }) {
-  const qc = useQueryClient();
   const [mood, setMood] = useState(existing?.mood ?? 7);
   const [energy, setEnergy] = useState(existing?.energy ?? 7);
   const [stress, setStress] = useState(existing?.stressLevel ?? 4);
   const [sleep, setSleep] = useState(existing?.sleepHours ?? 8);
 
-  const saveEntry = useMutation({
-    mutationFn: (payload: Parameters<typeof journalApi.createEntry>[0]) =>
-      existing
-        ? journalApi.updateEntry(date, payload)
-        : journalApi.createEntry(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["journal"] });
-      toast.success("Запись сохранена");
-    },
-  });
+  const saveEntry = useSaveJournalEntry(date, existing);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,17 +119,8 @@ export default function JournalPage() {
 
   const start = format(subDays(new Date(), 29), "yyyy-MM-dd");
 
-  // Selected entry
-  const { data: selectedEntry } = useQuery({
-    queryKey: ["journal", selectedDate],
-    queryFn: () => journalApi.getEntry(selectedDate).catch(() => null),
-  });
-
-  // History list (30 days)
-  const { data: entries } = useQuery({
-    queryKey: ["journal", "entries", start],
-    queryFn: () => journalApi.getEntries({ start, end: today, limit: 30 }),
-  });
+  const { data: selectedEntry } = useJournalEntry(selectedDate);
+  const { data: entries } = useJournalEntries({ start, end: today, limit: 30 });
 
   const chartData =
     entries

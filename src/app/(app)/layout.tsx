@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { AuthBootstrap } from "@/components/layout/AuthBootstrap";
 import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,6 +12,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useRealtimeEvents();
 
   return (
+    <>
+      <AuthBootstrap />
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
       <div className="flex flex-col flex-1 min-w-0">
@@ -20,5 +23,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </div>
+    </>
   );
 }

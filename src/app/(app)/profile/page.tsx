@@ -19,11 +19,13 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { useMe } from "@/lib/hooks/useAuth";
 import { usersApi } from "@/lib/api/users";
 import { authApi } from "@/lib/api/auth";
 import { mediaUrl } from "@/lib/api/client";
 import { telegramApi, type Reminder } from "@/lib/api/telegram";
 import { GlassCard } from "@/components/shared/GlassCard";
+import { CardSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -750,7 +752,32 @@ const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType }[] =
 
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
+  const { isPending, isFetching } = useMe();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  if (!user && (isPending || isFetching)) {
+    return (
+      <div className="max-w-4xl space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white/5 animate-pulse shrink-0" />
+          <div className="space-y-2 flex-1">
+            <div className="h-7 w-40 bg-white/5 rounded-lg animate-pulse" />
+            <div className="h-4 w-24 bg-white/5 rounded-lg animate-pulse" />
+          </div>
+        </div>
+        <div className="flex gap-6 items-start">
+          <div className="w-44 shrink-0 space-y-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1">
+            <CardSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 

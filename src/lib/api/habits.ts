@@ -7,10 +7,7 @@ export const habitsApi = {
     skip?: number;
     limit?: number;
   }): Promise<PaginatedResponse<Habit>> => {
-    const { data } = await api.get<Habit[] | PaginatedResponse<Habit>>("/habits/", { params });
-    if (Array.isArray(data)) {
-      return { items: data, total: data.length, skip: 0, limit: data.length };
-    }
+    const { data } = await api.get<PaginatedResponse<Habit>>("/habits/", { params });
     return data;
   },
 

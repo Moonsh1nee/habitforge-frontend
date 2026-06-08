@@ -15,12 +15,9 @@ export interface TaskFilters {
 
 export const tasksApi = {
   getAll: async (filters?: TaskFilters): Promise<PaginatedResponse<Task>> => {
-    const { data } = await api.get<Task[] | PaginatedResponse<Task>>("/tasks/", {
+    const { data } = await api.get<PaginatedResponse<Task>>("/tasks/", {
       params: filters,
     });
-    if (Array.isArray(data)) {
-      return { items: data, total: data.length, skip: 0, limit: data.length };
-    }
     return data;
   },
 

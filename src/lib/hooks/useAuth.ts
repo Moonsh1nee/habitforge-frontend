@@ -9,12 +9,11 @@ import { api } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 export function useMe() {
-  const user = useAuthStore((s) => s.user);
   return useQuery({
     queryKey: ["me"],
     queryFn: authApi.me,
-    enabled: !user, // only fetch if we don't have user in memory yet
     retry: false,
+    staleTime: 30_000,
   });
 }
 

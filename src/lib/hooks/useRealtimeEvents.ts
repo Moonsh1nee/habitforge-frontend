@@ -43,6 +43,7 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "habit.checked":
+            case "habit.updated":
               qc.invalidateQueries({ queryKey: ["habits"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
@@ -51,8 +52,10 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "nutrition.logged":
+            case "nutrition.updated":
               qc.invalidateQueries({ queryKey: ["nutrition"] });
               qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
+              qc.invalidateQueries({ queryKey: ["nutrition-plan-meals"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "finance.updated":

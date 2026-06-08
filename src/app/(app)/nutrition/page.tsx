@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Plus, Apple, Trash2, ChevronLeft, ChevronRight, Pencil,
@@ -10,7 +9,20 @@ import {
 import { addDays, format, isToday, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
-import { nutritionApi } from "@/lib/api/nutrition";
+import {
+  useNutritionSummary,
+  useNutritionLogs,
+  useNutritionPlans,
+  useCreateNutritionLog,
+  useDeleteNutritionLog,
+  useCreateNutritionPlan,
+  useUpdateNutritionPlan,
+  useDeleteNutritionPlan,
+  usePlanMeals,
+  useAddPlanMeal,
+  useUpdatePlanMeal,
+  useDeletePlanMeal,
+} from "@/lib/hooks/useNutrition";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
@@ -32,7 +44,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import { getTodayString } from "@/lib/utils";
 import type { MealType, NutritionPlan, MealTemplate } from "@/types";
 
@@ -48,28 +59,23 @@ const mealLabels: Record<MealType, string> = {
 
 function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void }) {
   const [mealType, setMealType] = useState<MealType>("breakfast");
-  const qc = useQueryClient();
-  const create = useMutation({
-    mutationFn: nutritionApi.createLog,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition"] });
-      toast.success("Еда добавлена!");
-      onSuccess();
-    },
-  });
+  const create = useCreateNutritionLog();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    create.mutate({
-      date,
-      mealType,
-      name: fd.get("name") as string,
-      calories: Number(fd.get("calories")),
-      protein: Number(fd.get("protein")),
-      carbs: Number(fd.get("carbs")),
-      fat: Number(fd.get("fat")),
-    });
+    create.mutate(
+      {
+        date,
+        mealType,
+        name: fd.get("name") as string,
+        calories: Number(fd.get("calories")),
+        protein: Number(fd.get("protein")),
+        carbs: Number(fd.get("carbs")),
+        fat: Number(fd.get("fat")),
+      },
+      { onSuccess: onSuccess }
+    );
   };
 
   return (
@@ -127,27 +133,8 @@ function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void 
 // ─── Nutrition Plan Form ──────────────────────────────────────────────────────
 
 function PlanForm({ plan, onSuccess }: { plan?: NutritionPlan; onSuccess: () => void }) {
-  const qc = useQueryClient();
-
-  const create = useMutation({
-    mutationFn: (payload: Partial<NutritionPlan>) => nutritionApi.createPlan(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
-      toast.success("План создан");
-      onSuccess();
-    },
-    onError: () => toast.error("Ошибка создания плана"),
-  });
-
-  const update = useMutation({
-    mutationFn: (payload: Partial<NutritionPlan>) => nutritionApi.updatePlan(plan!.id, payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
-      toast.success("План обновлён");
-      onSuccess();
-    },
-    onError: () => toast.error("Ошибка обновления плана"),
-  });
+  const create = useCreateNutritionPlan();
+  const update = useUpdateNutritionPlan();
 
   const isPending = create.isPending || update.isPending;
 
@@ -162,8 +149,8 @@ function PlanForm({ plan, onSuccess }: { plan?: NutritionPlan; onSuccess: () => 
       targetCarbs: Number(fd.get("carbs")) || undefined,
       targetFat: Number(fd.get("fat")) || undefined,
     };
-    if (plan) update.mutate(payload);
-    else create.mutate(payload);
+    if (plan) update.mutate({ id: plan.id, payload }, { onSuccess });
+    else create.mutate(payload, { onSuccess });
   };
 
   return (
@@ -213,28 +200,9 @@ function MealTemplateForm({
   onCancel: () => void;
 }) {
   const [mealType, setMealType] = useState<MealType>(meal?.mealType ?? "breakfast");
-  const qc = useQueryClient();
 
-  const create = useMutation({
-    mutationFn: (payload: Partial<MealTemplate>) => nutritionApi.addPlanMeal(planId, payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plan-meals", planId] });
-      toast.success("Шаблон добавлен");
-      onSuccess();
-    },
-    onError: () => toast.error("Ошибка создания шаблона"),
-  });
-
-  const upd = useMutation({
-    mutationFn: (payload: Partial<MealTemplate>) =>
-      nutritionApi.updatePlanMeal(planId, meal!.id, payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plan-meals", planId] });
-      toast.success("Шаблон обновлён");
-      onSuccess();
-    },
-    onError: () => toast.error("Ошибка обновления шаблона"),
-  });
+  const create = useAddPlanMeal(planId);
+  const upd = useUpdatePlanMeal(planId);
 
   const isPending = create.isPending || upd.isPending;
 
@@ -250,8 +218,8 @@ function MealTemplateForm({
       fat: Number(fd.get("fat")) || undefined,
       notes: (fd.get("notes") as string) || undefined,
     };
-    if (meal) upd.mutate(payload);
-    else create.mutate(payload);
+    if (meal) upd.mutate({ mealId: meal.id, payload }, { onSuccess });
+    else create.mutate(payload, { onSuccess });
   };
 
   return (
@@ -311,31 +279,10 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
   const [addMealOpen, setAddMealOpen] = useState(false);
   const [editMealId, setEditMealId] = useState<string | null>(null);
   const [editPlanOpen, setEditPlanOpen] = useState(false);
-  const qc = useQueryClient();
 
-  const { data: meals = [] } = useQuery({
-    queryKey: ["nutrition-plan-meals", plan.id],
-    queryFn: () => nutritionApi.getPlanMeals(plan.id),
-    enabled: expanded,
-  });
-
-  const deletePlan = useMutation({
-    mutationFn: () => nutritionApi.deletePlan(plan.id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
-      toast.success("План удалён");
-    },
-    onError: () => toast.error("Ошибка удаления плана"),
-  });
-
-  const deleteMeal = useMutation({
-    mutationFn: (mealId: string) => nutritionApi.deletePlanMeal(plan.id, mealId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nutrition-plan-meals", plan.id] });
-      toast.success("Шаблон удалён");
-    },
-    onError: () => toast.error("Ошибка удаления шаблона"),
-  });
+  const { data: meals = [] } = usePlanMeals(plan.id, expanded);
+  const deletePlan = useDeleteNutritionPlan();
+  const deleteMeal = useDeletePlanMeal(plan.id);
 
   return (
     <div className="glass p-5 group">
@@ -360,7 +307,7 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
           <button onClick={() => setEditPlanOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
             <Pencil size={13} />
           </button>
-          <button onClick={() => deletePlan.mutate()} className="p-1 text-muted hover:text-danger transition-colors">
+          <button onClick={() => deletePlan.mutate(plan.id)} className="p-1 text-muted hover:text-danger transition-colors">
             <Trash2 size={13} />
           </button>
           <button onClick={() => setExpanded((v) => !v)} className="p-1 text-muted hover:text-text transition-colors">
@@ -464,33 +411,16 @@ export default function NutritionPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(getTodayString());
-  const qc = useQueryClient();
   const today = getTodayString();
 
   const shiftDate = (days: number) => {
     setSelectedDate((d) => format(addDays(parseISO(d), days), "yyyy-MM-dd"));
   };
 
-  const { data: summary } = useQuery({
-    queryKey: ["nutrition", "summary", selectedDate],
-    queryFn: () => nutritionApi.getSummary(selectedDate),
-  });
-
-  const { data: logs = [] } = useQuery({
-    queryKey: ["nutrition", "logs", selectedDate],
-    queryFn: () => nutritionApi.getLogs({ date: selectedDate }),
-  });
-
-  const { data: plans = [] } = useQuery({
-    queryKey: ["nutrition-plans"],
-    queryFn: nutritionApi.getPlans,
-    enabled: activeTab === "plans",
-  });
-
-  const deleteLog = useMutation({
-    mutationFn: (id: string) => nutritionApi.deleteLog(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["nutrition"] }),
-  });
+  const { data: summary } = useNutritionSummary(selectedDate);
+  const { data: logs = [] } = useNutritionLogs(selectedDate);
+  const { data: plans = [] } = useNutritionPlans(activeTab === "plans");
+  const deleteLog = useDeleteNutritionLog();
 
   const macros = summary
     ? [
