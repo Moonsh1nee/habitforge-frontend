@@ -7,6 +7,7 @@ import { ru } from "date-fns/locale";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useLogout } from "@/lib/hooks/useAuth";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
+import { mediaUrl } from "@/lib/api/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,9 +53,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <DropdownMenuTrigger
               render={
                 <button className="flex items-center gap-2 p-1 pl-2 rounded-xl hover:bg-white/5 transition-colors outline-none">
-                  <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                    {user.firstName?.[0]?.toUpperCase() ?? "U"}
-                  </div>
+                  {mediaUrl(user.avatarUrl) ? (
+                    <img
+                      src={mediaUrl(user.avatarUrl)!}
+                      alt={user.firstName ?? "avatar"}
+                      className="w-8 h-8 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                      {user.firstName?.[0]?.toUpperCase() ?? "U"}
+                    </div>
+                  )}
                   <span className="text-sm text-text/80 hidden sm:block">{user.firstName}</span>
                   <ChevronDown size={13} className="text-muted hidden sm:block" />
                 </button>

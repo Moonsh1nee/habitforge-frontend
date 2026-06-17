@@ -124,12 +124,14 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
           <button
             onClick={() => onEdit(task)}
+            aria-label="Редактировать задачу"
             className="text-muted hover:text-primary transition-colors p-1 rounded"
           >
             <Pencil size={14} />
           </button>
           <button
             onClick={() => deleteTask.mutate(task.id)}
+            aria-label="Удалить задачу"
             className="text-muted hover:text-danger transition-colors p-1 rounded"
           >
             <Trash2 size={14} />

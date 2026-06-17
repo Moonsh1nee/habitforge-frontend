@@ -54,12 +54,14 @@ export function HabitCard({ habit, onLog, onClick, onEdit, onDelete }: HabitCard
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(habit); }}
+            aria-label="Редактировать привычку"
             className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 text-muted hover:text-primary transition-all p-1 rounded"
           >
             <Pencil size={13} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(habit.id); }}
+            aria-label="Удалить привычку"
             className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 text-muted hover:text-danger transition-all p-1 rounded"
           >
             <Trash2 size={13} />

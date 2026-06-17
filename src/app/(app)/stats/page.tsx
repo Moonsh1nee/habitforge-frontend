@@ -19,6 +19,7 @@ import { GlassCard } from "@/components/shared/GlassCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FilterTabs } from "@/components/shared/FilterTabs";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { CardSkeleton, Skeleton } from "@/components/shared/LoadingSkeleton";
 import { getTodayString } from "@/lib/utils";
 import type { Habit } from "@/types";
 
@@ -109,10 +110,11 @@ export default function StatsPage() {
   const today = getTodayString();
   const start = format(subDays(new Date(), days - 1), "yyyy-MM-dd");
 
-  const { data: entries = [] } = useJournalEntries({ start, end: today, limit: 100 });
-  const { data: workoutLogs = [] } = useWorkoutLogs({ limit: 50 });
-  const { data: habitsData } = useHabits({ archived: false });
+  const { data: entries = [], isLoading: loadingEntries } = useJournalEntries({ start, end: today, limit: 100 });
+  const { data: workoutLogs = [], isLoading: loadingWorkouts } = useWorkoutLogs({ limit: 50 });
+  const { data: habitsData, isLoading: loadingHabits } = useHabits({ archived: false });
   const habits = habitsData?.items ?? [];
+  const isLoading = loadingEntries || loadingWorkouts || loadingHabits;
 
   const workoutsInPeriod = useMemo(
     () => workoutLogs.filter((l) => l.date >= start && l.date <= today),
@@ -193,6 +195,20 @@ export default function StatsPage() {
         ]}
       />
 
+      {isLoading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[0,1,2,3].map((i) => <CardSkeleton key={i} className="p-4" />)}
+          </div>
+          <Skeleton className="h-56 rounded-2xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Skeleton className="h-52 rounded-2xl" />
+            <Skeleton className="h-52 rounded-2xl" />
+          </div>
+        </div>
+      )}
+
+      {!isLoading && (
       <motion.div key={period} variants={container} initial="hidden" animate="visible" className="space-y-4">
         {/* Summary metrics */}
         <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -387,6 +403,7 @@ export default function StatsPage() {
           </motion.div>
         )}
       </motion.div>
+      )}
     </div>
   );
 }

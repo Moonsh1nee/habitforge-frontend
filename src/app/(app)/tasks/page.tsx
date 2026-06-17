@@ -192,7 +192,7 @@ export default function TasksPage() {
       {isLoading ? (
         <ListSkeleton count={5} />
       ) : (
-        <TaskList tasks={tasks} onEdit={setEditTask} />
+        <TaskList tasks={tasks} onEdit={setEditTask} onCreateClick={() => setCreateOpen(true)} />
       )}
 
       <FormDialog open={createOpen} onOpenChange={setCreateOpen} title="Новая задача">

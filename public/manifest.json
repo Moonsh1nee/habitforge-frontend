@@ -1,0 +1,20 @@
+{
+  "name": "HabitForge",
+  "short_name": "HabitForge",
+  "description": "Система трекинга привычек, задач и здоровья",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["health", "lifestyle", "productivity"]
+}

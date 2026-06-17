@@ -262,10 +262,10 @@ function LogCard({ log }: { log: WorkoutLog }) {
             </span>
           )}
           <div className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 flex items-center gap-0.5 transition-all">
-            <button onClick={() => setEditOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
+            <button onClick={() => setEditOpen(true)} aria-label="Редактировать тренировку" className="p-1 text-muted hover:text-primary transition-colors">
               <Pencil size={13} />
             </button>
-            <button onClick={() => deleteLog.mutate(log.id)} className="p-1 text-muted hover:text-danger transition-colors">
+            <button onClick={() => deleteLog.mutate(log.id)} aria-label="Удалить тренировку" className="p-1 text-muted hover:text-danger transition-colors">
               <Trash2 size={13} />
             </button>
           </div>
@@ -355,10 +355,10 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
           )}
         </div>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
-          <button onClick={() => setEditOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
+          <button onClick={() => setEditOpen(true)} aria-label="Редактировать план" className="p-1 text-muted hover:text-primary transition-colors">
             <Pencil size={13} />
           </button>
-          <button onClick={() => deletePlan.mutate(plan.id)} className="p-1 text-muted hover:text-danger transition-colors">
+          <button onClick={() => deletePlan.mutate(plan.id)} aria-label="Удалить план" className="p-1 text-muted hover:text-danger transition-colors">
             <Trash2 size={13} />
           </button>
           <button onClick={() => setExpanded((v) => !v)} className="p-1 text-muted hover:text-text transition-colors">

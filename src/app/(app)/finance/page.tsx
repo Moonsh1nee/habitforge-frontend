@@ -432,10 +432,10 @@ function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
             {cat.icon && <span className="text-xs">{cat.icon}</span>}
             <span className="text-text/80 text-xs">{cat.name}</span>
             <div className="hidden group-hover:flex items-center gap-0.5 ml-1">
-              <button onClick={() => handleOpenEdit(cat)} className="text-muted hover:text-primary transition-colors">
+              <button onClick={() => handleOpenEdit(cat)} aria-label="Редактировать категорию" className="text-muted hover:text-primary transition-colors">
                 <Pencil size={11} />
               </button>
-              <button onClick={() => deleteCat.mutate(cat.id)} className="text-muted hover:text-danger transition-colors">
+              <button onClick={() => deleteCat.mutate(cat.id)} aria-label="Удалить категорию" className="text-muted hover:text-danger transition-colors">
                 <X size={11} />
               </button>
             </div>
@@ -510,9 +510,11 @@ export default function FinancePage() {
 
   const [txFilter, setTxFilter] = useState<TxFilter>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
+  const resetLimit = () => setTxLimit(50);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editTx, setEditTx] = useState<FinanceTransaction | null>(null);
+  const [txLimit, setTxLimit] = useState(50);
 
   const today = getTodayString();
 
@@ -533,9 +535,11 @@ export default function FinancePage() {
     end: transactionDateRange.end,
     ...(txFilter !== "all" ? { type: txFilter as TransactionType } : {}),
     ...(catFilter !== "all" ? { category_id: catFilter } : {}),
-    limit: 50,
+    limit: txLimit,
   });
   const deleteTransaction = useDeleteTransaction();
+  const hasMore = transactions.length >= txLimit;
+  const loadMore = () => setTxLimit((n) => n + 50);
 
   const chartData = (summary?.by_category ?? [])
     .filter((c) => c.type === "expense" && c.total > 0)
@@ -569,7 +573,7 @@ export default function FinancePage() {
         {summaryMode === "period" ? (
           <FilterTabs
             value={period}
-            onChange={setPeriod}
+            onChange={(v) => { setPeriod(v); resetLimit(); }}
             options={(Object.keys(PERIOD_LABELS) as Period[]).map((p) => ({
               value: p,
               label: PERIOD_LABELS[p],
@@ -679,7 +683,7 @@ export default function FinancePage() {
         <div className="flex items-center gap-3 flex-wrap">
           <FilterTabs
             value={txFilter}
-            onChange={setTxFilter}
+            onChange={(v) => { setTxFilter(v); resetLimit(); }}
             options={[
               { value: "all", label: "Все" },
               { value: "income", label: "Доходы" },
@@ -688,7 +692,7 @@ export default function FinancePage() {
           />
 
           {/* Category filter */}
-          <Select value={catFilter} onValueChange={(v) => setCatFilter(v ?? "all")}>
+          <Select value={catFilter} onValueChange={(v) => { setCatFilter(v ?? "all"); resetLimit(); }}>
             <SelectTrigger className="w-48" size="sm">
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
@@ -765,12 +769,14 @@ export default function FinancePage() {
                       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
                         <button
                           onClick={() => setEditTx(tx)}
+                          aria-label="Редактировать транзакцию"
                           className="text-muted hover:text-primary transition-colors p-1"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => deleteTransaction.mutate(tx.id)}
+                          aria-label="Удалить транзакцию"
                           className="text-muted hover:text-danger transition-colors p-1"
                         >
                           <Trash2 size={14} />
@@ -781,6 +787,16 @@ export default function FinancePage() {
                 );
               })}
             </AnimatePresence>
+
+            {hasMore && (
+              <button
+                onClick={loadMore}
+                disabled={loadingTx}
+                className="w-full mt-2 py-2.5 text-sm text-muted hover:text-primary border border-border hover:border-primary/40 rounded-xl transition-all"
+              >
+                {loadingTx ? "Загрузка..." : "Загрузить ещё"}
+              </button>
+            )}
           </div>
         )}
       </div>

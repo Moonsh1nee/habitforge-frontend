@@ -307,10 +307,10 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
           )}
         </div>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
-          <button onClick={() => setEditPlanOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
+          <button onClick={() => setEditPlanOpen(true)} aria-label="Редактировать план питания" className="p-1 text-muted hover:text-primary transition-colors">
             <Pencil size={13} />
           </button>
-          <button onClick={() => deletePlan.mutate(plan.id)} className="p-1 text-muted hover:text-danger transition-colors">
+          <button onClick={() => deletePlan.mutate(plan.id)} aria-label="Удалить план питания" className="p-1 text-muted hover:text-danger transition-colors">
             <Trash2 size={13} />
           </button>
           <button onClick={() => setExpanded((v) => !v)} className="p-1 text-muted hover:text-text transition-colors">
@@ -354,10 +354,10 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
                     )}
                   </div>
                   <div className="opacity-0 group-hover/meal:opacity-100 flex gap-0.5 transition-all shrink-0">
-                    <button onClick={() => setEditMealId(meal.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
+                    <button onClick={() => setEditMealId(meal.id)} aria-label="Редактировать приём пищи" className="p-0.5 text-muted hover:text-primary transition-colors">
                       <Pencil size={11} />
                     </button>
-                    <button onClick={() => deleteMeal.mutate(meal.id)} className="p-0.5 text-muted hover:text-danger transition-colors">
+                    <button onClick={() => deleteMeal.mutate(meal.id)} aria-label="Удалить приём пищи" className="p-0.5 text-muted hover:text-danger transition-colors">
                       <Trash2 size={11} />
                     </button>
                   </div>
@@ -560,6 +560,7 @@ export default function NutritionPage() {
                   </div>
                   <button
                     onClick={() => deleteLog.mutate(entry.id)}
+                    aria-label="Удалить запись питания"
                     className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 text-muted hover:text-danger transition-all"
                   >
                     <Trash2 size={14} />

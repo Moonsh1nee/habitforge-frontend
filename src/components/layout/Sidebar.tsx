@@ -78,6 +78,8 @@ function TodayProgress() {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { data: today } = useDashboardToday();
+  const overdueCount = today?.tasks_overdue?.length ?? 0;
 
   return (
     <>
@@ -91,6 +93,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
         {navItems.map(({ href, icon: Icon, label }) => {
           const active = pathname.startsWith(href);
+          const showBadge = href === "/tasks" && overdueCount > 0;
           return (
             <Link key={href} href={href} onClick={onNavigate}>
               <motion.div
@@ -111,7 +114,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   />
                 )}
                 <Icon size={18} />
-                <span>{label}</span>
+                <span className="flex-1">{label}</span>
+                {showBadge && (
+                  <span className="text-[10px] font-bold bg-danger text-white rounded-full px-1.5 py-0.5 leading-none tabular-nums">
+                    {overdueCount > 9 ? "9+" : overdueCount}
+                  </span>
+                )}
               </motion.div>
             </Link>
           );

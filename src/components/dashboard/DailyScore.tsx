@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { motion, useSpring, animate, useMotionValue, useTransform } from "motion/react";
 import { Sparkles } from "lucide-react";
+import confetti from "canvas-confetti";
 import type { TodayDashboard } from "@/types";
 
 interface DailyScoreProps {
@@ -54,9 +55,19 @@ export function DailyScore({ today }: DailyScoreProps) {
   // Animate the number
   const displayNum = useSpring(0, { stiffness: 80, damping: 20 });
 
+  const firedConfetti = useRef(false);
+
   useEffect(() => {
     const ctrl = animate(progress, score, { duration: 1.2, ease: [0.4, 0, 0.2, 1] });
     displayNum.set(score);
+
+    if (score === 100 && !firedConfetti.current) {
+      firedConfetti.current = true;
+      setTimeout(() => {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 }, colors: ["#7c3aed", "#06b6d4", "#22c55e", "#f59e0b"] });
+      }, 900);
+    }
+
     return ctrl.stop;
   }, [score, progress, displayNum]);
 

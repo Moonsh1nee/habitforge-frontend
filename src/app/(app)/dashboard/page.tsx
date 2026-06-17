@@ -12,6 +12,7 @@ import { HabitProgressRing } from "@/components/dashboard/HabitProgressRing";
 import { WeeklyStats } from "@/components/dashboard/WeeklyStats";
 import { MacroBar } from "@/components/dashboard/MacroBar";
 import { CardSkeleton } from "@/components/shared/LoadingSkeleton";
+import { OnboardingBanner } from "@/components/layout/OnboardingBanner";
 import { getGreeting, formatDate } from "@/lib/utils";
 
 const container = {
@@ -55,6 +56,16 @@ export default function DashboardPage() {
           все задачи
         </Link>
       </motion.div>
+
+      {!isLoading && (
+        <OnboardingBanner
+          show={
+            (today?.habits?.length ?? 0) === 0 &&
+            (today?.tasks_pending?.length ?? 0) === 0 &&
+            (today?.tasks_overdue?.length ?? 0) === 0
+          }
+        />
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
