@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Repeat2 } from "lucide-react";
+import { Plus, Repeat2, CheckCircle2, Flame } from "lucide-react";
 import { motion } from "motion/react";
 import { useHabits, useLogHabit, useDeleteHabit } from "@/lib/hooks/useHabits";
+import { useDashboardToday } from "@/lib/hooks/useDashboard";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { HabitForm } from "@/components/habits/HabitForm";
 import { HabitCalendar } from "@/components/habits/HabitCalendar";
@@ -37,6 +38,12 @@ export default function HabitsPage() {
   const { data, isLoading } = useHabits({ archived: false });
   const habits = data?.items ?? [];
 
+  const { data: todayData } = useDashboardToday();
+  const todayHabits = todayData?.habits ?? [];
+  const doneToday = todayHabits.filter((h) => h.completed_today).length;
+  const totalToday = todayHabits.length;
+  const allDone = totalToday > 0 && doneToday === totalToday;
+
   return (
     <div className="max-w-4xl space-y-6">
       <PageHeader
@@ -49,6 +56,42 @@ export default function HabitsPage() {
           </Button>
         }
       />
+
+      {/* Today summary */}
+      {totalToday > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`glass p-4 flex items-center justify-between ${allDone ? "border-success/20" : "border-border"}`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${allDone ? "bg-success/15" : "bg-warning/10"}`}>
+              {allDone ? <CheckCircle2 size={16} className="text-success" /> : <Flame size={16} className="text-warning" />}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">
+                {allDone ? "Все привычки выполнены!" : `Сегодня: ${doneToday} из ${totalToday}`}
+              </p>
+              <p className="text-xs text-muted">
+                {allDone ? "Отличная работа, так держать" : `Осталось ${totalToday - doneToday} привычек`}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className={`text-lg font-bold tabular-nums ${allDone ? "text-success" : "text-warning"}`}>
+              {totalToday > 0 ? Math.round((doneToday / totalToday) * 100) : 0}%
+            </span>
+            <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${allDone ? "bg-success" : "gradient-primary"}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${(doneToday / totalToday) * 100}%` }}
+                transition={{ duration: 0.7 }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {isLoading ? (
         <ListSkeleton count={4} />

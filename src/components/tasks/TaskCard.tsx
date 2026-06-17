@@ -1,12 +1,18 @@
 "use client";
 
-import { motion } from "motion/react";
-import { Calendar, Pencil, Trash2 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Calendar, Pencil, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
 import { useUpdateTask, useDeleteTask } from "@/lib/hooks/useTasks";
 import type { Task } from "@/types";
+
+const PRIORITY_ACCENT: Record<number, string> = {
+  1: "border-l-danger",
+  2: "border-l-warning",
+  3: "border-l-muted/30",
+};
 
 interface TaskCardProps {
   task: Task;
@@ -16,14 +22,19 @@ interface TaskCardProps {
 export function TaskCard({ task, onEdit }: TaskCardProps) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const [justCompleted, setJustCompleted] = useState(false);
   const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
 
   const toggleDone = () => {
+    const completing = !task.completed;
+    if (completing) {
+      setJustCompleted(true);
+    }
     updateTask.mutate({
       id: task.id,
       payload: {
-        completed: !task.completed,
-        completedAt: !task.completed ? new Date().toISOString() : null,
+        completed: completing,
+        completedAt: completing ? new Date().toISOString() : null,
       },
     });
   };
@@ -33,30 +44,56 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="glass p-4 group glass-hover"
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+      className={cn(
+        "glass p-4 group border-l-2 transition-all",
+        PRIORITY_ACCENT[task.priority],
+        task.completed && "opacity-60"
+      )}
     >
       <div className="flex items-start gap-3">
-        <Checkbox
-          checked={task.completed}
-          onCheckedChange={toggleDone}
-          className="mt-0.5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
+        {/* Checkbox */}
+        <button
+          onClick={toggleDone}
+          className={cn(
+            "mt-0.5 shrink-0 relative transition-all duration-200",
+            task.completed ? "text-success" : overdue ? "text-danger hover:text-success" : "text-muted hover:text-primary"
+          )}
+        >
+          <AnimatePresence mode="wait">
+            {task.completed || justCompleted ? (
+              <motion.span
+                key="done"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+                <CheckCircle2 size={19} />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="todo"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+              >
+                <Circle size={19} />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
 
         <div className="flex-1 min-w-0">
-          <p
-            className={cn(
-              "text-sm font-medium transition-all",
-              task.completed ? "line-through text-muted" : "text-text"
-            )}
-          >
+          <p className={cn(
+            "text-sm font-medium transition-all duration-300",
+            task.completed ? "line-through text-muted" : "text-text"
+          )}>
             {task.title}
           </p>
 
           {task.description && (
-            <p className="text-xs text-muted mt-0.5 truncate">
-              {task.description}
-            </p>
+            <p className="text-xs text-muted mt-0.5 truncate">{task.description}</p>
           )}
 
           <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -68,29 +105,32 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
             </Badge>
 
             {task.dueDate && (
-              <span
-                className={cn(
-                  "flex items-center gap-1 text-[10px]",
-                  overdue ? "text-danger" : "text-muted"
-                )}
-              >
+              <span className={cn(
+                "flex items-center gap-1 text-[10px]",
+                overdue ? "text-danger font-medium" : "text-muted"
+              )}>
                 <Calendar size={10} />
                 {formatDate(task.dueDate)}
+                {overdue && " · просрочено"}
               </span>
+            )}
+
+            {task.isRecurring && (
+              <span className="text-[10px] text-accent/70">↺ {task.recurrence}</span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
           <button
             onClick={() => onEdit(task)}
-            className="text-muted hover:text-primary transition-colors p-1"
+            className="text-muted hover:text-primary transition-colors p-1 rounded"
           >
             <Pencil size={14} />
           </button>
           <button
             onClick={() => deleteTask.mutate(task.id)}
-            className="text-muted hover:text-danger transition-colors p-1"
+            className="text-muted hover:text-danger transition-colors p-1 rounded"
           >
             <Trash2 size={14} />
           </button>

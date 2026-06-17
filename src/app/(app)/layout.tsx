@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { AuthBootstrap } from "@/components/layout/AuthBootstrap";
+import { QuickAddFab } from "@/components/layout/QuickAddFab";
 import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <PageTransition>{children}</PageTransition>
+          <QuickAddFab />
         </main>
       </div>
     </div>

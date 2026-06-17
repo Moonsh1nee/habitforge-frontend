@@ -6,21 +6,75 @@ import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
   Apple, BookOpen, User, Zap, Wallet, CalendarDays,
+  BarChart2, CheckCircle2, ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useDashboardToday } from "@/lib/hooks/useDashboard";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
   { href: "/tasks", icon: CheckSquare, label: "Задачи" },
   { href: "/calendar", icon: CalendarDays, label: "Календарь" },
   { href: "/habits", icon: Repeat2, label: "Привычки" },
+  { href: "/stats", icon: BarChart2, label: "Аналитика" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
   { href: "/finance", icon: Wallet, label: "Финансы" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
   { href: "/profile", icon: User, label: "Профиль" },
 ];
+
+function TodayProgress() {
+  const { data: today } = useDashboardToday();
+  if (!today) return null;
+
+  const totalHabits = today.habits.length;
+  const doneHabits = today.habits.filter((h) => h.completed_today).length;
+  const pendingTasks = today.tasks_pending.length + today.tasks_overdue.length;
+  const pct = totalHabits > 0 ? Math.round((doneHabits / totalHabits) * 100) : 0;
+  const allDone = totalHabits > 0 && doneHabits === totalHabits;
+
+  return (
+    <div className="px-4 pb-4 pt-2 border-t border-border space-y-2">
+      <p className="text-[10px] text-muted uppercase tracking-wider font-medium px-1">Сегодня</p>
+
+      {/* Habits progress */}
+      {totalHabits > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 size={11} className={allDone ? "text-success" : "text-muted"} />
+              <span className="text-xs text-muted">Привычки</span>
+            </div>
+            <span className={`text-xs font-semibold tabular-nums ${allDone ? "text-success" : "text-text"}`}>
+              {doneHabits}/{totalHabits}
+            </span>
+          </div>
+          <div className="h-1 bg-white/5 rounded-full overflow-hidden mx-1">
+            <motion.div
+              className={`h-full rounded-full ${allDone ? "bg-success" : "gradient-primary"}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.6 }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Pending tasks */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-1.5">
+          <ListTodo size={11} className="text-muted" />
+          <span className="text-xs text-muted">Задач</span>
+        </div>
+        <span className={`text-xs font-semibold tabular-nums ${pendingTasks > 0 ? "text-warning" : "text-success"}`}>
+          {pendingTasks > 0 ? `${pendingTasks} осталось` : "всё готово"}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -63,6 +117,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
+
+      <TodayProgress />
     </>
   );
 }
