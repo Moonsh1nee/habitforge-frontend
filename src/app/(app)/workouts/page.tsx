@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Plus, Dumbbell, Clock, Pencil, Trash2, ChevronDown, ChevronUp,
 } from "lucide-react";
@@ -12,18 +12,19 @@ import {
   useUpdatePlanExercise, useDeletePlanExercise,
   useUpdateLogExercise, useDeleteLogExercise,
 } from "@/lib/hooks/useWorkouts";
-import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { FormDialog } from "@/components/shared/FormDialog";
+import { FilterTabs } from "@/components/shared/FilterTabs";
+import { CollapsibleBody } from "@/components/shared/CollapsibleBody";
+import { ExerciseRow } from "@/components/workouts/ExerciseRow";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import type { WorkoutPlan, WorkoutLog, PlanExercise, ExerciseLog } from "@/types";
 
 // ─── Inline exercise editor ───────────────────────────────────────────────────
@@ -73,11 +74,9 @@ function EditExerciseInline({
 
 function LogForm({
   log,
-  plans,
   onSuccess,
 }: {
   log?: WorkoutLog;
-  plans: WorkoutPlan[];
   onSuccess: () => void;
 }) {
   const createLog = useCreateLog();
@@ -104,31 +103,16 @@ function LogForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Дата</Label>
-          <DatePicker
-            name="date"
-            defaultValue={log?.date ?? new Date().toISOString().split("T")[0]}
-          />
+          <DatePicker name="date" defaultValue={log?.date ?? new Date().toISOString().split("T")[0]} />
         </div>
         <div className="space-y-2">
           <Label>Длительность (мин)</Label>
-          <Input
-            name="duration"
-            type="number"
-            min={1}
-            defaultValue={log?.durationMinutes ?? ""}
-            placeholder="60"
-          />
+          <Input name="duration" type="number" min={1} defaultValue={log?.durationMinutes ?? ""} placeholder="60" />
         </div>
       </div>
       <div className="space-y-2">
         <Label>Заметки</Label>
-        <Textarea
-          name="notes"
-          defaultValue={log?.notes ?? ""}
-          placeholder="Как прошла тренировка?"
-          className="resize-none"
-          rows={3}
-        />
+        <Textarea name="notes" defaultValue={log?.notes ?? ""} placeholder="Как прошла тренировка?" className="resize-none" rows={3} />
       </div>
       <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white">
         {log ? "Сохранить" : "Записать тренировку"}
@@ -291,92 +275,57 @@ function LogCard({ log }: { log: WorkoutLog }) {
         </div>
       </div>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
-              <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                Упражнения {exercises.length > 0 && `(${exercises.length})`}
-              </p>
+      <CollapsibleBody expanded={expanded}>
+        <p className="text-xs text-muted font-medium uppercase tracking-wide">
+          Упражнения {exercises.length > 0 && `(${exercises.length})`}
+        </p>
 
-              {exercises.length > 0 && (
-                <div className="space-y-2">
-                  {exercises.map((ex) =>
-                    editExId === ex.id ? (
-                      <EditExerciseInline
-                        key={ex.id}
-                        exercise={ex}
-                        onSave={(payload) =>
-                          updateLogEx.mutate(
-                            { logId: log.id, exerciseId: ex.id, payload: payload as Partial<ExerciseLog> },
-                            { onSuccess: () => setEditExId(null) }
-                          )
-                        }
-                        onCancel={() => setEditExId(null)}
-                      />
-                    ) : (
-                      <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/ex">
-                        <div>
-                          <span className="text-text font-medium">{ex.name}</span>
-                          {ex.muscleGroup && (
-                            <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted shrink-0">
-                            {[
-                              ex.sets && `${ex.sets} п`,
-                              ex.repsPerSet && `${ex.repsPerSet} повт`,
-                              ex.weightKg && `${ex.weightKg} кг`,
-                            ].filter(Boolean).join(" · ")}
-                          </span>
-                          <div className="opacity-0 group-hover/ex:opacity-100 flex gap-0.5 transition-all">
-                            <button onClick={() => setEditExId(ex.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
-                              <Pencil size={11} />
-                            </button>
-                            <button onClick={() => deleteLogEx.mutate({ logId: log.id, exerciseId: ex.id })} className="p-0.5 text-muted hover:text-danger transition-colors">
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+        {exercises.length > 0 && (
+          <div className="space-y-2">
+            {exercises.map((ex) =>
+              editExId === ex.id ? (
+                <EditExerciseInline
+                  key={ex.id}
+                  exercise={ex}
+                  onSave={(payload) =>
+                    updateLogEx.mutate(
+                      { logId: log.id, exerciseId: ex.id, payload: payload as Partial<ExerciseLog> },
+                      { onSuccess: () => setEditExId(null) }
                     )
-                  )}
-                </div>
-              )}
-
-              {exOpen ? (
-                <>
-                  <ExerciseForm logId={log.id} onSuccess={() => setExOpen(false)} />
-                  <button onClick={() => setExOpen(false)} className="text-xs text-muted hover:text-text">Отмена</button>
-                </>
+                  }
+                  onCancel={() => setEditExId(null)}
+                />
               ) : (
-                <button
-                  onClick={() => setExOpen(true)}
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-                >
-                  <Plus size={12} />
-                  Добавить упражнение
-                </button>
-              )}
-            </div>
-          </motion.div>
+                <ExerciseRow
+                  key={ex.id}
+                  exercise={ex}
+                  onEdit={() => setEditExId(ex.id)}
+                  onDelete={() => deleteLogEx.mutate({ logId: log.id, exerciseId: ex.id })}
+                />
+              )
+            )}
+          </div>
         )}
-      </AnimatePresence>
 
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать тренировку</DialogTitle>
-          </DialogHeader>
-          <LogForm log={log} plans={[]} onSuccess={() => setEditOpen(false)} />
-        </DialogContent>
-      </Dialog>
+        {exOpen ? (
+          <>
+            <ExerciseForm logId={log.id} onSuccess={() => setExOpen(false)} />
+            <button onClick={() => setExOpen(false)} className="text-xs text-muted hover:text-text">Отмена</button>
+          </>
+        ) : (
+          <button
+            onClick={() => setExOpen(true)}
+            className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+          >
+            <Plus size={12} />
+            Добавить упражнение
+          </button>
+        )}
+      </CollapsibleBody>
+
+      <FormDialog open={editOpen} onOpenChange={setEditOpen} title="Редактировать тренировку">
+        <LogForm log={log} onSuccess={() => setEditOpen(false)} />
+      </FormDialog>
     </motion.div>
   );
 }
@@ -418,92 +367,57 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
         </div>
       </div>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
-              <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                Упражнения {exercises.length > 0 && `(${exercises.length})`}
-              </p>
+      <CollapsibleBody expanded={expanded}>
+        <p className="text-xs text-muted font-medium uppercase tracking-wide">
+          Упражнения {exercises.length > 0 && `(${exercises.length})`}
+        </p>
 
-              {exercises.length > 0 && (
-                <div className="space-y-2">
-                  {exercises.map((ex) =>
-                    editExId === ex.id ? (
-                      <EditExerciseInline
-                        key={ex.id}
-                        exercise={ex}
-                        onSave={(payload) =>
-                          updatePlanEx.mutate(
-                            { planId: plan.id, exerciseId: ex.id, payload: payload as Partial<PlanExercise> },
-                            { onSuccess: () => setEditExId(null) }
-                          )
-                        }
-                        onCancel={() => setEditExId(null)}
-                      />
-                    ) : (
-                      <div key={ex.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/ex">
-                        <div>
-                          <span className="text-text font-medium">{ex.name}</span>
-                          {ex.muscleGroup && (
-                            <span className="text-xs text-muted ml-2">{ex.muscleGroup}</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted shrink-0">
-                            {[
-                              ex.sets && `${ex.sets} п`,
-                              ex.repsPerSet && `${ex.repsPerSet} повт`,
-                              ex.weightKg && `${ex.weightKg} кг`,
-                            ].filter(Boolean).join(" · ")}
-                          </span>
-                          <div className="opacity-0 group-hover/ex:opacity-100 flex gap-0.5 transition-all">
-                            <button onClick={() => setEditExId(ex.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
-                              <Pencil size={11} />
-                            </button>
-                            <button onClick={() => deletePlanEx.mutate({ planId: plan.id, exerciseId: ex.id })} className="p-0.5 text-muted hover:text-danger transition-colors">
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+        {exercises.length > 0 && (
+          <div className="space-y-2">
+            {exercises.map((ex) =>
+              editExId === ex.id ? (
+                <EditExerciseInline
+                  key={ex.id}
+                  exercise={ex}
+                  onSave={(payload) =>
+                    updatePlanEx.mutate(
+                      { planId: plan.id, exerciseId: ex.id, payload: payload as Partial<PlanExercise> },
+                      { onSuccess: () => setEditExId(null) }
                     )
-                  )}
-                </div>
-              )}
-
-              {exOpen ? (
-                <>
-                  <ExerciseForm planId={plan.id} onSuccess={() => setExOpen(false)} />
-                  <button onClick={() => setExOpen(false)} className="text-xs text-muted hover:text-text">Отмена</button>
-                </>
+                  }
+                  onCancel={() => setEditExId(null)}
+                />
               ) : (
-                <button
-                  onClick={() => setExOpen(true)}
-                  className={cn("text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors")}
-                >
-                  <Plus size={12} />
-                  Добавить упражнение
-                </button>
-              )}
-            </div>
-          </motion.div>
+                <ExerciseRow
+                  key={ex.id}
+                  exercise={ex}
+                  onEdit={() => setEditExId(ex.id)}
+                  onDelete={() => deletePlanEx.mutate({ planId: plan.id, exerciseId: ex.id })}
+                />
+              )
+            )}
+          </div>
         )}
-      </AnimatePresence>
 
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать план</DialogTitle>
-          </DialogHeader>
-          <PlanForm plan={plan} onSuccess={() => setEditOpen(false)} />
-        </DialogContent>
-      </Dialog>
+        {exOpen ? (
+          <>
+            <ExerciseForm planId={plan.id} onSuccess={() => setExOpen(false)} />
+            <button onClick={() => setExOpen(false)} className="text-xs text-muted hover:text-text">Отмена</button>
+          </>
+        ) : (
+          <button
+            onClick={() => setExOpen(true)}
+            className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+          >
+            <Plus size={12} />
+            Добавить упражнение
+          </button>
+        )}
+      </CollapsibleBody>
+
+      <FormDialog open={editOpen} onOpenChange={setEditOpen} title="Редактировать план">
+        <PlanForm plan={plan} onSuccess={() => setEditOpen(false)} />
+      </FormDialog>
     </div>
   );
 }
@@ -513,43 +427,43 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
 export default function WorkoutsPage() {
   const [logOpen, setLogOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("logs");
+  const [activeTab, setActiveTab] = useState<"logs" | "plans">("logs");
 
   const { data: plans } = useWorkoutPlans();
   const { data: logs } = useWorkoutLogs({ limit: 30 });
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-text">Тренировки</h1>
-        <div className="flex gap-2">
-          {activeTab === "plans" && (
-            <Button onClick={() => setPlanOpen(true)} variant="outline" className="border-border text-text gap-2">
+      <PageHeader
+        title="Тренировки"
+        action={
+          <div className="flex gap-2">
+            {activeTab === "plans" && (
+              <Button onClick={() => setPlanOpen(true)} variant="outline" className="border-border text-text gap-2">
+                <Plus size={16} />
+                Новый план
+              </Button>
+            )}
+            <Button onClick={() => setLogOpen(true)} className="gradient-primary text-white gap-2">
               <Plus size={16} />
-              Новый план
+              Тренировка
             </Button>
-          )}
-          <Button onClick={() => setLogOpen(true)} className="gradient-primary text-white gap-2">
-            <Plus size={16} />
-            Тренировка
-          </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-transparent p-0 gap-2 h-auto">
-          {(["logs", "plans"] as const).map((v) => (
-            <TabsTrigger
-              key={v}
-              value={v}
-              className="px-5 py-2 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_16px_var(--color-primary-glow)] hover:text-text"
-            >
-              {v === "logs" ? "Логи" : "Планы"}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <FilterTabs
+        value={activeTab}
+        onChange={setActiveTab}
+        size="md"
+        options={[
+          { value: "logs", label: "Логи" },
+          { value: "plans", label: "Планы" },
+        ]}
+      />
 
-        <TabsContent value="logs" className="mt-4 space-y-3">
+      <Tabs value={activeTab}>
+        <TabsContent value="logs" className="mt-0 space-y-3">
           {!logs || logs.length === 0 ? (
             <EmptyState icon={<Dumbbell />} title="Нет записей" description="Начните записывать свои тренировки" />
           ) : (
@@ -557,7 +471,7 @@ export default function WorkoutsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="plans" className="mt-4">
+        <TabsContent value="plans" className="mt-0">
           {!plans || plans.length === 0 ? (
             <EmptyState
               icon={<Dumbbell />}
@@ -577,23 +491,13 @@ export default function WorkoutsPage() {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={logOpen} onOpenChange={setLogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Записать тренировку</DialogTitle>
-          </DialogHeader>
-          <LogForm plans={plans ?? []} onSuccess={() => setLogOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={logOpen} onOpenChange={setLogOpen} title="Записать тренировку">
+        <LogForm onSuccess={() => setLogOpen(false)} />
+      </FormDialog>
 
-      <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Новый план</DialogTitle>
-          </DialogHeader>
-          <PlanForm onSuccess={() => setPlanOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={planOpen} onOpenChange={setPlanOpen} title="Новый план">
+        <PlanForm onSuccess={() => setPlanOpen(false)} />
+      </FormDialog>
     </div>
   );
 }

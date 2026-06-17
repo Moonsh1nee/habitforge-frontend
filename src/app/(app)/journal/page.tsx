@@ -7,6 +7,7 @@ import { ru } from "date-fns/locale";
 import { BookOpen } from "lucide-react";
 import { useJournalEntry, useJournalEntries, useSaveJournalEntry } from "@/lib/hooks/useJournal";
 import { GlassCard } from "@/components/shared/GlassCard";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,7 +133,7 @@ export default function JournalPage() {
 
   return (
     <div className="max-w-5xl space-y-6">
-      <h1 className="text-2xl font-bold text-text">Дневник</h1>
+      <PageHeader title="Дневник" />
 
       <div className="flex gap-6 items-start">
         {/* History sidebar */}

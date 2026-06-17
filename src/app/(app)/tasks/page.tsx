@@ -6,14 +6,11 @@ import { useTasks } from "@/lib/hooks/useTasks";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { FormDialog } from "@/components/shared/FormDialog";
+import { FilterTabs } from "@/components/shared/FilterTabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -21,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { Task, TaskPriority } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
@@ -85,17 +81,16 @@ export default function TasksPage() {
 
   return (
     <div className="max-w-3xl space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text">Задачи</h1>
-          <p className="text-sm text-muted mt-0.5">{data?.total ?? 0} задач всего</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} className="gradient-primary text-white gap-2">
-          <Plus size={16} />
-          Новая задача
-        </Button>
-      </div>
+      <PageHeader
+        title="Задачи"
+        subtitle={`${data?.total ?? 0} задач всего`}
+        action={
+          <Button onClick={() => setCreateOpen(true)} className="gradient-primary text-white gap-2">
+            <Plus size={16} />
+            Новая задача
+          </Button>
+        }
+      />
 
       {/* Search */}
       <div className="relative">
@@ -120,19 +115,15 @@ export default function TasksPage() {
       </div>
 
       {/* Row 1: Completion tabs */}
-      <Tabs value={completedFilter} onValueChange={(v) => setCompletedFilter(v as CompletedFilter)}>
-        <TabsList className="bg-transparent p-0 gap-1 h-auto">
-          {(["all", "todo", "done"] as const).map((v) => (
-            <TabsTrigger
-              key={v}
-              value={v}
-              className="px-4 py-1.5 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_var(--color-primary-glow)] hover:text-text"
-            >
-              {v === "all" ? "Все" : v === "todo" ? "Активные" : "Выполненные"}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <FilterTabs
+        value={completedFilter}
+        onChange={setCompletedFilter}
+        options={[
+          { value: "all", label: "Все" },
+          { value: "todo", label: "Активные" },
+          { value: "done", label: "Выполненные" },
+        ]}
+      />
 
       {/* Row 2: Priority chips + sort */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -198,25 +189,17 @@ export default function TasksPage() {
         <TaskList tasks={tasks} onEdit={setEditTask} />
       )}
 
-      {/* Create dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Новая задача</DialogTitle>
-          </DialogHeader>
-          <TaskForm onSuccess={() => setCreateOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={createOpen} onOpenChange={setCreateOpen} title="Новая задача">
+        <TaskForm onSuccess={() => setCreateOpen(false)} />
+      </FormDialog>
 
-      {/* Edit dialog */}
-      <Dialog open={!!editTask} onOpenChange={(o) => !o && setEditTask(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать задачу</DialogTitle>
-          </DialogHeader>
-          {editTask && <TaskForm task={editTask} onSuccess={() => setEditTask(null)} />}
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!editTask}
+        onOpenChange={(o) => !o && setEditTask(null)}
+        title="Редактировать задачу"
+      >
+        {editTask && <TaskForm task={editTask} onSuccess={() => setEditTask(null)} />}
+      </FormDialog>
     </div>
   );
 }

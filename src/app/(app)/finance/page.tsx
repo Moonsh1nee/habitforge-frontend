@@ -18,11 +18,12 @@ import {
 } from "@/lib/hooks/useFinance";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { FilterTabs } from "@/components/shared/FilterTabs";
+import { StatCard } from "@/components/shared/StatCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -551,34 +552,28 @@ export default function FinancePage() {
 
   return (
     <div className="max-w-5xl space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text">Финансы</h1>
-          <p className="text-sm text-muted mt-0.5">{summary?.transactions_count ?? 0} транзакций</p>
-        </div>
-        <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
-          <Plus size={16} />
-          Добавить
-        </Button>
-      </div>
+      <PageHeader
+        title="Финансы"
+        subtitle={`${summary?.transactions_count ?? 0} транзакций`}
+        action={
+          <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
+            <Plus size={16} />
+            Добавить
+          </Button>
+        }
+      />
 
       {/* Period / Range toggle */}
       <div className="flex items-center gap-3 flex-wrap">
         {summaryMode === "period" ? (
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-            <TabsList className="bg-transparent p-0 gap-1 h-auto">
-              {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
-                <TabsTrigger
-                  key={p}
-                  value={p}
-                  className="px-4 py-1.5 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_var(--color-primary-glow)] hover:text-text"
-                >
-                  {PERIOD_LABELS[p]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <FilterTabs
+            value={period}
+            onChange={setPeriod}
+            options={(Object.keys(PERIOD_LABELS) as Period[]).map((p) => ({
+              value: p,
+              label: PERIOD_LABELS[p],
+            }))}
+          />
         ) : (
           <div className="flex items-center gap-2">
             <DatePicker
@@ -613,39 +608,16 @@ export default function FinancePage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
-        {[
-          {
-            label: "Доходы",
-            value: summary?.total_income ?? 0,
-            icon: TrendingUp,
-            color: "text-success",
-            bg: "bg-success/10",
-          },
-          {
-            label: "Расходы",
-            value: summary?.total_expense ?? 0,
-            icon: TrendingDown,
-            color: "text-danger",
-            bg: "bg-danger/10",
-          },
-          {
-            label: "Баланс",
-            value: summary?.balance ?? 0,
-            icon: Wallet,
-            color: (summary?.balance ?? 0) >= 0 ? "text-success" : "text-danger",
-            bg: (summary?.balance ?? 0) >= 0 ? "bg-success/10" : "bg-danger/10",
-          },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <GlassCard key={label}>
-            <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
-              <Icon size={18} className={color} />
-            </div>
-            <p className={cn("text-xl font-bold", color)}>
-              <AnimatedNumber value={Math.abs(value)} suffix=" ₽" decimals={0} />
-            </p>
-            <p className="text-xs text-muted mt-0.5">{label}</p>
-          </GlassCard>
-        ))}
+        <StatCard label="Доходы" value={summary?.total_income ?? 0} icon={<TrendingUp size={18} />} color="text-success" bg="bg-success/10" suffix=" ₽" />
+        <StatCard label="Расходы" value={summary?.total_expense ?? 0} icon={<TrendingDown size={18} />} color="text-danger" bg="bg-danger/10" suffix=" ₽" />
+        <StatCard
+          label="Баланс"
+          value={summary?.balance ?? 0}
+          icon={<Wallet size={18} />}
+          color={(summary?.balance ?? 0) >= 0 ? "text-success" : "text-danger"}
+          bg={(summary?.balance ?? 0) >= 0 ? "bg-success/10" : "bg-danger/10"}
+          suffix=" ₽"
+        />
       </div>
 
       {/* Chart + categories */}
@@ -698,19 +670,15 @@ export default function FinancePage() {
       {/* Transactions */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <Tabs value={txFilter} onValueChange={(v) => setTxFilter(v as TxFilter)}>
-            <TabsList className="bg-transparent p-0 gap-1 h-auto">
-              {(["all", "income", "expense"] as const).map((f) => (
-                <TabsTrigger
-                  key={f}
-                  value={f}
-                  className="px-4 py-1.5 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_var(--color-primary-glow)] hover:text-text"
-                >
-                  {f === "all" ? "Все" : f === "income" ? "Доходы" : "Расходы"}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <FilterTabs
+            value={txFilter}
+            onChange={setTxFilter}
+            options={[
+              { value: "all", label: "Все" },
+              { value: "income", label: "Доходы" },
+              { value: "expense", label: "Расходы" },
+            ]}
+          />
 
           {/* Category filter */}
           <Select value={catFilter} onValueChange={(v) => setCatFilter(v ?? "all")}>

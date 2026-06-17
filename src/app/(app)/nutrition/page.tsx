@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Plus, Apple, Trash2, ChevronLeft, ChevronRight, Pencil,
   ChevronDown, ChevronUp, UtensilsCrossed,
@@ -26,24 +26,21 @@ import {
 import { GlassCard } from "@/components/shared/GlassCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { FormDialog } from "@/components/shared/FormDialog";
+import { FilterTabs } from "@/components/shared/FilterTabs";
+import { CollapsibleBody } from "@/components/shared/CollapsibleBody";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { SelectOption } from "@/components/shared/SelectOption";
 import { getTodayString } from "@/lib/utils";
 import type { MealType, NutritionPlan, MealTemplate } from "@/types";
@@ -322,90 +319,74 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
         </div>
       </div>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
-              <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                Шаблоны приёмов пищи {meals.length > 0 && `(${meals.length})`}
-              </p>
+      <CollapsibleBody expanded={expanded}>
+        <p className="text-xs text-muted font-medium uppercase tracking-wide">
+          Шаблоны приёмов пищи {meals.length > 0 && `(${meals.length})`}
+        </p>
 
-              {meals.length > 0 && (
-                <div className="space-y-2">
-                  {meals.map((meal) =>
-                    editMealId === meal.id ? (
-                      <MealTemplateForm
-                        key={meal.id}
-                        planId={plan.id}
-                        meal={meal}
-                        onSuccess={() => setEditMealId(null)}
-                        onCancel={() => setEditMealId(null)}
-                      />
-                    ) : (
-                      <div key={meal.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/meal">
-                        <div className="min-w-0">
-                          <span className="text-xs text-primary font-medium mr-2">{mealLabels[meal.mealType]}</span>
-                          <span className="text-text font-medium">{meal.name}</span>
-                          {meal.calories && (
-                            <span className="text-xs text-muted ml-2">{meal.calories} ккал</span>
-                          )}
-                          {(meal.protein || meal.carbs || meal.fat) && (
-                            <p className="text-xs text-muted mt-0.5">
-                              {[
-                                meal.protein && `Б ${meal.protein}г`,
-                                meal.carbs && `У ${meal.carbs}г`,
-                                meal.fat && `Ж ${meal.fat}г`,
-                              ].filter(Boolean).join(" · ")}
-                            </p>
-                          )}
-                        </div>
-                        <div className="opacity-0 group-hover/meal:opacity-100 flex gap-0.5 transition-all shrink-0">
-                          <button onClick={() => setEditMealId(meal.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
-                            <Pencil size={11} />
-                          </button>
-                          <button onClick={() => deleteMeal.mutate(meal.id)} className="p-0.5 text-muted hover:text-danger transition-colors">
-                            <Trash2 size={11} />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-
-              {addMealOpen ? (
+        {meals.length > 0 && (
+          <div className="space-y-2">
+            {meals.map((meal) =>
+              editMealId === meal.id ? (
                 <MealTemplateForm
+                  key={meal.id}
                   planId={plan.id}
-                  onSuccess={() => setAddMealOpen(false)}
-                  onCancel={() => setAddMealOpen(false)}
+                  meal={meal}
+                  onSuccess={() => setEditMealId(null)}
+                  onCancel={() => setEditMealId(null)}
                 />
               ) : (
-                <button
-                  onClick={() => setAddMealOpen(true)}
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-                >
-                  <Plus size={12} />
-                  Добавить шаблон
-                </button>
-              )}
-            </div>
-          </motion.div>
+                <div key={meal.id} className="flex items-center justify-between text-sm bg-white/3 rounded-lg px-3 py-2 group/meal">
+                  <div className="min-w-0">
+                    <span className="text-xs text-primary font-medium mr-2">{mealLabels[meal.mealType]}</span>
+                    <span className="text-text font-medium">{meal.name}</span>
+                    {meal.calories && (
+                      <span className="text-xs text-muted ml-2">{meal.calories} ккал</span>
+                    )}
+                    {(meal.protein || meal.carbs || meal.fat) && (
+                      <p className="text-xs text-muted mt-0.5">
+                        {[
+                          meal.protein && `Б ${meal.protein}г`,
+                          meal.carbs && `У ${meal.carbs}г`,
+                          meal.fat && `Ж ${meal.fat}г`,
+                        ].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="opacity-0 group-hover/meal:opacity-100 flex gap-0.5 transition-all shrink-0">
+                    <button onClick={() => setEditMealId(meal.id)} className="p-0.5 text-muted hover:text-primary transition-colors">
+                      <Pencil size={11} />
+                    </button>
+                    <button onClick={() => deleteMeal.mutate(meal.id)} className="p-0.5 text-muted hover:text-danger transition-colors">
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         )}
-      </AnimatePresence>
 
-      <Dialog open={editPlanOpen} onOpenChange={setEditPlanOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать план</DialogTitle>
-          </DialogHeader>
-          <PlanForm plan={plan} onSuccess={() => setEditPlanOpen(false)} />
-        </DialogContent>
-      </Dialog>
+        {addMealOpen ? (
+          <MealTemplateForm
+            planId={plan.id}
+            onSuccess={() => setAddMealOpen(false)}
+            onCancel={() => setAddMealOpen(false)}
+          />
+        ) : (
+          <button
+            onClick={() => setAddMealOpen(true)}
+            className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+          >
+            <Plus size={12} />
+            Добавить шаблон
+          </button>
+        )}
+      </CollapsibleBody>
+
+      <FormDialog open={editPlanOpen} onOpenChange={setEditPlanOpen} title="Редактировать план">
+        <PlanForm plan={plan} onSuccess={() => setEditPlanOpen(false)} />
+      </FormDialog>
     </div>
   );
 }
@@ -438,34 +419,34 @@ export default function NutritionPage() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-text">Питание</h1>
-        {activeTab === "plans" ? (
-          <Button onClick={() => setPlanOpen(true)} className="gradient-primary text-white gap-2">
-            <Plus size={16} />
-            Новый план
-          </Button>
-        ) : (
-          <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
-            <Plus size={16} />
-            Добавить еду
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Питание"
+        action={
+          activeTab === "plans" ? (
+            <Button onClick={() => setPlanOpen(true)} className="gradient-primary text-white gap-2">
+              <Plus size={16} />
+              Новый план
+            </Button>
+          ) : (
+            <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
+              <Plus size={16} />
+              Добавить еду
+            </Button>
+          )
+        }
+      />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-transparent p-0 gap-2 h-auto">
-          {(["diary", "plans"] as const).map((v) => (
-            <TabsTrigger
-              key={v}
-              value={v}
-              className="px-5 py-2 rounded-full text-sm font-medium transition-all text-muted data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_16px_var(--color-primary-glow)] hover:text-text"
-            >
-              {v === "diary" ? "Дневник" : "Планы"}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <FilterTabs
+        value={activeTab}
+        onChange={setActiveTab}
+        size="md"
+        options={[
+          { value: "diary", label: "Дневник" },
+          { value: "plans", label: "Планы" },
+        ]}
+      />
 
+      <Tabs value={activeTab}>
         {/* ── Diary tab ── */}
         <TabsContent value="diary" className="mt-4 space-y-4">
           <div className="flex items-center justify-center gap-3">
@@ -612,25 +593,13 @@ export default function NutritionPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Add food dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Добавить еду</DialogTitle>
-          </DialogHeader>
-          <AddFoodForm date={selectedDate} onSuccess={() => setAddOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={addOpen} onOpenChange={setAddOpen} title="Добавить еду">
+        <AddFoodForm date={selectedDate} onSuccess={() => setAddOpen(false)} />
+      </FormDialog>
 
-      {/* Create plan dialog */}
-      <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Новый план питания</DialogTitle>
-          </DialogHeader>
-          <PlanForm onSuccess={() => setPlanOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={planOpen} onOpenChange={setPlanOpen} title="Новый план питания">
+        <PlanForm onSuccess={() => setPlanOpen(false)} />
+      </FormDialog>
     </div>
   );
 }

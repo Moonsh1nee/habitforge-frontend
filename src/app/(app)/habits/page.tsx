@@ -9,13 +9,9 @@ import { HabitForm } from "@/components/habits/HabitForm";
 import { HabitCalendar } from "@/components/habits/HabitCalendar";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { FormDialog } from "@/components/shared/FormDialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -43,16 +39,16 @@ export default function HabitsPage() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text">Привычки</h1>
-          <p className="text-sm text-muted mt-0.5">{habits.length} привычек</p>
-        </div>
-        <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white gap-2">
-          <Plus size={16} />
-          Новая привычка
-        </Button>
-      </div>
+      <PageHeader
+        title="Привычки"
+        subtitle={`${habits.length} привычек`}
+        action={
+          <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white gap-2">
+            <Plus size={16} />
+            Новая привычка
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <ListSkeleton count={4} />
@@ -88,27 +84,19 @@ export default function HabitsPage() {
         </motion.div>
       )}
 
-      {/* Create dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Новая привычка</DialogTitle>
-          </DialogHeader>
-          <HabitForm onSuccess={() => setFormOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={formOpen} onOpenChange={setFormOpen} title="Новая привычка">
+        <HabitForm onSuccess={() => setFormOpen(false)} />
+      </FormDialog>
 
-      {/* Edit dialog */}
-      <Dialog open={!!editHabit} onOpenChange={(o) => !o && setEditHabit(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать привычку</DialogTitle>
-          </DialogHeader>
-          {editHabit && (
-            <HabitForm habit={editHabit} onSuccess={() => setEditHabit(null)} />
-          )}
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!editHabit}
+        onOpenChange={(o) => !o && setEditHabit(null)}
+        title="Редактировать привычку"
+      >
+        {editHabit && (
+          <HabitForm habit={editHabit} onSuccess={() => setEditHabit(null)} />
+        )}
+      </FormDialog>
 
       {/* Detail sheet */}
       <Sheet open={!!selectedHabit} onOpenChange={(o) => !o && setSelectedHabit(null)}>
