@@ -21,6 +21,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FilterTabs } from "@/components/shared/FilterTabs";
 import { StatCard } from "@/components/shared/StatCard";
+import { CardSkeleton, ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -525,9 +526,9 @@ export default function FinancePage() {
       ? { start: rangeStart, end: rangeEnd }
       : getPeriodDateRange(period, today);
 
-  const { data: summary } = useFinanceSummary(summaryParams);
+  const { data: summary, isLoading: loadingSummary } = useFinanceSummary(summaryParams);
   const { data: categories = [] } = useCategories();
-  const { data: transactions = [] } = useTransactions({
+  const { data: transactions = [], isLoading: loadingTx } = useTransactions({
     start: transactionDateRange.start,
     end: transactionDateRange.end,
     ...(txFilter !== "all" ? { type: txFilter as TransactionType } : {}),
@@ -607,18 +608,24 @@ export default function FinancePage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Доходы" value={summary?.total_income ?? 0} icon={<TrendingUp size={18} />} color="text-success" bg="bg-success/10" suffix=" ₽" />
-        <StatCard label="Расходы" value={summary?.total_expense ?? 0} icon={<TrendingDown size={18} />} color="text-danger" bg="bg-danger/10" suffix=" ₽" />
-        <StatCard
-          label="Баланс"
-          value={summary?.balance ?? 0}
-          icon={<Wallet size={18} />}
-          color={(summary?.balance ?? 0) >= 0 ? "text-success" : "text-danger"}
-          bg={(summary?.balance ?? 0) >= 0 ? "bg-success/10" : "bg-danger/10"}
-          suffix=" ₽"
-        />
-      </div>
+      {loadingSummary ? (
+        <div className="grid grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => <CardSkeleton key={i} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          <StatCard label="Доходы" value={summary?.total_income ?? 0} icon={<TrendingUp size={18} />} color="text-success" bg="bg-success/10" suffix=" ₽" />
+          <StatCard label="Расходы" value={summary?.total_expense ?? 0} icon={<TrendingDown size={18} />} color="text-danger" bg="bg-danger/10" suffix=" ₽" />
+          <StatCard
+            label="Баланс"
+            value={summary?.balance ?? 0}
+            icon={<Wallet size={18} />}
+            color={(summary?.balance ?? 0) >= 0 ? "text-success" : "text-danger"}
+            bg={(summary?.balance ?? 0) >= 0 ? "bg-success/10" : "bg-danger/10"}
+            suffix=" ₽"
+          />
+        </div>
+      )}
 
       {/* Chart + categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -694,7 +701,9 @@ export default function FinancePage() {
           </Select>
         </div>
 
-        {transactions.length === 0 ? (
+        {loadingTx ? (
+          <ListSkeleton count={4} />
+        ) : transactions.length === 0 ? (
           <EmptyState
             icon={<Wallet />}
             title="Нет транзакций"
@@ -719,7 +728,7 @@ export default function FinancePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96 }}
                     transition={{ delay: i * 0.02 }}
-                    className="glass p-4 flex items-center gap-3 group"
+                    className={cn("glass p-4 flex items-center gap-3 group border-l-2", isIncome ? "border-l-success/60" : "border-l-danger/60")}
                   >
                     {/* Category icon */}
                     <div

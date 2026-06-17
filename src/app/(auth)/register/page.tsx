@@ -52,7 +52,7 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Имя</Label>
             <Input
@@ -104,6 +104,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text transition-colors"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Search, CheckSquare, Repeat2, BookOpen, Wallet, Tag } from "lucide-react";
+import { Search, CheckSquare, Repeat2, BookOpen, Wallet, Tag, Loader2 } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -53,7 +53,9 @@ export function GlobalSearch() {
     return () => clearTimeout(t);
   }, [query]);
 
-  const { data: rawResults } = useQuery({
+  const isMac = typeof window !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+
+  const { data: rawResults, isLoading: isSearching } = useQuery({
     queryKey: ["search", debouncedQuery],
     queryFn: () => searchApi.search(debouncedQuery),
     enabled: debouncedQuery.length >= 2,
@@ -82,7 +84,7 @@ export function GlobalSearch() {
       >
         <Search size={18} />
         <kbd className="hidden sm:inline-flex items-center gap-0.5 text-xs text-muted/60 bg-white/5 border border-border rounded px-1.5 py-0.5">
-          Ctrl K
+          {isMac ? "⌘" : "Ctrl"} K
         </kbd>
       </button>
 
@@ -94,7 +96,12 @@ export function GlobalSearch() {
             onValueChange={setQuery}
           />
           <CommandList>
-            {debouncedQuery.length >= 2 && results.length === 0 && (
+            {isSearching && debouncedQuery.length >= 2 && (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 size={16} className="animate-spin text-muted" />
+              </div>
+            )}
+            {!isSearching && debouncedQuery.length >= 2 && results.length === 0 && (
               <CommandEmpty>Ничего не найдено</CommandEmpty>
             )}
             {debouncedQuery.length < 2 && (

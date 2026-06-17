@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { taskSchema, type TaskInput } from "@/lib/schemas/task.schema";
 import { useCreateTask, useUpdateTask } from "@/lib/hooks/useTasks";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -97,6 +98,36 @@ export function TaskForm({ task, defaultDueDate, onSuccess }: TaskFormProps) {
             value={watch("dueDate") ?? ""}
             onChange={(v) => setValue("dueDate", v || undefined)}
           />
+        </div>
+      </div>
+
+      {/* Recurrence */}
+      <div className="space-y-2">
+        <Label className="text-sm">Повторение</Label>
+        <div className="flex flex-wrap gap-2">
+          {(["daily", "weekly", "monthly"] as const).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => {
+                if (watch("recurrence") === r) {
+                  setValue("isRecurring", false);
+                  setValue("recurrence", undefined);
+                } else {
+                  setValue("isRecurring", true);
+                  setValue("recurrence", r);
+                }
+              }}
+              className={cn(
+                "text-xs px-3 py-1.5 rounded-full border transition-all",
+                watch("recurrence") === r
+                  ? "border-primary/60 text-primary bg-primary/10"
+                  : "border-border text-muted hover:text-text hover:border-border/80"
+              )}
+            >
+              {r === "daily" ? "Ежедневно" : r === "weekly" ? "Еженедельно" : "Ежемесячно"}
+            </button>
+          ))}
         </div>
       </div>
 

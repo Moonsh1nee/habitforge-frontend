@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { format, subDays } from "date-fns";
+import { format, subDays, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { BookOpen } from "lucide-react";
 import { useJournalEntry, useJournalEntries, useSaveJournalEntry } from "@/lib/hooks/useJournal";
@@ -16,6 +16,11 @@ import { Input } from "@/components/ui/input";
 
 import { cn, getTodayString, getMoodColor } from "@/lib/utils";
 import type { DailyEntry } from "@/types";
+
+const MOOD_EMOJI: Record<number, string> = {
+  1: "😞", 2: "😔", 3: "😕", 4: "😐", 5: "🙂",
+  6: "😊", 7: "😄", 8: "😁", 9: "🤩", 10: "🌟",
+};
 
 // ─── Entry Form ───────────────────────────────────────────────────────────────
 
@@ -54,6 +59,11 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
     <form onSubmit={handleSubmit} className="space-y-5">
       {sliders.map(({ label, value, setter, max = 10, color }) => (
         <div key={label} className="space-y-2">
+          {label === "Настроение" && (
+            <div className="text-center text-4xl py-1 select-none transition-all duration-200">
+              {MOOD_EMOJI[value] ?? "😐"}
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <Label className="text-sm">{label}</Label>
             <span className="text-sm font-bold" style={{ color }}>
@@ -108,11 +118,6 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const MOOD_EMOJI: Record<number, string> = {
-  1: "😞", 2: "😔", 3: "😕", 4: "😐", 5: "🙂",
-  6: "😊", 7: "😄", 8: "😁", 9: "🤩", 10: "🌟",
-};
-
 export default function JournalPage() {
   const today = getTodayString();
   const [selectedDate, setSelectedDate] = useState(today);
@@ -121,6 +126,26 @@ export default function JournalPage() {
 
   const { data: selectedEntry } = useJournalEntry(selectedDate);
   const { data: entries } = useJournalEntries({ start, end: today, limit: 30 });
+
+  const streak = useMemo(() => {
+    if (!entries?.length) return 0;
+    const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
+    let count = 0;
+    let expected = today;
+    for (const e of sorted) {
+      if (e.date === expected) {
+        count++;
+        expected = format(subDays(parseISO(e.date), 1), "yyyy-MM-dd");
+      } else {
+        break;
+      }
+    }
+    return count;
+  }, [entries, today]);
+
+  const streakLabel = streak > 0
+    ? `🔥 ${streak} ${streak === 1 ? "день" : streak < 5 ? "дня" : "дней"} подряд`
+    : undefined;
 
   const chartData =
     entries
@@ -133,7 +158,7 @@ export default function JournalPage() {
 
   return (
     <div className="max-w-5xl space-y-6">
-      <PageHeader title="Дневник" />
+      <PageHeader title="Дневник" subtitle={streakLabel} />
 
       <div className="flex gap-6 items-start">
         {/* History sidebar */}
