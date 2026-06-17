@@ -306,7 +306,7 @@ function NutritionPlanCard({ plan }: { plan: NutritionPlan }) {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
           <button onClick={() => setEditPlanOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
             <Pencil size={13} />
           </button>
@@ -560,7 +560,7 @@ export default function NutritionPage() {
                   </div>
                   <button
                     onClick={() => deleteLog.mutate(entry.id)}
-                    className="opacity-0 group-hover:opacity-100 text-muted hover:text-danger transition-all"
+                    className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 text-muted hover:text-danger transition-all"
                   >
                     <Trash2 size={14} />
                   </button>

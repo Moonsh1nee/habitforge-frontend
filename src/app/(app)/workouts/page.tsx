@@ -261,7 +261,7 @@ function LogCard({ log }: { log: WorkoutLog }) {
               {log.durationMinutes} мин
             </span>
           )}
-          <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-all">
+          <div className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 flex items-center gap-0.5 transition-all">
             <button onClick={() => setEditOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
               <Pencil size={13} />
             </button>
@@ -354,7 +354,7 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
             <p className="text-xs text-muted mt-1">{plan.daysPerWeek} дней/нед</p>
           )}
         </div>
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
           <button onClick={() => setEditOpen(true)} className="p-1 text-muted hover:text-primary transition-colors">
             <Pencil size={13} />
           </button>

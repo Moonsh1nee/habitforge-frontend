@@ -762,7 +762,7 @@ export default function FinancePage() {
                       <span className={cn("text-sm font-semibold", isIncome ? "text-success" : "text-danger")}>
                         {isIncome ? "+" : "-"}{formatAmount(tx.amount)}
                       </span>
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
                         <button
                           onClick={() => setEditTx(tx)}
                           className="text-muted hover:text-primary transition-colors p-1"

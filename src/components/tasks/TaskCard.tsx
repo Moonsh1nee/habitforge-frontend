@@ -121,7 +121,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all shrink-0">
           <button
             onClick={() => onEdit(task)}
             className="text-muted hover:text-primary transition-colors p-1 rounded"
