@@ -32,6 +32,12 @@ const PRIORITY_CHIPS: { label: string; value: TaskPriority | undefined }[] = [
   { label: "Низкий", value: 3 },
 ];
 
+const ORDER_BY_LABELS: Record<string, string> = {
+  createdAt: "По дате создания",
+  dueDate: "По дедлайну",
+  priority: "По приоритету",
+};
+
 const PRIORITY_ACTIVE_CLASS: Record<number, string> = {
   1: "border-warning/60 text-warning bg-warning/10",
   2: "border-accent/60 text-accent bg-accent/10",
@@ -151,7 +157,7 @@ export default function TasksPage() {
           {/* Sort by */}
           <Select value={orderBy} onValueChange={(v) => setOrderBy(v as OrderBy)}>
             <SelectTrigger size="sm" className="w-36 sm:w-44">
-              <SelectValue />
+              <SelectValue>{ORDER_BY_LABELS[orderBy]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="createdAt">По дате создания</SelectItem>

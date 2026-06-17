@@ -21,10 +21,11 @@ import type { Task } from "@/types";
 
 interface TaskFormProps {
   task?: Task;
+  defaultDueDate?: string;
   onSuccess?: () => void;
 }
 
-export function TaskForm({ task, onSuccess }: TaskFormProps) {
+export function TaskForm({ task, defaultDueDate, onSuccess }: TaskFormProps) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const isPending = createTask.isPending || updateTask.isPending;
@@ -46,7 +47,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
           isRecurring: task.isRecurring,
           recurrence: task.recurrence ?? undefined,
         }
-      : { priority: 2, isRecurring: false },
+      : { priority: 2, isRecurring: false, dueDate: defaultDueDate },
   });
 
   const onSubmit = (data: TaskInput) => {

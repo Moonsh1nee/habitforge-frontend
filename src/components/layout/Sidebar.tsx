@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
-  Apple, BookOpen, User, Zap, Wallet,
+  Apple, BookOpen, User, Zap, Wallet, CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -13,6 +13,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
   { href: "/tasks", icon: CheckSquare, label: "Задачи" },
+  { href: "/calendar", icon: CalendarDays, label: "Календарь" },
   { href: "/habits", icon: Repeat2, label: "Привычки" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
