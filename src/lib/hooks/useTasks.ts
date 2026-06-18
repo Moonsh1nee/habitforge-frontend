@@ -57,3 +57,24 @@ export function useDeleteTask() {
     onError: () => toast.error("Ошибка удаления задачи"),
   });
 }
+
+export function useSubtasks(taskId: string) {
+  return useQuery({
+    queryKey: ["tasks", taskId, "subtasks"],
+    queryFn: () => tasksApi.getSubtasks(taskId),
+    enabled: !!taskId,
+  });
+}
+
+export function useCreateSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, title, priority }: { taskId: string; title: string; priority?: number }) =>
+      tasksApi.createSubtask(taskId, { title, priority }),
+    onSuccess: (_, { taskId }) => {
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "subtasks"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => toast.error("Ошибка создания подзадачи"),
+  });
+}

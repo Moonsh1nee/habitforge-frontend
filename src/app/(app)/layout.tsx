@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { AuthBootstrap } from "@/components/layout/AuthBootstrap";
 import { QuickAddFab } from "@/components/layout/QuickAddFab";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { PomodoroTicker } from "@/components/layout/PomodoroWidget";
 import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
           <PageTransition>{children}</PageTransition>
           <QuickAddFab />
+          <PomodoroTicker />
         </main>
       </div>
     </div>

@@ -11,6 +11,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
+import { useProjects } from "@/lib/hooks/useProjects";
+import { FolderOpen } from "lucide-react";
+import { PomodoroSidebarSection } from "@/components/layout/PomodoroWidget";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
@@ -126,8 +129,42 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
+      <ProjectsSection onNavigate={onNavigate} />
+      <PomodoroSidebarSection />
       <TodayProgress />
     </>
+  );
+}
+
+function ProjectsSection({ onNavigate }: { onNavigate?: () => void }) {
+  const { data: projects = [] } = useProjects();
+  const pathname = usePathname();
+  if (projects.length === 0) return null;
+
+  return (
+    <div className="px-3 pb-2 border-t border-border pt-3">
+      <p className="text-[10px] text-muted uppercase tracking-wider font-medium px-1 mb-1.5">Проекты</p>
+      <div className="space-y-0.5">
+        {projects.map((p) => {
+          const href = `/tasks?project_id=${p.id}`;
+          const active = pathname === "/tasks" && typeof window !== "undefined" && window.location.search.includes(p.id);
+          return (
+            <Link key={p.id} href={href} onClick={onNavigate}>
+              <div className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-colors",
+                active ? "bg-primary/10 text-primary" : "text-muted hover:text-text hover:bg-white/5"
+              )}>
+                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
+                <span className="flex-1 truncate">{p.name}</span>
+                {p.tasksCount > 0 && (
+                  <span className="text-[10px] tabular-nums opacity-60">{p.tasksDone}/{p.tasksCount}</span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

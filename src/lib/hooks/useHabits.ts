@@ -83,3 +83,15 @@ export function useDeleteHabit() {
     },
   });
 }
+
+export function useFreezeHabit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, date }: { id: string; date?: string }) => habitsApi.freeze(id, date),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["habits"] });
+      toast.success("Серия заморожена на 1 день ❄️");
+    },
+    onError: () => toast.error("Нет доступных заморозок"),
+  });
+}

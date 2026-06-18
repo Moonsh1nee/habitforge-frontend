@@ -18,12 +18,12 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { AnimatePresence } from "motion/react";
-import { GripVertical } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { GripVertical, CheckCircle2, ChevronDown, Plus, CheckSquare } from "lucide-react";
 import { TaskCard } from "./TaskCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Plus } from "lucide-react";
+import { tasksApi } from "@/lib/api/tasks";
 import type { Task } from "@/types";
 
 const STORAGE_KEY = "habitforge-task-order";
@@ -65,7 +65,6 @@ function SortableTaskCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => v
 
   return (
     <div ref={setNodeRef} style={style} className="flex items-stretch gap-1 group/row">
-      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
@@ -87,14 +86,19 @@ interface TaskListProps {
   tasks: Task[];
   onEdit: (task: Task) => void;
   onCreateClick?: () => void;
+  isDndEnabled?: boolean;
 }
 
-export function TaskList({ tasks, onEdit, onCreateClick }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: TaskListProps) {
   const [ordered, setOrdered] = useState<Task[]>([]);
+  const [completedOpen, setCompletedOpen] = useState(false);
+
+  const done = tasks.filter((t) => t.completed);
 
   useEffect(() => {
-    setOrdered(applyOrder(tasks, loadOrder()));
-  }, [tasks]);
+    const active = tasks.filter((t) => !t.completed);
+    setOrdered(isDndEnabled ? applyOrder(active, loadOrder()) : active);
+  }, [tasks, isDndEnabled]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -108,7 +112,9 @@ export function TaskList({ tasks, onEdit, onCreateClick }: TaskListProps) {
       const oldIdx = prev.findIndex((t) => t.id === active.id);
       const newIdx = prev.findIndex((t) => t.id === over.id);
       const next = arrayMove(prev, oldIdx, newIdx);
-      saveOrder(next.map((t) => t.id));
+      const ids = next.map((t) => t.id);
+      saveOrder(ids);
+      tasksApi.reorder(ids).catch(() => {});
       return next;
     });
   }, []);
@@ -132,16 +138,75 @@ export function TaskList({ tasks, onEdit, onCreateClick }: TaskListProps) {
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={ordered.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
-          <AnimatePresence initial={false}>
-            {ordered.map((task) => (
-              <SortableTaskCard key={task.id} task={task} onEdit={onEdit} />
-            ))}
+    <div className="space-y-2">
+      {/* Active tasks */}
+      {ordered.length > 0 && (
+        isDndEnabled ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={ordered.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                <AnimatePresence initial={false}>
+                  {ordered.map((task) => (
+                    <SortableTaskCard key={task.id} task={task} onEdit={onEdit} />
+                  ))}
+                </AnimatePresence>
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="space-y-2">
+            <AnimatePresence initial={false}>
+              {ordered.map((task) => (
+                <TaskCard key={task.id} task={task} onEdit={onEdit} />
+              ))}
+            </AnimatePresence>
+          </div>
+        )
+      )}
+
+      {/* Completed collapsible */}
+      {done.length > 0 && (
+        <div className="mt-2">
+          <button
+            onClick={() => setCompletedOpen((v) => !v)}
+            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted hover:text-text transition-colors rounded-xl hover:bg-white/4 group/toggle"
+          >
+            <CheckCircle2 size={14} className="text-success/70 shrink-0" />
+            <span className="font-medium">Выполнено</span>
+            <span className="text-xs bg-white/8 px-1.5 py-0.5 rounded-full">
+              {done.length}
+            </span>
+            <motion.span
+              animate={{ rotate: completedOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="ml-auto"
+            >
+              <ChevronDown size={14} />
+            </motion.span>
+          </button>
+
+          <AnimatePresence>
+            {completedOpen && (
+              <motion.div
+                key="completed-list"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-2 mt-2">
+                  <AnimatePresence initial={false}>
+                    {done.map((task) => (
+                      <TaskCard key={task.id} task={task} onEdit={onEdit} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
-      </SortableContext>
-    </DndContext>
+      )}
+    </div>
   );
 }

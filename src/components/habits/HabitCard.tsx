@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { CheckCircle2, Circle, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle2, Circle, Pencil, Trash2, Snowflake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Habit } from "@/types";
 
@@ -17,9 +17,10 @@ interface HabitCardProps {
   onClick: () => void;
   onEdit: (habit: Habit) => void;
   onDelete: (id: string) => void;
+  onFreeze?: () => void;
 }
 
-export function HabitCard({ habit, onLog, onClick, onEdit, onDelete }: HabitCardProps) {
+export function HabitCard({ habit, onLog, onClick, onEdit, onDelete, onFreeze }: HabitCardProps) {
   const done = habit.completedToday;
   const color = habit.color ?? "#7c3aed";
 
@@ -66,6 +67,20 @@ export function HabitCard({ habit, onLog, onClick, onEdit, onDelete }: HabitCard
           >
             <Trash2 size={13} />
           </button>
+
+          {/* Freeze button — only when available and not done today */}
+          {!done && (habit.freezeAvailable ?? 0) > 0 && onFreeze && (
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={(e) => { e.stopPropagation(); onFreeze(); }}
+              aria-label="Заморозить серию"
+              title={`Заморозить серию (${habit.freezeAvailable} доступно)`}
+              className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 flex items-center gap-0.5 text-xs text-muted hover:text-accent transition-all p-1 rounded"
+            >
+              <Snowflake size={13} />
+              <span className="text-[10px] tabular-nums">{habit.freezeAvailable}</span>
+            </motion.button>
+          )}
 
           <motion.button
             whileTap={{ scale: 0.8 }}

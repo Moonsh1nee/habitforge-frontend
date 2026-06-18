@@ -7,6 +7,7 @@ export const taskSchema = z.object({
   dueDate: z.string().optional(),
   isRecurring: z.boolean().default(false),
   recurrence: z.string().optional(),
+  projectId: z.string().optional(),
 });
 
 export type TaskInput = z.input<typeof taskSchema>;

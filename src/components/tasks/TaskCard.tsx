@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar, Pencil, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
 import { useUpdateTask, useDeleteTask } from "@/lib/hooks/useTasks";
+import { SubtaskList } from "./SubtaskList";
 import type { Task } from "@/types";
 
 const PRIORITY_ACCENT: Record<number, string> = {
@@ -23,13 +24,16 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const [justCompleted, setJustCompleted] = useState(false);
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
   const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
+
+  const hasSubtasks = (task.subtasksCount ?? 0) > 0;
+  const subtasksDone = task.subtasksDone ?? 0;
+  const subtasksCount = task.subtasksCount ?? 0;
 
   const toggleDone = () => {
     const completing = !task.completed;
-    if (completing) {
-      setJustCompleted(true);
-    }
+    if (completing) setJustCompleted(true);
     updateTask.mutate({
       id: task.id,
       payload: {
@@ -72,12 +76,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
                 <CheckCircle2 size={19} />
               </motion.span>
             ) : (
-              <motion.span
-                key="todo"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-              >
+              <motion.span key="todo" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
                 <Circle size={19} />
               </motion.span>
             )}
@@ -85,10 +84,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={cn(
-            "text-sm font-medium transition-all duration-300",
-            task.completed ? "line-through text-muted" : "text-text"
-          )}>
+          <p className={cn("text-sm font-medium transition-all duration-300", task.completed ? "line-through text-muted" : "text-text")}>
             {task.title}
           </p>
 
@@ -97,18 +93,12 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
           )}
 
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <Badge
-              variant="outline"
-              className={cn("text-[10px] px-1.5 py-0", getPriorityColor(task.priority))}
-            >
+            <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", getPriorityColor(task.priority))}>
               {getPriorityLabel(task.priority)}
             </Badge>
 
             {task.dueDate && (
-              <span className={cn(
-                "flex items-center gap-1 text-[10px]",
-                overdue ? "text-danger font-medium" : "text-muted"
-              )}>
+              <span className={cn("flex items-center gap-1 text-[10px]", overdue ? "text-danger font-medium" : "text-muted")}>
                 <Calendar size={10} />
                 {formatDate(task.dueDate)}
                 {overdue && " · просрочено"}
@@ -118,6 +108,35 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
             {task.isRecurring && (
               <span className="text-[10px] text-accent/70">↺ {task.recurrence}</span>
             )}
+
+            {/* Subtasks progress badge */}
+            {hasSubtasks && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setSubtasksOpen((v) => !v); }}
+                className={cn(
+                  "flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border transition-all",
+                  subtasksDone === subtasksCount
+                    ? "border-success/40 text-success bg-success/8"
+                    : "border-border text-muted hover:border-primary/40 hover:text-primary"
+                )}
+              >
+                <span>{subtasksDone}/{subtasksCount}</span>
+                <motion.span animate={{ rotate: subtasksOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown size={9} />
+                </motion.span>
+              </button>
+            )}
+
+            {/* Tags */}
+            {(task.tags ?? []).map((tag) => (
+              <span
+                key={tag.id}
+                className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                style={{ color: tag.color, borderColor: `${tag.color}40`, background: `${tag.color}12` }}
+              >
+                {tag.name}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -138,6 +157,11 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
           </button>
         </div>
       </div>
+
+      {/* Subtasks expandable */}
+      <AnimatePresence>
+        {subtasksOpen && <SubtaskList taskId={task.id} />}
+      </AnimatePresence>
     </motion.div>
   );
 }

@@ -53,6 +53,15 @@ import { ActivityCalendar } from "react-activity-calendar";
 import ActivityCalendar from "react-activity-calendar";
 ```
 
+### shadcn/ui v4 — Select `onValueChange`
+`onValueChange` типизирует аргумент как `string | null | undefined`, не `string`.
+Паттерн защиты:
+```ts
+// sentinel-значение для "ничего не выбрано" — обязательно проверять !v
+<Select value={tagId ?? "all"} onValueChange={(v) => setTagId(!v || v === "all" ? undefined : v)}>
+<Select value={projectId ?? "none"} onValueChange={(v) => setProjectId(!v || v === "none" ? undefined : v)}>
+```
+
 ## Структура проекта
 
 ```
@@ -62,13 +71,16 @@ src/
 │   │   ├── login/page.tsx
 │   │   └── register/page.tsx
 │   ├── (app)/               ← защищённые маршруты
-│   │   ├── layout.tsx       ← Sidebar + Topbar + PageTransition
+│   │   ├── layout.tsx       ← Sidebar + Topbar + PageTransition + PomodoroTicker
 │   │   ├── dashboard/page.tsx
 │   │   ├── tasks/page.tsx
 │   │   ├── habits/page.tsx
 │   │   ├── workouts/page.tsx
 │   │   ├── nutrition/page.tsx
 │   │   ├── journal/page.tsx
+│   │   ├── finance/page.tsx
+│   │   ├── stats/page.tsx
+│   │   ├── calendar/page.tsx
 │   │   └── profile/page.tsx
 │   ├── layout.tsx           ← root: Providers + Geist font + dark class
 │   ├── page.tsx             ← redirect → /dashboard
@@ -77,26 +89,44 @@ src/
 ├── components/
 │   ├── ui/                  ← shadcn генерирует сюда (не трогать вручную)
 │   ├── layout/
-│   │   ├── Sidebar.tsx      ← motion layoutId для active indicator
+│   │   ├── Sidebar.tsx      ← motion layoutId + PomodoroSidebarSection + ProjectsSection
 │   │   ├── Topbar.tsx
-│   │   └── PageTransition.tsx ← AnimatePresence по pathname
+│   │   ├── PageTransition.tsx ← AnimatePresence по pathname
+│   │   ├── QuickAddFab.tsx  ← плавающая кнопка быстрого создания
+│   │   ├── GlobalSearch.tsx ← Ctrl/⌘K поиск
+│   │   └── PomodoroWidget.tsx ← экспортирует PomodoroTicker (null-render, в layout) + PomodoroSidebarSection (UI, в Sidebar)
 │   ├── dashboard/           ← TodayCard, HabitProgressRing, MacroBar, WeeklyStats
-│   ├── tasks/               ← TaskCard, TaskList, TaskForm
-│   ├── habits/              ← HabitCard, HabitForm, HabitCalendar
+│   ├── tasks/               ← TaskCard (subtasks, project, tags), TaskList (DnD), TaskForm
+│   ├── habits/              ← HabitCard (freeze btn), HabitForm, HabitCalendar
 │   └── shared/              ← GlassCard, AnimatedNumber, ProgressRing, EmptyState, LoadingSkeleton
 ├── lib/
 │   ├── api/
 │   │   ├── client.ts        ← Axios instance + Bearer interceptor + 401 refresh
 │   │   ├── auth.ts, tasks.ts, habits.ts, workouts.ts
 │   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts
-│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard
+│   │   ├── projects.ts      ← CRUD /projects
+│   │   ├── tags.ts          ← CRUD /tags + POST /tasks/{id}/tags
+│   │   └── push.ts          ← VAPID key + subscribe /push/*
+│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags
 │   ├── stores/
-│   │   └── authStore.ts     ← Zustand + persist ("habitforge-auth" в localStorage)
+│   │   ├── authStore.ts     ← Zustand + persist ("habitforge-auth" в localStorage)
+│   │   └── pomodoroStore.ts ← Zustand: phase, timeLeft, selectedTaskId, sessionCount
 │   ├── schemas/             ← Zod v4 схемы (auth, task, habit, journal)
 │   └── utils.ts             ← cn(), formatDate(), getGreeting(), getPriorityColor()
-└── types/
-    └── api.ts               ← все TypeScript-типы (User, Task, Habit, ...)
+├── types/
+│   └── api.ts               ← все TypeScript-типы (User, Task, Habit, Project, Tag, ...)
+└── public/
+    └── sw.js                ← Service Worker для Web Push уведомлений
 ```
+
+## Pomodoro — архитектура
+
+Pomodoro разбит на два компонента во избежание двойного тика (Sidebar рендерится дважды: desktop aside + mobile Sheet):
+
+- **`PomodoroTicker`** — рендерит `null`, живёт в `layout.tsx` единожды. Владеет `setInterval`, считает время, показывает toast при смене фазы, инициализирует `sessionCount`.
+- **`PomodoroSidebarSection`** — только UI. Читает состояние из `pomodoroStore`. Рендерится в `Sidebar.tsx`. Compact header (иконка + фаза + отсчёт + кнопка play/pause) всегда виден; expanded-блок раскрывается по клику.
+
+**Никогда не помещать `setInterval` в `PomodoroSidebarSection`** — это вызовет двойной тик.
 
 ## Дизайн-система
 
@@ -232,3 +262,15 @@ uvicorn src.main:app --reload
 - Поля в ответе могут отсутствовать (null/undefined) даже если они есть в TypeScript-типах — всегда защищать `??`
 - `GET /dashboard/week` возвращает `tasks`, `habits`, `workouts`, `nutrition`, `journal` — но некоторые могут быть пустыми объектами без ожидаемых полей
 - `GET /nutrition/logs/summary` возвращает объект, но `entries` может отсутствовать если записей нет
+
+## Подключённые backend-эндпоинты
+
+| Домен | Эндпоинты |
+|---|---|
+| Подзадачи | `GET /tasks/{id}/subtasks`, `POST /tasks/{id}/subtasks` |
+| Проекты | `GET/POST /projects`, `GET/PATCH/DELETE /projects/{id}` |
+| Теги | `GET/POST /tags`, `GET/PATCH/DELETE /tags/{id}`, `POST /tasks/{id}/tags`, `DELETE /tasks/{id}/tags/{tagId}` |
+| Стрик-заморозка | `POST /habits/{id}/freeze` |
+| Push-уведомления | `GET /push/vapid-key`, `POST /push/subscribe`, `DELETE /push/unsubscribe` |
+
+Service worker регистрируется в `src/app/(app)/profile/page.tsx` при включении push-уведомлений. Файл `public/sw.js` обрабатывает `push` event и `notificationclick`.

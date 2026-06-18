@@ -78,7 +78,7 @@ export function QuickAddFab() {
       </AnimatePresence>
 
       {/* Container */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2.5">
+      <div className="hidden md:flex fixed bottom-6 right-6 z-50 flex-col items-end gap-2.5">
         {/* Quick action items */}
         <AnimatePresence>
           {open &&

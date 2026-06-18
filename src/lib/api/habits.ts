@@ -58,4 +58,9 @@ export const habitsApi = {
     const { data } = await api.get<HabitStats>(`/habits/${id}/stats`, { params });
     return data;
   },
+
+  freeze: async (id: string, date?: string): Promise<Habit> => {
+    const { data } = await api.post<Habit>(`/habits/${id}/freeze`, { date });
+    return data;
+  },
 };

@@ -7,7 +7,7 @@ import {
   eachDayOfInterval, isToday, isSameMonth, parseISO,
 } from "date-fns";
 import { ru } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Loader2 } from "lucide-react";
 import { useTasks } from "@/lib/hooks/useTasks";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormDialog } from "@/components/shared/FormDialog";
@@ -106,12 +106,13 @@ function TaskPill({ task, onClick }: { task: Task; onClick: () => void }) {
 
 // ─── Month Cell ───────────────────────────────────────────────────────────────
 
-function MonthCell({ date, tasks, inMonth, onAdd, onTaskClick }: {
+function MonthCell({ date, tasks, inMonth, onAdd, onTaskClick, onViewDay }: {
   date: Date;
   tasks: Task[];
   inMonth: boolean;
   onAdd: (dateStr: string) => void;
   onTaskClick: (task: Task) => void;
+  onViewDay: (date: Date) => void;
 }) {
   const MAX = 3;
   const visible = tasks.slice(0, MAX);
@@ -139,7 +140,12 @@ function MonthCell({ date, tasks, inMonth, onAdd, onTaskClick }: {
           <TaskPill key={t.id} task={t} onClick={() => onTaskClick(t)} />
         ))}
         {overflow > 0 && (
-          <p className="text-xs text-muted/70 pl-1">+{overflow} ещё</p>
+          <button
+            onClick={(e) => { e.stopPropagation(); onViewDay(date); }}
+            className="text-xs text-primary/70 hover:text-primary pl-1 transition-colors"
+          >
+            +{overflow} ещё
+          </button>
         )}
       </div>
     </div>
@@ -207,7 +213,7 @@ export default function CalendarPage() {
   const rangeStart = format(days[0], "yyyy-MM-dd") + "T00:00:00";
   const rangeEnd = format(days[days.length - 1], "yyyy-MM-dd") + "T23:59:59";
 
-  const { data } = useTasks({ due_after: rangeStart, due_before: rangeEnd, limit: 100 });
+  const { data, isLoading, isFetching } = useTasks({ due_after: rangeStart, due_before: rangeEnd, limit: 100 });
   const tasks = data?.items ?? [];
 
   const tasksByDate = useMemo(() => {
@@ -271,8 +277,18 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar */}
-      <div className="glass overflow-hidden flex-1">
-        {view === "month" ? (
+      <div className="glass overflow-hidden flex-1 relative">
+        {/* Fetching overlay */}
+        {isFetching && !isLoading && (
+          <div className="absolute top-2 right-3 z-10">
+            <Loader2 size={14} className="animate-spin text-primary/60" />
+          </div>
+        )}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full min-h-52">
+            <Loader2 size={24} className="animate-spin text-primary/50" />
+          </div>
+        ) : view === "month" ? (
           <>
             {/* Week day headers */}
             <div className="grid grid-cols-7 border-b border-border">
@@ -296,6 +312,7 @@ export default function CalendarPage() {
                     inMonth={isSameMonth(day, anchor)}
                     onAdd={setCreateDate}
                     onTaskClick={setEditTask}
+                    onViewDay={(d) => { setView("day"); setAnchor(d); }}
                   />
                 ))}
               </div>

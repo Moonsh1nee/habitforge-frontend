@@ -17,6 +17,27 @@ export interface AuthResponse {
   user: User;
 }
 
+// ─── Tags & Projects ─────────────────────────────────────────────────────────
+
+export interface Tag {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+}
+
+export interface Project {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+  icon: string | null;
+  sortOrder: number;
+  tasksCount: number;
+  tasksDone: number;
+  createdAt: string;
+}
+
 // ─── Tasks ───────────────────────────────────────────────────────────────────
 
 // 1=high, 2=medium, 3=low
@@ -25,6 +46,8 @@ export type TaskPriority = 1 | 2 | 3;
 export interface Task {
   id: string;
   userId: string;
+  parentId: string | null;
+  projectId: string | null;
   title: string;
   description: string | null;
   priority: TaskPriority;
@@ -33,6 +56,9 @@ export interface Task {
   completedAt: string | null;
   isRecurring: boolean;
   recurrence: "daily" | "weekly" | "monthly" | null;
+  subtasksCount: number;
+  subtasksDone: number;
+  tags: Tag[];
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +78,8 @@ export interface Habit {
   targetPerWeek: number | null;
   weekdays: number[] | null;
   isArchived: boolean;
+  freezeAvailable: number;
+  freezeUsedDates: string[];
   createdAt: string;
   updatedAt: string;
 }

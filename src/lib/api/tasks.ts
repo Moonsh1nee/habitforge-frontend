@@ -11,6 +11,9 @@ export interface TaskFilters {
   order?: "asc" | "desc";
   skip?: number;
   limit?: number;
+  project_id?: string;
+  tag_id?: string;
+  include_subtasks?: boolean;
 }
 
 export const tasksApi = {
@@ -35,6 +38,7 @@ export const tasksApi = {
       dueDate: payload.dueDate ?? null,
       isRecurring: payload.isRecurring ?? false,
       recurrence: payload.recurrence ?? null,
+      ...(payload.projectId !== undefined && { projectId: payload.projectId }),
     });
     return data;
   },
@@ -48,6 +52,7 @@ export const tasksApi = {
       ...(payload.dueDate !== undefined && { dueDate: payload.dueDate }),
       ...(payload.isRecurring !== undefined && { isRecurring: payload.isRecurring }),
       ...(payload.recurrence !== undefined && { recurrence: payload.recurrence }),
+      ...(payload.projectId !== undefined && { projectId: payload.projectId }),
     });
     return data;
   },
@@ -58,5 +63,19 @@ export const tasksApi = {
 
   bulkComplete: async (ids: string[]): Promise<void> => {
     await api.post("/tasks/bulk-complete", { ids });
+  },
+
+  reorder: async (ids: string[]): Promise<void> => {
+    await api.post("/tasks/reorder", { ids });
+  },
+
+  getSubtasks: async (taskId: string): Promise<Task[]> => {
+    const { data } = await api.get<Task[]>(`/tasks/${taskId}/subtasks`);
+    return data;
+  },
+
+  createSubtask: async (taskId: string, payload: { title: string; priority?: number }): Promise<Task> => {
+    const { data } = await api.post<Task>(`/tasks/${taskId}/subtasks`, payload);
+    return data;
   },
 };

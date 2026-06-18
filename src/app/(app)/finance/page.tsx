@@ -32,6 +32,10 @@ import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SelectOption } from "@/components/shared/SelectOption";
 import { cn, getTodayString } from "@/lib/utils";
 import type { TransactionType, FinanceCategory, FinanceTransaction } from "@/types";
@@ -538,6 +542,7 @@ export default function FinancePage() {
     limit: txLimit,
   });
   const deleteTransaction = useDeleteTransaction();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const hasMore = transactions.length >= txLimit;
   const loadMore = () => setTxLimit((n) => n + 50);
 
@@ -775,7 +780,7 @@ export default function FinancePage() {
                           <Pencil size={14} />
                         </button>
                         <button
-                          onClick={() => deleteTransaction.mutate(tx.id)}
+                          onClick={() => setDeleteConfirmId(tx.id)}
                           aria-label="Удалить транзакцию"
                           className="text-muted hover:text-danger transition-colors p-1"
                         >
@@ -809,6 +814,26 @@ export default function FinancePage() {
           categories={categories}
         />
       )}
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить транзакцию?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted">
+              Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { deleteTransaction.mutate(deleteConfirmId!); setDeleteConfirmId(null); }}
+              className="bg-danger text-white hover:bg-danger/80"
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

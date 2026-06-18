@@ -7,6 +7,7 @@ import { ru } from "date-fns/locale";
 import { BookOpen } from "lucide-react";
 import { useJournalEntry, useJournalEntries, useSaveJournalEntry } from "@/lib/hooks/useJournal";
 import { GlassCard } from "@/components/shared/GlassCard";
+import { CardSkeleton, ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -124,8 +125,8 @@ export default function JournalPage() {
 
   const start = format(subDays(new Date(), 29), "yyyy-MM-dd");
 
-  const { data: selectedEntry } = useJournalEntry(selectedDate);
-  const { data: entries } = useJournalEntries({ start, end: today, limit: 30 });
+  const { data: selectedEntry, isLoading: entryLoading } = useJournalEntry(selectedDate);
+  const { data: entries, isLoading: entriesLoading } = useJournalEntries({ start, end: today, limit: 30 });
 
   const streak = useMemo(() => {
     if (!entries?.length) return 0;
@@ -181,28 +182,32 @@ export default function JournalPage() {
             Сегодня
           </button>
 
-          {entries
-            ?.filter((e) => e.date !== today)
-            .slice(0, 25)
-            .map((entry) => (
-              <button
-                key={entry.date}
-                onClick={() => setSelectedDate(entry.date)}
-                className={cn(
-                  "w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all",
-                  selectedDate === entry.date
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted hover:text-text hover:bg-white/5"
-                )}
-              >
-                <span className="text-xs">
-                  {format(new Date(entry.date), "d MMM", { locale: ru })}
-                </span>
-                {entry.mood != null && (
-                  <span className="text-sm">{MOOD_EMOJI[entry.mood] ?? "📝"}</span>
-                )}
-              </button>
-            ))}
+          {entriesLoading ? (
+            <ListSkeleton count={5} />
+          ) : (
+            entries
+              ?.filter((e) => e.date !== today)
+              .slice(0, 25)
+              .map((entry) => (
+                <button
+                  key={entry.date}
+                  onClick={() => setSelectedDate(entry.date)}
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all",
+                    selectedDate === entry.date
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted hover:text-text hover:bg-white/5"
+                  )}
+                >
+                  <span className="text-xs">
+                    {format(new Date(entry.date), "d MMM", { locale: ru })}
+                  </span>
+                  {entry.mood != null && (
+                    <span className="text-sm">{MOOD_EMOJI[entry.mood] ?? "📝"}</span>
+                  )}
+                </button>
+              ))
+          )}
         </div>
 
         {/* Main content */}
@@ -215,16 +220,20 @@ export default function JournalPage() {
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <GlassCard>
-              <h2 className="font-semibold text-text mb-5">
-                {selectedEntry ? "Редактировать запись" : "Новая запись"}
-              </h2>
-              <EntryForm
-                key={`${selectedDate}-${selectedEntry?.id ?? "new"}`}
-                date={selectedDate}
-                existing={selectedEntry ?? null}
-              />
-            </GlassCard>
+            {entryLoading ? (
+              <CardSkeleton />
+            ) : (
+              <GlassCard>
+                <h2 className="font-semibold text-text mb-5">
+                  {selectedEntry ? "Редактировать запись" : "Новая запись"}
+                </h2>
+                <EntryForm
+                  key={`${selectedDate}-${selectedEntry?.id ?? "new"}`}
+                  date={selectedDate}
+                  existing={selectedEntry ?? null}
+                />
+              </GlassCard>
+            )}
 
             {/* Chart */}
             <GlassCard>

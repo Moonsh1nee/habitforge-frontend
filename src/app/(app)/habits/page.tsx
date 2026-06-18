@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Repeat2, CheckCircle2, Flame } from "lucide-react";
 import { motion } from "motion/react";
-import { useHabits, useLogHabit, useDeleteHabit } from "@/lib/hooks/useHabits";
+import { useHabits, useLogHabit, useDeleteHabit, useFreezeHabit } from "@/lib/hooks/useHabits";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { HabitForm } from "@/components/habits/HabitForm";
@@ -34,6 +34,7 @@ export default function HabitsPage() {
 
   const logHabit = useLogHabit();
   const deleteHabit = useDeleteHabit();
+  const freezeHabit = useFreezeHabit();
 
   const { data, isLoading } = useHabits({ archived: false });
   const habits = data?.items ?? [];
@@ -121,6 +122,7 @@ export default function HabitsPage() {
                 onClick={() => setSelectedHabit(habit)}
                 onEdit={(h) => setEditHabit(h)}
                 onDelete={(id) => deleteHabit.mutate(id)}
+                onFreeze={() => freezeHabit.mutate({ id: habit.id })}
               />
             </motion.div>
           ))}

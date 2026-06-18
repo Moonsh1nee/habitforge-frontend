@@ -36,6 +36,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectTrigger,
@@ -404,10 +408,12 @@ export default function NutritionPage() {
     setSelectedDate((d) => format(addDays(parseISO(d), days), "yyyy-MM-dd"));
   };
 
-  const { data: summary } = useNutritionSummary(selectedDate);
-  const { data: logs = [] } = useNutritionLogs(selectedDate);
+  const { data: summary, isFetching: summaryFetching } = useNutritionSummary(selectedDate);
+  const { data: logs = [], isFetching: logsFetching } = useNutritionLogs(selectedDate);
   const { data: plans = [] } = useNutritionPlans(activeTab === "plans");
   const deleteLog = useDeleteNutritionLog();
+  const [deleteLogConfirmId, setDeleteLogConfirmId] = useState<string | null>(null);
+  const isFetching = summaryFetching || logsFetching;
 
   const macros = summary
     ? [
@@ -456,12 +462,17 @@ export default function NutritionPage() {
             >
               <ChevronLeft size={16} />
             </button>
-            <div className="text-center min-w-40">
+            <div className="text-center min-w-40 relative">
               <p className="text-sm font-medium text-text capitalize">
                 {isToday(parseISO(selectedDate))
                   ? "Сегодня"
                   : format(parseISO(selectedDate), "d MMMM", { locale: ru })}
               </p>
+              {isFetching && (
+                <span className="absolute -right-5 top-1/2 -translate-y-1/2">
+                  <span className="block w-1.5 h-1.5 rounded-full bg-primary/50 animate-pulse" />
+                </span>
+              )}
               <p className="text-xs text-muted">
                 {format(parseISO(selectedDate), "EEEE", { locale: ru })}
               </p>
@@ -559,7 +570,7 @@ export default function NutritionPage() {
                     </p>
                   </div>
                   <button
-                    onClick={() => deleteLog.mutate(entry.id)}
+                    onClick={() => setDeleteLogConfirmId(entry.id)}
                     aria-label="Удалить запись питания"
                     className="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 text-muted hover:text-danger transition-all"
                   >
@@ -601,6 +612,26 @@ export default function NutritionPage() {
       <FormDialog open={planOpen} onOpenChange={setPlanOpen} title="Новый план питания">
         <PlanForm onSuccess={() => setPlanOpen(false)} />
       </FormDialog>
+
+      <AlertDialog open={!!deleteLogConfirmId} onOpenChange={(o) => !o && setDeleteLogConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить запись питания?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted">
+              Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { deleteLog.mutate(deleteLogConfirmId!); setDeleteLogConfirmId(null); }}
+              className="bg-danger text-white hover:bg-danger/80"
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, formatDistanceToNow, isToday, isPast } from "date-fns";
+import { ru } from "date-fns/locale";
+import * as chrono from "chrono-node";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -43,6 +45,21 @@ export function getPriorityLabel(priority: number): string {
     case 2: return "Средний";
     default: return "Низкий";
   }
+}
+
+export function parseNaturalDate(
+  text: string
+): { date: string; label: string; matchText: string } | null {
+  const results = chrono.ru.parse(text, new Date(), { forwardDate: true });
+  if (!results.length) return null;
+  const result = results[0];
+  const date = result.date();
+  if (date <= new Date()) return null;
+  return {
+    date: format(date, "yyyy-MM-dd"),
+    label: format(date, "d MMM, HH:mm", { locale: ru }),
+    matchText: result.text,
+  };
 }
 
 export function getMoodColor(mood: number): string {
