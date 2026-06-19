@@ -15,11 +15,13 @@ import {
 import { useJournalEntries } from "@/lib/hooks/useJournal";
 import { useWorkoutLogs } from "@/lib/hooks/useWorkouts";
 import { useHabits, useHabitStats } from "@/lib/hooks/useHabits";
+import { usePlan } from "@/lib/hooks/usePlan";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FilterTabs } from "@/components/shared/FilterTabs";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
 import { CardSkeleton, Skeleton } from "@/components/shared/LoadingSkeleton";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { getTodayString } from "@/lib/utils";
 import type { Habit } from "@/types";
 
@@ -105,7 +107,8 @@ const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: {
 const item = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function StatsPage() {
-  const [period, setPeriod] = useState<Period>("30");
+  const { isPro } = usePlan();
+  const [period, setPeriod] = useState<Period>("7");
   const days = parseInt(period);
   const today = getTodayString();
   const start = format(subDays(new Date(), days - 1), "yyyy-MM-dd");
@@ -186,14 +189,25 @@ export default function StatsPage() {
 
       <FilterTabs
         value={period}
-        onChange={setPeriod}
+        onChange={(v) => {
+          if (!isPro && (v === "30" || v === "90")) return;
+          setPeriod(v as Period);
+        }}
         size="md"
         options={[
           { value: "7", label: "7 дней" },
-          { value: "30", label: "30 дней" },
-          { value: "90", label: "90 дней" },
+          { value: "30", label: isPro ? "30 дней" : "30 дней 🔒" },
+          { value: "90", label: isPro ? "90 дней" : "90 дней 🔒" },
         ]}
       />
+
+      {!isPro && (
+        <UpgradePrompt
+          title="Расширенная аналитика в Pro"
+          description="Периоды 30 и 90 дней доступны на Pro-плане. Откройте историю и тренды."
+          variant="primary"
+        />
+      )}
 
       {isLoading && (
         <div className="space-y-4">

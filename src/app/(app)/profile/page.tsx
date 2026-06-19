@@ -15,6 +15,9 @@ import {
   ToggleLeft,
   ToggleRight,
   Download,
+  CreditCard,
+  Sparkles,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -56,6 +59,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatDate } from "@/lib/utils";
+import { usePlan } from "@/lib/hooks/usePlan";
+import { usePlanStore } from "@/lib/stores/planStore";
 import type { User as UserType } from "@/types";
 import type { AxiosError } from "axios";
 
@@ -832,15 +837,154 @@ function DataTab({ user }: { user: UserType }) {
   );
 }
 
+// ─── Subscription Tab ────────────────────────────────────────────────────────
+
+function SubscriptionTab() {
+  const { plan, isPro } = usePlan();
+  const setPlan = usePlanStore((s) => s.setPlan);
+  const router = useRouter();
+
+  const PRO_FEATURES = [
+    "Неограниченные привычки, проекты, теги",
+    "Аналитика за 90 дней",
+    "Годовой хитмап привычек",
+    "AI-инсайты и рекомендации",
+    "Библиотека шаблонов программ",
+    "Приоритетная поддержка",
+  ];
+
+  return (
+    <div className="space-y-5">
+      {/* Current plan badge */}
+      <GlassCard>
+        <div className="flex items-center gap-3 mb-4">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+            isPro ? "gradient-primary" : "bg-white/8"
+          )}>
+            {isPro ? (
+              <Sparkles size={18} className="text-white" />
+            ) : (
+              <CreditCard size={18} className="text-muted" />
+            )}
+          </div>
+          <div>
+            <h3 className="font-semibold text-text">
+              {isPro ? "HabitForge Pro" : "Бесплатный план"}
+            </h3>
+            <p className="text-xs text-muted">
+              {isPro ? "Все функции разблокированы" : "Ограниченные возможности"}
+            </p>
+          </div>
+          <span className={cn(
+            "ml-auto text-xs font-semibold px-2.5 py-1 rounded-full",
+            isPro
+              ? "bg-primary/15 text-primary"
+              : "bg-white/8 text-muted"
+          )}>
+            {isPro ? "Pro" : "Free"}
+          </span>
+        </div>
+
+        {!isPro && (
+          <>
+            <p className="text-sm text-muted mb-4">
+              Перейдите на Pro чтобы разблокировать все возможности HabitForge.
+            </p>
+            <Button
+              className="gradient-primary text-white gap-2"
+              onClick={() => router.push("/upgrade")}
+            >
+              <Sparkles size={15} />
+              Перейти на Pro — 499₽/мес
+            </Button>
+          </>
+        )}
+
+        {isPro && (
+          <div className="space-y-2">
+            {PRO_FEATURES.map((f) => (
+              <div key={f} className="flex items-center gap-2 text-sm text-text">
+                <Check size={14} className="text-success shrink-0" />
+                {f}
+              </div>
+            ))}
+          </div>
+        )}
+      </GlassCard>
+
+      {/* Manage subscription */}
+      {isPro && (
+        <GlassCard>
+          <h3 className="font-semibold text-text mb-2">Управление подпиской</h3>
+          <p className="text-sm text-muted mb-4">
+            Изменить план, обновить способ оплаты или отменить подписку через портал Stripe.
+          </p>
+          <Button
+            variant="outline"
+            className="border-border text-text hover:bg-white/5 gap-2"
+            onClick={() => {
+              window.open("https://billing.stripe.com", "_blank");
+            }}
+          >
+            <CreditCard size={15} />
+            Открыть портал управления
+          </Button>
+        </GlassCard>
+      )}
+
+      {/* Payment history placeholder */}
+      <GlassCard>
+        <h3 className="font-semibold text-text mb-3">История платежей</h3>
+        {isPro ? (
+          <p className="text-sm text-muted text-center py-4">
+            История платежей доступна в портале Stripe
+          </p>
+        ) : (
+          <p className="text-sm text-muted text-center py-4">
+            Нет платежей
+          </p>
+        )}
+      </GlassCard>
+
+      {/* Debug toggle for development */}
+      {process.env.NODE_ENV === "development" && (
+        <GlassCard className="border-dashed border-warning/20">
+          <p className="text-xs text-muted mb-2 font-mono">[DEV] Переключить план</p>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPlan("free")}
+              className={cn("text-xs", plan === "free" && "border-primary text-primary")}
+            >
+              Free
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPlan("pro")}
+              className={cn("text-xs", plan === "pro" && "border-primary text-primary")}
+            >
+              Pro
+            </Button>
+          </div>
+        </GlassCard>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-type SettingsTab = "profile" | "security" | "telegram" | "data";
+type SettingsTab = "profile" | "security" | "telegram" | "data" | "subscription";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: "profile", label: "Профиль", icon: User },
   { id: "security", label: "Безопасность", icon: Lock },
   { id: "telegram", label: "Telegram", icon: MessageSquare },
   { id: "data", label: "Данные", icon: Database },
+  { id: "subscription", label: "Подписка", icon: CreditCard },
 ];
 
 export default function ProfilePage() {
@@ -914,6 +1058,7 @@ export default function ProfilePage() {
           {activeTab === "security" && <SecurityTab />}
           {activeTab === "telegram" && <TelegramTab />}
           {activeTab === "data" && <DataTab user={user} />}
+          {activeTab === "subscription" && <SubscriptionTab />}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
   Apple, BookOpen, User, Zap, Wallet, CalendarDays,
-  BarChart2, CheckCircle2, ListTodo,
+  BarChart2, CheckCircle2, ListTodo, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -25,6 +25,7 @@ const navItems = [
   { href: "/nutrition", icon: Apple, label: "Питание" },
   { href: "/finance", icon: Wallet, label: "Финансы" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
+  { href: "/upgrade", icon: Sparkles, label: "Pro", highlight: true },
   { href: "/profile", icon: User, label: "Профиль" },
 ];
 
@@ -94,7 +95,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-        {navItems.map(({ href, icon: Icon, label }) => {
+        {navItems.map(({ href, icon: Icon, label, highlight }) => {
           const active = pathname.startsWith(href);
           const showBadge = href === "/tasks" && overdueCount > 0;
           return (
@@ -106,6 +107,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   active
                     ? "bg-primary/10 text-primary"
+                    : highlight
+                    ? "text-primary hover:bg-primary/10"
                     : "text-muted hover:text-text hover:bg-white/5"
                 )}
               >
@@ -121,6 +124,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {showBadge && (
                   <span className="text-[10px] font-bold bg-danger text-white rounded-full px-1.5 py-0.5 leading-none tabular-nums">
                     {overdueCount > 9 ? "9+" : overdueCount}
+                  </span>
+                )}
+                {highlight && !active && (
+                  <span className="text-[10px] font-bold bg-primary/15 text-primary rounded-full px-1.5 py-0.5 leading-none">
+                    NEW
                   </span>
                 )}
               </motion.div>

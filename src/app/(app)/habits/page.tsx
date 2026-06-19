@@ -5,6 +5,7 @@ import { Plus, Repeat2, CheckCircle2, Flame } from "lucide-react";
 import { motion } from "motion/react";
 import { useHabits, useLogHabit, useDeleteHabit, useFreezeHabit } from "@/lib/hooks/useHabits";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
+import { usePlan } from "@/lib/hooks/usePlan";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { HabitForm } from "@/components/habits/HabitForm";
 import { HabitCalendar } from "@/components/habits/HabitCalendar";
@@ -12,6 +13,8 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormDialog } from "@/components/shared/FormDialog";
+import { LimitBadge } from "@/components/shared/LimitBadge";
+import { UpgradePrompt } from "@/components/billing/UpgradePrompt";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -45,18 +48,42 @@ export default function HabitsPage() {
   const totalToday = todayHabits.length;
   const allDone = totalToday > 0 && doneToday === totalToday;
 
+  const { isPro, getLimit, isAtLimit } = usePlan();
+  const habitLimit = getLimit("habits");
+  const atHabitLimit = isAtLimit("habits", habits.length);
+
   return (
     <div className="max-w-4xl space-y-6">
       <PageHeader
         title="Привычки"
-        subtitle={`${habits.length} привычек`}
+        subtitle={
+          <span className="flex items-center gap-2">
+            {habits.length} привычек
+            {!isPro && (
+              <LimitBadge current={habits.length} max={habitLimit} label="привычек" />
+            )}
+          </span>
+        }
         action={
-          <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white gap-2">
+          <Button
+            onClick={() => !atHabitLimit && setFormOpen(true)}
+            disabled={atHabitLimit}
+            className="gradient-primary text-white gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            title={atHabitLimit ? "Лимит достигнут — перейдите на Pro" : undefined}
+          >
             <Plus size={16} />
             Новая привычка
           </Button>
         }
       />
+
+      {atHabitLimit && (
+        <UpgradePrompt
+          title="Достигнут лимит привычек"
+          description={`В Free-плане доступно максимум ${habitLimit} привычек. Перейдите на Pro чтобы добавлять сколько угодно.`}
+          variant="warning"
+        />
+      )}
 
       {/* Today summary */}
       {totalToday > 0 && (
