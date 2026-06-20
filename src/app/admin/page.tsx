@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { adminApi } from "@/lib/api/admin";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { useMe } from "@/lib/hooks/useAuth";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -173,10 +174,32 @@ const item = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } };
 
 export default function AdminPage() {
   const user = useAuthStore((s) => s.user);
+  const { isPending } = useMe();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const limit = 20;
+
+  if (isPending || (!user && !isPending)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {isPending ? (
+          <Loader2 size={28} className="animate-spin text-muted" />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto">
+              <Shield size={28} className="text-danger" />
+            </div>
+            <h1 className="text-xl font-bold text-text">Доступ запрещён</h1>
+            <p className="text-sm text-muted">Эта страница доступна только администраторам.</p>
+            <Button variant="outline" onClick={() => router.push("/login")} className="border-border">
+              Войти
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (user?.role !== "admin") {
     return (
