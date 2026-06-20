@@ -180,28 +180,49 @@ export default function AdminPage() {
   const [page, setPage] = useState(0);
   const limit = 20;
 
-  if (isPending || (!user && !isPending)) {
+  const isAdmin = user?.role === "admin";
+
+  const { data: stats } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: adminApi.getStats,
+    enabled: isAdmin,
+  });
+
+  const { data: usersData, isLoading } = useQuery({
+    queryKey: ["admin-users", search, page],
+    queryFn: () => adminApi.getUsers({ skip: page * limit, limit, search: search || undefined }),
+    enabled: isAdmin,
+  });
+
+  const users = usersData?.items ?? [];
+  const total = usersData?.total ?? 0;
+
+  if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        {isPending ? (
-          <Loader2 size={28} className="animate-spin text-muted" />
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto">
-              <Shield size={28} className="text-danger" />
-            </div>
-            <h1 className="text-xl font-bold text-text">Доступ запрещён</h1>
-            <p className="text-sm text-muted">Эта страница доступна только администраторам.</p>
-            <Button variant="outline" onClick={() => router.push("/login")} className="border-border">
-              Войти
-            </Button>
-          </div>
-        )}
+        <Loader2 size={28} className="animate-spin text-muted" />
       </div>
     );
   }
 
-  if (user?.role !== "admin") {
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto">
+            <Shield size={28} className="text-danger" />
+          </div>
+          <h1 className="text-xl font-bold text-text">Доступ запрещён</h1>
+          <p className="text-sm text-muted">Необходимо войти в аккаунт.</p>
+          <Button variant="outline" onClick={() => router.push("/login")} className="border-border">
+            Войти
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -217,19 +238,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  const { data: stats } = useQuery({
-    queryKey: ["admin-stats"],
-    queryFn: adminApi.getStats,
-  });
-
-  const { data: usersData, isLoading } = useQuery({
-    queryKey: ["admin-users", search, page],
-    queryFn: () => adminApi.getUsers({ skip: page * limit, limit, search: search || undefined }),
-  });
-
-  const users = usersData?.items ?? [];
-  const total = usersData?.total ?? 0;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
