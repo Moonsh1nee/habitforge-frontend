@@ -9,6 +9,8 @@ export interface User {
   bio: string | null;
   timezone: string;
   isActive: boolean;
+  plan: "free" | "pro";
+  role: "user" | "admin";
   createdAt: string;
   updatedAt: string;
 }
@@ -353,6 +355,41 @@ export interface FinanceSummary {
   balance:            number;
   transactions_count: number;
   by_category:        CategorySummary[];
+}
+
+// ─── Goals ───────────────────────────────────────────────────────────────────
+
+export type GoalCategory =
+  | "health"
+  | "fitness"
+  | "productivity"
+  | "finance"
+  | "learning"
+  | "other";
+
+export type GoalStatus = "active" | "completed" | "archived";
+
+export interface Goal {
+  id: string;
+  userId: string;
+  title: string;
+  category: GoalCategory;
+  targetValue: number;
+  currentValue: number;
+  unit: string;
+  status: GoalStatus;
+  dueDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminStats {
+  total_users: number;
+  pro_users: number;
+  active_today: number;
+  new_this_week: number;
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────

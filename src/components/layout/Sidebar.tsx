@@ -6,12 +6,13 @@ import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
   Apple, BookOpen, User, Zap, Wallet, CalendarDays,
-  BarChart2, CheckCircle2, ListTodo, Sparkles,
+  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
 import { useProjects } from "@/lib/hooks/useProjects";
+import { useAuthStore } from "@/lib/stores/authStore";
 import { FolderOpen } from "lucide-react";
 import { PomodoroSidebarSection } from "@/components/layout/PomodoroWidget";
 
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/tasks", icon: CheckSquare, label: "Задачи" },
   { href: "/calendar", icon: CalendarDays, label: "Календарь" },
   { href: "/habits", icon: Repeat2, label: "Привычки" },
+  { href: "/goals", icon: Target, label: "Цели" },
   { href: "/stats", icon: BarChart2, label: "Аналитика" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
@@ -84,6 +86,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { data: today } = useDashboardToday();
   const overdueCount = today?.tasks_overdue?.length ?? 0;
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === "admin";
 
   return (
     <>
@@ -136,6 +140,22 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
+
+      {isAdmin && (
+        <div className="px-3 pb-2 border-t border-border pt-2">
+          <Link href="/admin" onClick={onNavigate}>
+            <div className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors",
+              pathname.startsWith("/admin")
+                ? "bg-danger/10 text-danger"
+                : "text-muted hover:text-danger hover:bg-danger/10"
+            )}>
+              <Shield size={15} />
+              Администрирование
+            </div>
+          </Link>
+        </div>
+      )}
 
       <ProjectsSection onNavigate={onNavigate} />
       <PomodoroSidebarSection />
