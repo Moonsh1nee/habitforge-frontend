@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./Providers";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   title: "HabitForge",
   description: "Система трекинга привычек, задач и здоровья",
   manifest: "/manifest.json",
-  themeColor: "#7c3aed",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -27,6 +26,10 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7c3aed",
 };
 
 export default function RootLayout({
