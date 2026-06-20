@@ -60,7 +60,6 @@ import {
 } from "@/components/ui/select";
 import { cn, formatDate } from "@/lib/utils";
 import { usePlan } from "@/lib/hooks/usePlan";
-import { usePlanStore } from "@/lib/stores/planStore";
 import type { User as UserType } from "@/types";
 import type { AxiosError } from "axios";
 
@@ -841,7 +840,6 @@ function DataTab({ user }: { user: UserType }) {
 
 function SubscriptionTab() {
   const { plan, isPro } = usePlan();
-  const setPlan = usePlanStore((s) => s.setPlan);
   const router = useRouter();
 
   const PRO_FEATURES = [
@@ -947,30 +945,6 @@ function SubscriptionTab() {
         )}
       </GlassCard>
 
-      {/* Debug toggle for development */}
-      {process.env.NODE_ENV === "development" && (
-        <GlassCard className="border-dashed border-warning/20">
-          <p className="text-xs text-muted mb-2 font-mono">[DEV] Переключить план</p>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setPlan("free")}
-              className={cn("text-xs", plan === "free" && "border-primary text-primary")}
-            >
-              Free
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setPlan("pro")}
-              className={cn("text-xs", plan === "pro" && "border-primary text-primary")}
-            >
-              Pro
-            </Button>
-          </div>
-        </GlassCard>
-      )}
     </div>
   );
 }
