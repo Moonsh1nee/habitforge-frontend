@@ -10,7 +10,6 @@ const rows: { label: string; free: string | boolean; pro: string | boolean }[] =
   { label: "Аналитика", free: "7 дней", pro: "90+ дней" },
   { label: "Годовой хитмап привычек", free: false, pro: true },
   { label: "Шаблоны привычек/тренировок", free: false, pro: true },
-  { label: "AI-инсайты", free: false, pro: true },
   { label: "Экспорт данных", free: true, pro: true },
   { label: "PWA / мобильный доступ", free: true, pro: true },
   { label: "Telegram-бот", free: true, pro: true },

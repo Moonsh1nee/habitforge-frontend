@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Users, Shield, TrendingUp, Activity,
-  Search, Loader2, Trash2, Crown, UserCheck, UserX,
+  Search, Loader2, Trash2, Crown, UserCheck, UserX, LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { adminApi } from "@/lib/api/admin";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { GlassCard } from "@/components/shared/GlassCard";
@@ -26,10 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { User } from "@/types";
 
-// ─── Stats row ────────────────────────────────────────────────────────────────
+// ─── Stat block ───────────────────────────────────────────────────────────────
 
 function StatBlock({ icon: Icon, label, value, color }: {
   icon: React.ElementType;
@@ -80,12 +81,10 @@ function UserRow({ user }: { user: User }) {
 
   return (
     <div className="flex items-center gap-3 py-3 border-b border-border/50 last:border-0">
-      {/* Avatar */}
       <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
         {user.firstName?.[0]?.toUpperCase()}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-text truncate">
           {user.firstName} {user.lastName ?? ""}
@@ -96,7 +95,6 @@ function UserRow({ user }: { user: User }) {
         <p className="text-xs text-muted truncate">{user.email ?? user.username}</p>
       </div>
 
-      {/* Plan badge */}
       <span className={cn(
         "text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0",
         user.plan === "pro" ? "bg-primary/15 text-primary" : "bg-white/8 text-muted"
@@ -104,13 +102,11 @@ function UserRow({ user }: { user: User }) {
         {user.plan?.toUpperCase() ?? "FREE"}
       </span>
 
-      {/* Status */}
-      <span className={cn(
-        "w-2 h-2 rounded-full shrink-0",
-        user.isActive ? "bg-success" : "bg-muted"
-      )} title={user.isActive ? "Активен" : "Заблокирован"} />
+      <span
+        className={cn("w-2 h-2 rounded-full shrink-0", user.isActive ? "bg-success" : "bg-muted")}
+        title={user.isActive ? "Активен" : "Заблокирован"}
+      />
 
-      {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
         {isPending ? (
           <Loader2 size={14} className="animate-spin text-muted" />
@@ -177,18 +173,24 @@ const item = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } };
 
 export default function AdminPage() {
   const user = useAuthStore((s) => s.user);
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const limit = 20;
 
   if (user?.role !== "admin") {
     return (
-      <div className="max-w-lg mx-auto mt-20 text-center space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto">
-          <Shield size={28} className="text-danger" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto">
+            <Shield size={28} className="text-danger" />
+          </div>
+          <h1 className="text-xl font-bold text-text">Доступ запрещён</h1>
+          <p className="text-sm text-muted">Эта страница доступна только администраторам.</p>
+          <Button variant="outline" onClick={() => router.push("/dashboard")} className="border-border">
+            На главную
+          </Button>
         </div>
-        <h1 className="text-xl font-bold text-text">Доступ запрещён</h1>
-        <p className="text-sm text-muted">Эта страница доступна только администраторам.</p>
       </div>
     );
   }
@@ -207,25 +209,25 @@ export default function AdminPage() {
   const total = usersData?.total ?? 0;
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="Администрирование"
         subtitle="Управление пользователями и метрики"
         action={
-          <div className="w-8 h-8 rounded-xl bg-danger/10 flex items-center justify-center">
-            <Shield size={15} className="text-danger" />
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="border-border text-muted hover:text-text gap-1.5"
+          >
+            <LogOut size={14} />
+            В приложение
+          </Button>
         }
       />
 
-      {/* Stats */}
       {stats && (
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-        >
+        <motion.div variants={container} initial="hidden" animate="visible" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <motion.div variants={item}><StatBlock icon={Users} label="Всего пользователей" value={stats.total_users} color="bg-primary" /></motion.div>
           <motion.div variants={item}><StatBlock icon={Crown} label="Pro-пользователей" value={stats.pro_users} color="bg-warning/80" /></motion.div>
           <motion.div variants={item}><StatBlock icon={Activity} label="Активны сегодня" value={stats.active_today} color="bg-success" /></motion.div>
@@ -233,7 +235,6 @@ export default function AdminPage() {
         </motion.div>
       )}
 
-      {/* Users table */}
       <GlassCard className="p-0 overflow-hidden">
         <div className="p-4 border-b border-border flex items-center gap-3">
           <div className="relative flex-1">
@@ -262,25 +263,13 @@ export default function AdminPage() {
 
         {total > limit && (
           <div className="p-4 border-t border-border flex items-center justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 0}
-              onClick={() => setPage((p) => p - 1)}
-              className="border-border"
-            >
+            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)} className="border-border">
               Назад
             </Button>
             <p className="text-xs text-muted">
               {page * limit + 1}–{Math.min((page + 1) * limit, total)} из {total}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={(page + 1) * limit >= total}
-              onClick={() => setPage((p) => p + 1)}
-              className="border-border"
-            >
+            <Button variant="outline" size="sm" disabled={(page + 1) * limit >= total} onClick={() => setPage((p) => p + 1)} className="border-border">
               Вперёд
             </Button>
           </div>

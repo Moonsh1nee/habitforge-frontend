@@ -17,7 +17,6 @@ const FREE_FEATURES = [
   { label: "Задачи и журнал", included: true },
   { label: "Тренировки и питание", included: true },
   { label: "Telegram-бот", included: true },
-  { label: "AI-инсайты", included: false },
   { label: "Годовой хитмап", included: false },
   { label: "Шаблоны программ", included: false },
 ];
@@ -29,16 +28,15 @@ const PRO_FEATURES = [
   { label: "Задачи и журнал", included: true },
   { label: "Тренировки и питание", included: true },
   { label: "Telegram-бот", included: true },
-  { label: "AI-инсайты", included: true },
   { label: "Годовой хитмап", included: true },
   { label: "Шаблоны программ", included: true },
 ];
 
 const PERKS = [
-  { icon: Sparkles, label: "AI-инсайты", desc: "Персональные паттерны и рекомендации на основе ваших данных" },
   { icon: BarChart2, label: "Глубокая аналитика", desc: "История за 90 дней, годовые хитмапы, кросс-корреляции" },
+  { icon: Sparkles, label: "Шаблоны программ", desc: "Готовые планы привычек, тренировок и питания — применяй в один клик" },
   { icon: Shield, label: "Приоритет поддержки", desc: "Ответ в течение 24 часов, прямой доступ к команде" },
-  { icon: Zap, label: "Всё без лимитов", desc: "Неограниченные привычки, проекты, теги и шаблоны" },
+  { icon: Zap, label: "Всё без лимитов", desc: "Неограниченные привычки, проекты, теги и цели" },
 ];
 
 const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
