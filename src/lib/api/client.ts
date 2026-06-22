@@ -21,6 +21,28 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (error.response?.status === 403) {
+      const data = error.response.data;
+      if (data?.code === "PLAN_LIMIT_REACHED") {
+        const labels: Record<string, string> = {
+          habits:   "привычек",
+          projects: "проектов",
+          tags:     "тегов",
+          goals:    "целей",
+        };
+        const feature = labels[data.feature] ?? data.feature;
+        toast.error(`Лимит ${feature} достигнут (${data.current}/${data.limit})`, {
+          description: "Перейдите на Pro для снятия ограничений",
+          action: {
+            label: "Upgrade →",
+            onClick: () => { window.location.href = "/upgrade"; },
+          },
+          duration: 6000,
+        });
+        return Promise.reject(error);
+      }
+    }
+
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
 

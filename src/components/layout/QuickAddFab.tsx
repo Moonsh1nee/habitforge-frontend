@@ -4,9 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, CheckSquare, Repeat2, Apple, Dumbbell, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { HabitForm } from "@/components/habits/HabitForm";
 import { FormDialog } from "@/components/shared/FormDialog";
+import { usePlan } from "@/lib/hooks/usePlan";
+import { useHabits } from "@/lib/hooks/useHabits";
 
 type QuickAction = "task" | "habit" | null;
 
@@ -51,13 +54,25 @@ export function QuickAddFab() {
   const [action, setAction] = useState<QuickAction>(null);
   const router = useRouter();
 
+  const { isAtLimit, getLimit } = usePlan();
+  const { data: habitsData } = useHabits();
+  const habitsCount = habitsData?.total ?? 0;
+
   const handleSelect = (id: string, navigate?: string) => {
     setOpen(false);
     if (navigate) {
       router.push(navigate);
-    } else {
-      setAction(id as QuickAction);
+      return;
     }
+    if (id === "habit" && isAtLimit("habits", habitsCount)) {
+      toast.error(`Лимит привычек достигнут (${habitsCount}/${getLimit("habits")})`, {
+        description: "Перейдите на Pro для снятия ограничений",
+        action: { label: "Upgrade →", onClick: () => router.push("/upgrade") },
+        duration: 6000,
+      });
+      return;
+    }
+    setAction(id as QuickAction);
   };
 
   return (

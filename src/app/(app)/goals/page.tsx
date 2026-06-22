@@ -95,9 +95,9 @@ function GoalForm({
           payload: {
             title: values.title,
             category: values.category,
-            target_value: values.target_value as number,
+            targetValue: values.target_value as number,
             unit: values.unit,
-            due_date: values.due_date || null,
+            dueDate: values.due_date || null,
           },
         },
         { onSuccess }
@@ -107,10 +107,10 @@ function GoalForm({
         {
           title: values.title,
           category: values.category,
-          target_value: values.target_value as number,
-          current_value: (values.current_value as number) ?? 0,
+          targetValue: values.target_value as number,
+          currentValue: (values.current_value as number) ?? 0,
           unit: values.unit,
-          due_date: values.due_date || null,
+          dueDate: values.due_date || null,
         },
         { onSuccess }
       );

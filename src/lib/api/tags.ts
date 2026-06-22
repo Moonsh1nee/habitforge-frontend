@@ -22,7 +22,7 @@ export const tagsApi = {
   },
 
   addToTask: async (taskId: string, tagId: string): Promise<Task> => {
-    const { data } = await api.post<Task>(`/tasks/${taskId}/tags`, { tag_id: tagId });
+    const { data } = await api.post<Task>(`/tasks/${taskId}/tags`, { tagId });
     return data;
   },
 

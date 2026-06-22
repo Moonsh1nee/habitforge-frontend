@@ -10,8 +10,10 @@ import { format, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
   Flame, Dumbbell, BookOpen, Heart, TrendingUp,
-  Zap, Moon, BarChart2,
+  Zap, Moon, BarChart2, Lightbulb,
 } from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { InsightCard, type Insight } from "@/components/stats/InsightCard";
 import { useJournalEntries } from "@/lib/hooks/useJournal";
 import { useWorkoutLogs } from "@/lib/hooks/useWorkouts";
 import { useHabits, useHabitStats } from "@/lib/hooks/useHabits";
@@ -165,6 +167,120 @@ export default function StatsPage() {
   const energyEntries = entries.filter((e) => e.energy != null);
   const sleepEntries = entries.filter((e) => e.sleepHours != null);
 
+  // ─── Insights ─────────────────────────────────────────────────────────────
+  const insights = useMemo<Insight[]>(() => {
+    const result: Insight[] = [];
+
+    // 1. Workout ↔ mood correlation
+    const workoutDates = new Set(workoutsInPeriod.map((w) => w.date));
+    const moodOnWorkoutDays = moodEntries.filter((e) => workoutDates.has(e.date));
+    const moodOnRestDays = moodEntries.filter((e) => !workoutDates.has(e.date));
+    if (moodOnWorkoutDays.length >= 2 && moodOnRestDays.length >= 2) {
+      const avgW = moodOnWorkoutDays.reduce((s, e) => s + e.mood!, 0) / moodOnWorkoutDays.length;
+      const avgR = moodOnRestDays.reduce((s, e) => s + e.mood!, 0) / moodOnRestDays.length;
+      const diff = avgW - avgR;
+      if (diff >= 0.5) {
+        result.push({
+          id: "workout-mood",
+          variant: "success",
+          emoji: "💪",
+          title: `В дни тренировок настроение выше на ${diff.toFixed(1)} балла`,
+          description: `Наблюдение по ${moodOnWorkoutDays.length} дням с тренировками`,
+        });
+      }
+    }
+
+    // 2. Sleep ↔ mood correlation
+    const goodSleepMood = entries.filter((e) => e.sleepHours != null && e.sleepHours >= 7 && e.mood != null);
+    const poorSleepMood = entries.filter((e) => e.sleepHours != null && e.sleepHours < 7 && e.mood != null);
+    if (goodSleepMood.length >= 2 && poorSleepMood.length >= 2) {
+      const avgG = goodSleepMood.reduce((s, e) => s + e.mood!, 0) / goodSleepMood.length;
+      const avgP = poorSleepMood.reduce((s, e) => s + e.mood!, 0) / poorSleepMood.length;
+      const diff = avgG - avgP;
+      if (diff >= 0.8) {
+        result.push({
+          id: "sleep-mood",
+          variant: "primary",
+          emoji: "😴",
+          title: `При 7+ часах сна настроение выше на ${diff.toFixed(1)} балла`,
+          description: "Хороший сон — твой главный инструмент восстановления",
+        });
+      }
+    }
+
+    // 3. Mood trend (first half vs second half of period)
+    if (moodEntries.length >= 4) {
+      const half = Math.floor(moodEntries.length / 2);
+      const avgFirst = moodEntries.slice(0, half).reduce((s, e) => s + e.mood!, 0) / half;
+      const avgSecond = moodEntries.slice(half).reduce((s, e) => s + e.mood!, 0) / (moodEntries.length - half);
+      const diff = avgSecond - avgFirst;
+      if (diff >= 0.5) {
+        result.push({
+          id: "mood-trend-up",
+          variant: "success",
+          emoji: "📈",
+          title: `Настроение улучшилось на ${diff.toFixed(1)} балла за период`,
+        });
+      } else if (diff <= -0.5) {
+        result.push({
+          id: "mood-trend-down",
+          variant: "warning",
+          emoji: "📉",
+          title: `Настроение снизилось на ${Math.abs(diff).toFixed(1)} балла за период`,
+          description: "Обрати внимание на сон и физическую активность",
+        });
+      }
+    }
+
+    // 4. Workout frequency
+    if (workoutsInPeriod.length > 0) {
+      const perWeek = workoutsInPeriod.length / (days / 7);
+      if (perWeek >= 3) {
+        result.push({
+          id: "workout-freq",
+          variant: "success",
+          emoji: "🏆",
+          title: `${perWeek.toFixed(1)} тренировок в неделю — отличный ритм!`,
+          description: "Продолжай в том же духе",
+        });
+      }
+    }
+
+    // 5. No workouts recently
+    if (workoutLogs.length > 0) {
+      const last = [...workoutLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
+      if (last) {
+        const daysSince = Math.floor(
+          (Date.now() - new Date(last.date).getTime()) / 86_400_000
+        );
+        if (daysSince >= 5) {
+          const label = daysSince === 1 ? "день" : daysSince < 5 ? "дня" : "дней";
+          result.push({
+            id: "no-workouts",
+            variant: "warning",
+            emoji: "⚠️",
+            title: `Ты не записывал тренировки ${daysSince} ${label}`,
+            description: `Последняя: ${format(new Date(last.date), "d MMMM", { locale: ru })}`,
+          });
+        }
+      }
+    }
+
+    // 6. No journal entries in period
+    if (entries.length === 0 && !isLoading) {
+      result.push({
+        id: "no-journal",
+        variant: "warning",
+        emoji: "📓",
+        title: "Нет записей в дневнике за выбранный период",
+        description: "Добавь первую запись — и здесь появятся персональные инсайты",
+      });
+    }
+
+    // Cap at 4 most relevant
+    return result.slice(0, 4);
+  }, [entries, moodEntries, workoutsInPeriod, workoutLogs, days, isLoading]);
+
   const avgMood = moodEntries.length > 0
     ? moodEntries.reduce((s, e) => s + e.mood!, 0) / moodEntries.length
     : null;
@@ -220,6 +336,28 @@ export default function StatsPage() {
             <Skeleton className="h-52 rounded-2xl" />
           </div>
         </div>
+      )}
+
+      {!isLoading && insights.length > 0 && (
+        <motion.div
+          key={`insights-${period}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-2"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb size={14} className="text-warning" />
+            <h3 className="text-sm font-semibold text-text">Инсайты</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <AnimatePresence>
+              {insights.map((insight) => (
+                <InsightCard key={insight.id} insight={insight} />
+              ))}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       )}
 
       {!isLoading && (

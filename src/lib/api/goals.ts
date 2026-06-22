@@ -4,18 +4,18 @@ import type { Goal, GoalCategory, GoalStatus } from "@/types";
 export interface CreateGoalPayload {
   title: string;
   category: GoalCategory;
-  target_value: number;
-  current_value?: number;
+  targetValue: number;
+  currentValue?: number;
   unit: string;
-  due_date?: string | null;
+  dueDate?: string | null;
 }
 
 export interface UpdateGoalPayload {
   title?: string;
   category?: GoalCategory;
-  target_value?: number;
+  targetValue?: number;
   unit?: string;
-  due_date?: string | null;
+  dueDate?: string | null;
   status?: GoalStatus;
 }
 

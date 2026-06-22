@@ -2,9 +2,9 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Search, ArrowUp, ArrowDown, X } from "lucide-react";
+import { Plus, Search, ArrowUp, ArrowDown, X, FolderOpen, Pencil, Trash2 } from "lucide-react";
 import { useTasks } from "@/lib/hooks/useTasks";
-import { useProjects } from "@/lib/hooks/useProjects";
+import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/lib/hooks/useProjects";
 import { useTags } from "@/lib/hooks/useTags";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskForm } from "@/components/tasks/TaskForm";
@@ -20,8 +20,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import type { Task, TaskPriority } from "@/types";
+import type { Task, TaskPriority, Project } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
 
 type OrderBy = "createdAt" | "dueDate" | "priority";
@@ -45,6 +62,182 @@ const PRIORITY_ACTIVE_CLASS: Record<number, string> = {
   3: "border-muted/40 text-muted bg-muted/10",
 };
 
+const PRESET_COLORS = [
+  "#7c3aed", "#8b5cf6", "#06b6d4", "#0ea5e9",
+  "#22c55e", "#f59e0b", "#f97316", "#ef4444",
+  "#ec4899", "#64748b",
+];
+
+// ─── Color picker ─────────────────────────────────────────────────────────────
+
+function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
+  return (
+    <div className="flex gap-1.5 flex-wrap">
+      {PRESET_COLORS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          onClick={() => onChange(c)}
+          className={cn(
+            "w-6 h-6 rounded-full transition-all shrink-0",
+            value === c
+              ? "ring-2 ring-offset-2 ring-offset-background ring-white scale-110"
+              : "hover:scale-110"
+          )}
+          style={{ background: c }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Projects manager ─────────────────────────────────────────────────────────
+
+function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const { data: projects = [] } = useProjects();
+  const create = useCreateProject();
+  const update = useUpdateProject();
+  const del = useDeleteProject();
+
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("");
+
+  const handleCreate = () => {
+    if (!newName.trim()) return;
+    create.mutate(
+      { name: newName.trim(), color: newColor },
+      { onSuccess: () => { setNewName(""); setNewColor(PRESET_COLORS[0]); } }
+    );
+  };
+
+  const startEdit = (p: Project) => {
+    setEditId(p.id);
+    setEditName(p.name);
+    setEditColor(p.color);
+  };
+
+  const handleUpdate = () => {
+    if (!editId || !editName.trim()) return;
+    update.mutate(
+      { id: editId, payload: { name: editName.trim(), color: editColor } },
+      { onSuccess: () => setEditId(null) }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Управление проектами</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
+          {projects.length === 0 ? (
+            <p className="text-sm text-muted text-center py-6">Пока нет проектов</p>
+          ) : projects.map((p) =>
+            editId === p.id ? (
+              <div key={p.id} className="space-y-3 p-3 rounded-xl bg-white/5 border border-border">
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
+                  autoFocus
+                />
+                <ColorPicker value={editColor} onChange={setEditColor} />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleUpdate}
+                    disabled={!editName.trim() || update.isPending}
+                    className="gradient-primary text-white"
+                  >
+                    Сохранить
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>
+                    Отмена
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                key={p.id}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 group transition-colors"
+              >
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ background: p.color }} />
+                <span className="flex-1 text-sm text-text truncate">{p.name}</span>
+                {p.tasksCount > 0 && (
+                  <span className="text-xs text-muted tabular-nums shrink-0">
+                    {p.tasksDone}/{p.tasksCount}
+                  </span>
+                )}
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <button
+                    onClick={() => startEdit(p)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted hover:text-text hover:bg-white/5 transition-colors"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={
+                        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors">
+                          <Trash2 size={13} />
+                        </button>
+                      }
+                    />
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Удалить «{p.name}»?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Задачи в проекте не удаляются — они просто открепятся от него.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => del.mutate(p.id)}
+                          className="bg-danger text-white hover:bg-danger/80"
+                        >
+                          Удалить
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Create form */}
+        <div className="border-t border-border pt-4 space-y-3">
+          <p className="text-xs text-muted font-medium uppercase tracking-wide">Новый проект</p>
+          <Input
+            placeholder="Название проекта"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+          />
+          <ColorPicker value={newColor} onChange={setNewColor} />
+          <Button
+            onClick={handleCreate}
+            disabled={!newName.trim() || create.isPending}
+            className="gradient-primary text-white w-full gap-2"
+          >
+            <Plus size={14} />
+            Создать проект
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Tasks page ───────────────────────────────────────────────────────────────
+
 function TasksPageInner() {
   const searchParams = useSearchParams();
   const urlProjectId: string | undefined = searchParams.get("project_id") ?? undefined;
@@ -59,6 +252,7 @@ function TasksPageInner() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [projectsOpen, setProjectsOpen] = useState(false);
 
   const { data: projects = [] } = useProjects();
   const { data: allTags = [] } = useTags();
@@ -108,10 +302,20 @@ function TasksPageInner() {
         title={activeProject ? activeProject.name : "Задачи"}
         subtitle={`${data?.total ?? 0} задач всего`}
         action={
-          <Button onClick={() => setCreateOpen(true)} className="gradient-primary text-white gap-2">
-            <Plus size={16} />
-            Новая задача
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setProjectsOpen(true)}
+              className="border-border text-muted hover:text-text gap-2"
+            >
+              <FolderOpen size={16} />
+              <span className="hidden sm:inline">Проекты</span>
+            </Button>
+            <Button onClick={() => setCreateOpen(true)} className="gradient-primary text-white gap-2">
+              <Plus size={16} />
+              Новая задача
+            </Button>
+          </div>
         }
       />
 
@@ -231,6 +435,8 @@ function TasksPageInner() {
       <FormDialog open={!!editTask} onOpenChange={(o) => !o && setEditTask(null)} title="Редактировать задачу">
         {editTask && <TaskForm task={editTask} onSuccess={() => setEditTask(null)} />}
       </FormDialog>
+
+      <ProjectsManager open={projectsOpen} onOpenChange={setProjectsOpen} />
     </div>
   );
 }
