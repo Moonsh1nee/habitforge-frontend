@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useQueries } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -16,7 +17,8 @@ import { AnimatePresence } from "motion/react";
 import { InsightCard, type Insight } from "@/components/stats/InsightCard";
 import { useJournalEntries } from "@/lib/hooks/useJournal";
 import { useWorkoutLogs } from "@/lib/hooks/useWorkouts";
-import { useHabits, useHabitStats } from "@/lib/hooks/useHabits";
+import { useHabits } from "@/lib/hooks/useHabits";
+import { habitsApi } from "@/lib/api/habits";
 import { usePlan } from "@/lib/hooks/usePlan";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -37,13 +39,9 @@ const TT_STYLE = {
   fontSize: 12,
 };
 
-// ─── Habit streak row (each triggers its own stats query) ──────────────────
+// ─── Habit streak row ──────────────────────────────────────────────────────
 
-function HabitStreakRow({ habit }: { habit: Habit }) {
-  const { data: stats } = useHabitStats(habit.id);
-  const streak = stats?.current_streak ?? 0;
-  const best = stats?.longest_streak ?? 0;
-
+function HabitStreakRow({ habit, streak, best }: { habit: Habit; streak: number; best: number }) {
   return (
     <div className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
       <div
@@ -54,13 +52,13 @@ function HabitStreakRow({ habit }: { habit: Habit }) {
       </div>
       <span className="flex-1 text-sm text-text truncate min-w-0">{habit.title}</span>
       <div className="flex items-center gap-3 shrink-0">
-        <div className="text-right min-w-[40px]">
+        <div className="text-right min-w-10">
           <p className={`text-sm font-bold tabular-nums ${streak > 0 ? "text-warning" : "text-muted"}`}>
             {streak > 0 ? `🔥 ${streak}` : streak}
           </p>
           <p className="text-[10px] text-muted">сейчас</p>
         </div>
-        <div className="text-right min-w-[32px]">
+        <div className="text-right min-w-8">
           <p className="text-sm font-semibold tabular-nums text-primary">{best}</p>
           <p className="text-[10px] text-muted">рекорд</p>
         </div>
@@ -119,6 +117,15 @@ export default function StatsPage() {
   const { data: workoutLogs = [], isLoading: loadingWorkouts } = useWorkoutLogs({ limit: 50 });
   const { data: habitsData, isLoading: loadingHabits } = useHabits({ archived: false });
   const habits = habitsData?.items ?? [];
+
+  const habitStatsQueries = useQueries({
+    queries: habits.map((h) => ({
+      queryKey: ["habits", h.id, "stats"],
+      queryFn: () => habitsApi.getStats(h.id),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
   const isLoading = loadingEntries || loadingWorkouts || loadingHabits;
 
   const workoutsInPeriod = useMemo(
@@ -489,8 +496,13 @@ export default function StatsPage() {
               </div>
             ) : (
               <div className="overflow-y-auto max-h-52 scrollbar-thin">
-                {habits.map((habit) => (
-                  <HabitStreakRow key={habit.id} habit={habit} />
+                {habits.map((habit, i) => (
+                  <HabitStreakRow
+                    key={habit.id}
+                    habit={habit}
+                    streak={habitStatsQueries[i]?.data?.current_streak ?? 0}
+                    best={habitStatsQueries[i]?.data?.longest_streak ?? 0}
+                  />
                 ))}
               </div>
             )}

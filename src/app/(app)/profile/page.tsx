@@ -403,7 +403,18 @@ function PushNotificationsCard() {
     setStatus(sub ? "subscribed" : "idle");
   };
 
-  React.useEffect(() => { checkStatus(); }, []); // eslint-disable-line
+  React.useEffect(() => {
+    const supported =
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window;
+    if (!supported) { setStatus("unsupported"); return; }
+    (async () => {
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      const sub = await reg?.pushManager?.getSubscription();
+      setStatus(sub ? "subscribed" : "idle");
+    })();
+  }, []);
 
   const subscribe = async () => {
     setStatus("loading");
@@ -646,47 +657,60 @@ function TelegramTab() {
       </GlassCard>
 
       {/* Link code dialog */}
-      {linkCodeOpen && linkCode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="glass p-6 rounded-2xl max-w-sm w-full mx-4 space-y-4">
-            <h3 className="font-semibold text-text text-lg">Привязка Telegram</h3>
-            <ol className="text-sm text-muted space-y-2 list-decimal list-inside">
-              <li>Откройте нашего Telegram-бота</li>
-              <li>Отправьте команду <span className="text-text font-mono">/start</span></li>
-              <li>Введите код ниже в ответ на запрос бота</li>
-            </ol>
-            <div className="bg-white/5 rounded-xl p-4 text-center">
-              <p className="text-xs text-muted mb-1">Ваш код</p>
-              <p className="text-3xl font-mono font-bold text-primary tracking-widest">{linkCode}</p>
-              <p className="text-xs text-muted mt-2">Действителен 15 минут</p>
+      <Dialog
+        open={linkCodeOpen && !!linkCode}
+        onOpenChange={(open) => {
+          if (!open) {
+            setLinkCodeOpen(false);
+            setLinkCode(null);
+            qc.invalidateQueries({ queryKey: ["telegram-link"] });
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Привязка Telegram</DialogTitle>
+          </DialogHeader>
+          {linkCode && (
+            <div className="space-y-4">
+              <ol className="text-sm text-muted space-y-2 list-decimal list-inside">
+                <li>Откройте нашего Telegram-бота</li>
+                <li>Отправьте команду <span className="text-text font-mono">/start</span></li>
+                <li>Введите код ниже в ответ на запрос бота</li>
+              </ol>
+              <div className="bg-white/5 rounded-xl p-4 text-center">
+                <p className="text-xs text-muted mb-1">Ваш код</p>
+                <p className="text-3xl font-mono font-bold text-primary tracking-widest">{linkCode}</p>
+                <p className="text-xs text-muted mt-2">Действителен 15 минут</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {
+                    navigator.clipboard.writeText(linkCode);
+                    toast.success("Код скопирован");
+                  }}
+                >
+                  Скопировать
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 gradient-primary text-white"
+                  onClick={() => {
+                    setLinkCodeOpen(false);
+                    setLinkCode(null);
+                    qc.invalidateQueries({ queryKey: ["telegram-link"] });
+                  }}
+                >
+                  Готово
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  navigator.clipboard.writeText(linkCode);
-                  toast.success("Код скопирован");
-                }}
-              >
-                Скопировать
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1 gradient-primary text-white"
-                onClick={() => {
-                  setLinkCodeOpen(false);
-                  setLinkCode(null);
-                  qc.invalidateQueries({ queryKey: ["telegram-link"] });
-                }}
-              >
-                Готово
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Reminders */}
       <div>
@@ -846,7 +870,6 @@ function SubscriptionTab() {
     "Неограниченные привычки, проекты, теги",
     "Аналитика за 90 дней",
     "Годовой хитмап привычек",
-    "AI-инсайты и рекомендации",
     "Библиотека шаблонов программ",
     "Приоритетная поддержка",
   ];

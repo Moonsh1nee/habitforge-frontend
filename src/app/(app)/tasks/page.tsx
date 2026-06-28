@@ -257,8 +257,8 @@ function TasksPageInner() {
   const { data: projects = [] } = useProjects();
   const { data: allTags = [] } = useTags();
 
-  useEffect(() => { setProjectId(urlProjectId); }, [urlProjectId]);   // eslint-disable-line
-  useEffect(() => { setTagId(urlTagId); }, [urlTagId]);               // eslint-disable-line
+  useEffect(() => { setProjectId(urlProjectId); }, [urlProjectId]);
+  useEffect(() => { setTagId(urlTagId); }, [urlTagId]);
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);

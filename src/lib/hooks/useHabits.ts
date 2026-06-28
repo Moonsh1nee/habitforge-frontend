@@ -25,6 +25,7 @@ export function useHabitStats(id: string) {
     queryKey: ["habits", id, "stats"],
     queryFn: () => habitsApi.getStats(id),
     enabled: !!id,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
