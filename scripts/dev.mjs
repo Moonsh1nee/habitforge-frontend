@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import { spawn } from "child_process";
+import { resolve } from "path";
 
 function readEnvPort(file) {
   try {
@@ -11,12 +12,12 @@ function readEnvPort(file) {
   }
 }
 
-const port = readEnvPort(".env.local") ?? readEnvPort(".env") ?? "3000";
-
+// process.env.PORT (Docker / CLI) beats .env files
+const port = process.env.PORT ?? readEnvPort(".env.local") ?? readEnvPort(".env") ?? "3200";
+const nextBin = resolve("node_modules", "next", "dist", "bin", "next");
 const [, , ...extraArgs] = process.argv;
-const child = spawn(
-  "npx",
-  ["next", "dev", "--port", port, ...extraArgs],
-  { stdio: "inherit", shell: true }
-);
+
+const child = spawn(process.execPath, [nextBin, "dev", "--port", port, ...extraArgs], {
+  stdio: "inherit",
+});
 child.on("exit", (code) => process.exit(code ?? 0));
