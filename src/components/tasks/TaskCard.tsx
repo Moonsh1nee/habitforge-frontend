@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onEdit }: TaskCardProps) {
+  const router = useRouter();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const [justCompleted, setJustCompleted] = useState(false);
@@ -129,13 +131,14 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
 
             {/* Tags */}
             {(task.tags ?? []).map((tag) => (
-              <span
+              <button
                 key={tag.id}
-                className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                onClick={(e) => { e.stopPropagation(); router.push(`/tasks?tag_id=${tag.id}`); }}
+                className="text-[10px] px-1.5 py-0.5 rounded-full border hover:opacity-70 transition-opacity cursor-pointer"
                 style={{ color: tag.color, borderColor: `${tag.color}40`, background: `${tag.color}12` }}
               >
                 {tag.name}
-              </span>
+              </button>
             ))}
           </div>
         </div>

@@ -192,9 +192,9 @@ function DayColumn({ date, tasks, onAdd, onTaskClick }: {
           ))}
         </div>
         {tasks.length === 0 && (
-          <div className="flex items-center justify-center h-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Plus size={13} className="text-muted" />
-          </div>
+          <p className="text-xs text-muted/30 text-center mt-4 pointer-events-none select-none">
+            Нет задач
+          </p>
         )}
       </div>
     </div>

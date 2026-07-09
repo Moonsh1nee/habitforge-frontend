@@ -410,7 +410,7 @@ export default function NutritionPage() {
 
   const { data: summary, isFetching: summaryFetching } = useNutritionSummary(selectedDate);
   const { data: logs = [], isFetching: logsFetching } = useNutritionLogs(selectedDate);
-  const { data: plans = [] } = useNutritionPlans(activeTab === "plans");
+  const { data: plans = [] } = useNutritionPlans(true);
   const deleteLog = useDeleteNutritionLog();
   const [deleteLogConfirmId, setDeleteLogConfirmId] = useState<string | null>(null);
   const isFetching = summaryFetching || logsFetching;
@@ -421,6 +421,16 @@ export default function NutritionPage() {
         { name: "Углеводы", value: summary.total_carbs ?? 0, color: MACRO_COLORS[2] },
         { name: "Жиры", value: summary.total_fat ?? 0, color: MACRO_COLORS[3] },
       ]
+    : [];
+
+  const activePlan = plans[0] ?? null;
+  const planBars = activePlan
+    ? [
+        { label: "Калории", value: summary?.total_calories ?? 0, target: activePlan.targetCalories, color: MACRO_COLORS[0] },
+        { label: "Белки", value: summary?.total_protein ?? 0, target: activePlan.targetProtein, color: MACRO_COLORS[1] },
+        { label: "Углеводы", value: summary?.total_carbs ?? 0, target: activePlan.targetCarbs, color: MACRO_COLORS[2] },
+        { label: "Жиры", value: summary?.total_fat ?? 0, target: activePlan.targetFat, color: MACRO_COLORS[3] },
+      ].filter((b) => b.target && b.target > 0)
     : [];
 
   return (
@@ -495,7 +505,8 @@ export default function NutritionPage() {
           </div>
 
           {summary && (
-            <GlassCard className="flex flex-col sm:flex-row items-center gap-6">
+            <GlassCard className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="w-40 h-40 shrink-0">
                 <PieChart width={160} height={160}>
                   <Pie
@@ -539,6 +550,30 @@ export default function NutritionPage() {
                   </div>
                 ))}
               </div>
+            </div>
+            {planBars.length > 0 && (
+              <div className="border-t border-border pt-4 space-y-2">
+                {planBars.map((bar) => (
+                  <div key={bar.label}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted">{bar.label}</span>
+                      <span style={{ color: bar.color }}>
+                        {Math.round(bar.value)} / {bar.target}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          background: bar.color,
+                          width: `${Math.min(100, (bar.value / bar.target!) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             </GlassCard>
           )}
 

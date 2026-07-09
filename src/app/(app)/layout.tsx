@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -12,7 +13,20 @@ import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
   useRealtimeEvents();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.code === "KeyN") { e.preventDefault(); router.push("/tasks?create=1"); }
+      if (e.code === "KeyH") { e.preventDefault(); router.push("/habits?create=1"); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [router]);
 
   return (
     <>

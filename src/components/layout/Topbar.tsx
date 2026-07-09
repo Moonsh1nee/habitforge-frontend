@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, User, LogOut, ChevronDown, Keyboard } from "lucide-react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -17,6 +18,78 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// ─── Keyboard shortcuts hint ──────────────────────────────────────────────────
+
+const SHORTCUTS = [
+  { keys: ["N"], description: "Новая задача" },
+  { keys: ["H"], description: "Новая привычка" },
+  { keys: ["Ctrl", "K"], description: "Поиск" },
+  { keys: ["?"], description: "Горячие клавиши" },
+];
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex items-center justify-center min-w-[1.6rem] h-6 px-1.5 rounded-md text-xs font-mono bg-white/8 border border-white/15 text-muted">
+      {children}
+    </kbd>
+  );
+}
+
+function ShortcutsHelp() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      if (e.code === "Slash" && e.shiftKey) { e.preventDefault(); setOpen(true); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Горячие клавиши"
+        className="p-1.5 text-muted hover:text-text hover:bg-white/5 rounded-lg transition-colors"
+      >
+        <Keyboard size={16} />
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Горячие клавиши</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            {SHORTCUTS.map(({ keys, description }) => (
+              <div key={description} className="flex items-center justify-between">
+                <span className="text-sm text-muted">{description}</span>
+                <div className="flex items-center gap-1">
+                  {keys.map((k, i) => (
+                    <span key={k} className="flex items-center gap-1">
+                      {i > 0 && <span className="text-muted/40 text-xs">+</span>}
+                      <Kbd>{k}</Kbd>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -47,6 +120,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
       <div className="flex items-center gap-2">
         <GlobalSearch />
+        <ShortcutsHelp />
 
         {user && (
           <DropdownMenu>

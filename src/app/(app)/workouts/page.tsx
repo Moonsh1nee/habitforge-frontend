@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
-  Plus, Dumbbell, Clock, Pencil, Trash2, ChevronDown, ChevronUp,
+  Plus, Dumbbell, Clock, Pencil, Trash2, ChevronDown, ChevronUp, Loader2,
 } from "lucide-react";
 import {
   useWorkoutPlans, useWorkoutPlan, useWorkoutLogs, useWorkoutLog,
@@ -236,7 +236,7 @@ function LogCard({ log }: { log: WorkoutLog }) {
   const updateLogEx = useUpdateLogExercise();
   const deleteLogEx = useDeleteLogExercise();
 
-  const { data: fullLog } = useWorkoutLog(expanded ? log.id : "");
+  const { data: fullLog, isLoading: exercisesLoading } = useWorkoutLog(expanded ? log.id : "");
   const exercises = fullLog?.exercises ?? [];
 
   return (
@@ -280,7 +280,11 @@ function LogCard({ log }: { log: WorkoutLog }) {
           Упражнения {exercises.length > 0 && `(${exercises.length})`}
         </p>
 
-        {exercises.length > 0 && (
+        {exercisesLoading ? (
+          <div className="flex justify-center py-3">
+            <Loader2 size={16} className="animate-spin text-muted" />
+          </div>
+        ) : exercises.length > 0 && (
           <div className="space-y-2">
             {exercises.map((ex) =>
               editExId === ex.id ? (
@@ -341,7 +345,7 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
   const updatePlanEx = useUpdatePlanExercise();
   const deletePlanEx = useDeletePlanExercise();
 
-  const { data: fullPlan } = useWorkoutPlan(expanded ? plan.id : "");
+  const { data: fullPlan, isLoading: exercisesLoading } = useWorkoutPlan(expanded ? plan.id : "");
   const exercises = fullPlan?.exercises ?? [];
 
   return (
@@ -372,7 +376,11 @@ function PlanCard({ plan }: { plan: WorkoutPlan }) {
           Упражнения {exercises.length > 0 && `(${exercises.length})`}
         </p>
 
-        {exercises.length > 0 && (
+        {exercisesLoading ? (
+          <div className="flex justify-center py-3">
+            <Loader2 size={16} className="animate-spin text-muted" />
+          </div>
+        ) : exercises.length > 0 && (
           <div className="space-y-2">
             {exercises.map((ex) =>
               editExId === ex.id ? (

@@ -242,6 +242,7 @@ function TasksPageInner() {
   const searchParams = useSearchParams();
   const urlProjectId: string | undefined = searchParams.get("project_id") ?? undefined;
   const urlTagId: string | undefined = searchParams.get("tag_id") ?? undefined;
+  const urlCreate = searchParams.get("create");
 
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | undefined>(undefined);
   const [projectId, setProjectId] = useState<string | undefined>(urlProjectId);
@@ -259,6 +260,7 @@ function TasksPageInner() {
 
   useEffect(() => { setProjectId(urlProjectId); }, [urlProjectId]);
   useEffect(() => { setTagId(urlTagId); }, [urlTagId]);
+  useEffect(() => { if (urlCreate === "1") setCreateOpen(true); }, [urlCreate]);
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);

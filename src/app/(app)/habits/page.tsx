@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Repeat2, CheckCircle2, Flame } from "lucide-react";
 import { motion } from "motion/react";
 import { useHabits, useLogHabit, useDeleteHabit, useFreezeHabit } from "@/lib/hooks/useHabits";
@@ -30,10 +31,15 @@ const container = {
 };
 const item = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
-export default function HabitsPage() {
+function HabitsPageInner() {
   const [formOpen, setFormOpen] = useState(false);
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("create") === "1") setFormOpen(true);
+  }, [searchParams]);
 
   const logHabit = useLogHabit();
   const deleteHabit = useDeleteHabit();
@@ -197,5 +203,13 @@ export default function HabitsPage() {
         </SheetContent>
       </Sheet>
     </div>
+  );
+}
+
+export default function HabitsPage() {
+  return (
+    <Suspense>
+      <HabitsPageInner />
+    </Suspense>
   );
 }
