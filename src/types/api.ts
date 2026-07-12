@@ -357,6 +357,47 @@ export interface FinanceSummary {
   by_category:        CategorySummary[];
 }
 
+// ─── Shopping ────────────────────────────────────────────────────────────────
+
+export type ShoppingListStatus = "active" | "completed" | "cancelled";
+
+export interface ShoppingList {
+  id:            string;
+  name:          string;
+  store:         string | null;
+  plannedDate:   string | null;
+  plannedTime:   string | null;
+  status:        ShoppingListStatus;
+  notes:         string | null;
+  transactionId: string | null;
+  totalPlanned:  number;
+  totalActual:   number;
+  itemsCount:    number;
+  itemsChecked:  number;
+  createdAt:     string;
+  updatedAt:     string;
+}
+
+export interface ShoppingItem {
+  id:           string;
+  listId:       string;
+  name:         string;
+  quantity:     number;
+  unit:         string | null;
+  plannedPrice: number | null;
+  actualPrice:  number | null;
+  categoryId:   string | null;
+  checked:      boolean;
+  sortOrder:    number;
+  notes:        string | null;
+  createdAt:    string;
+  updatedAt:    string;
+}
+
+export interface ShoppingListWithItems extends ShoppingList {
+  items: ShoppingItem[];
+}
+
 // ─── Goals ───────────────────────────────────────────────────────────────────
 
 export type GoalCategory =

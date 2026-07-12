@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
   Apple, BookOpen, User, Zap, Wallet, CalendarDays,
-  BarChart2, CheckCircle2, ListTodo, Sparkles, Target,
+  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -25,6 +25,7 @@ const navItems = [
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
   { href: "/finance", icon: Wallet, label: "Финансы" },
+  { href: "/shopping", icon: ShoppingCart, label: "Покупки" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
   { href: "/upgrade", icon: Sparkles, label: "Pro", highlight: true },
   { href: "/profile", icon: User, label: "Профиль" },
