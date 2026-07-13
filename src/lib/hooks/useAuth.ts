@@ -48,7 +48,7 @@ export function useRegister() {
     }) => authApi.register(email, password, username, firstName),
     onSuccess: (data) => {
       setUser(data.user);
-      router.push("/dashboard");
+      router.push(data.user.onboardingCompleted ? "/dashboard" : "/onboarding");
     },
     onError: () => toast.error("Ошибка регистрации. Попробуйте снова."),
   });

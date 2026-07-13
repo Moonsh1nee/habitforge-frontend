@@ -14,6 +14,21 @@ import { useDashboardToday } from "@/lib/hooks/useDashboard";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { FolderOpen } from "lucide-react";
 import { PomodoroSidebarSection } from "@/components/layout/PomodoroWidget";
+import { useOnboardingStore } from "@/lib/stores/onboardingStore";
+
+// module key → href (пустая строка = всегда видно)
+const MODULE_MAP: Record<string, string> = {
+  "/tasks":     "tasks",
+  "/calendar":  "tasks",   // calendar идёт вместе с tasks
+  "/habits":    "habits",
+  "/goals":     "",         // всегда
+  "/stats":     "stats",
+  "/workouts":  "workouts",
+  "/nutrition": "nutrition",
+  "/finance":   "finance",
+  "/shopping":  "shopping",
+  "/journal":   "journal",
+};
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
@@ -86,6 +101,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { data: today } = useDashboardToday();
   const overdueCount = today?.tasks_overdue?.length ?? 0;
+  const { modules } = useOnboardingStore();
+
+  const visibleItems = navItems.filter(({ href }) => {
+    const moduleKey = MODULE_MAP[href];
+    // нет в карте (dashboard, upgrade, profile) → всегда видно
+    if (moduleKey === undefined) return true;
+    // пустая строка → всегда видно
+    if (moduleKey === "") return true;
+    return modules.includes(moduleKey as never);
+  });
 
   return (
     <>
@@ -97,7 +122,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-        {navItems.map(({ href, icon: Icon, label, highlight }) => {
+        {visibleItems.map(({ href, icon: Icon, label, highlight }) => {
           const active = pathname.startsWith(href);
           const showBadge = href === "/tasks" && overdueCount > 0;
           return (

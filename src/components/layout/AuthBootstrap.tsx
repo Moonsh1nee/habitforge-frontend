@@ -18,8 +18,9 @@ export function AuthBootstrap() {
     if (isSuccess && data) {
       setUser(data);
       setPlan(data.plan ?? "free");
+      if (!data.onboardingCompleted) router.replace("/onboarding");
     }
-  }, [isSuccess, data, setUser, setPlan]);
+  }, [isSuccess, data, setUser, setPlan, router]);
 
   useEffect(() => {
     if (isError) {

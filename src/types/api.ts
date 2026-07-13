@@ -11,6 +11,7 @@ export interface User {
   isActive: boolean;
   plan: "free" | "pro";
   role: "user" | "admin";
+  onboardingCompleted: boolean;
   createdAt: string;
   updatedAt: string;
 }
