@@ -37,6 +37,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { usePlan } from "@/lib/hooks/usePlan";
+import { LimitBadge } from "@/components/shared/LimitBadge";
 import { cn } from "@/lib/utils";
 import type { Task, TaskPriority, Project } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
@@ -96,6 +98,9 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
 function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { data: projects = [] } = useProjects();
   const create = useCreateProject();
+  const { isAtLimit, getLimit } = usePlan();
+  const atProjectLimit = isAtLimit("projects", projects.length);
+  const projectLimit = getLimit("projects");
   const update = useUpdateProject();
   const del = useDeleteProject();
 
@@ -214,22 +219,34 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
 
         {/* Create form */}
         <div className="border-t border-border pt-4 space-y-3">
-          <p className="text-xs text-muted font-medium uppercase tracking-wide">Новый проект</p>
-          <Input
-            placeholder="Название проекта"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          />
-          <ColorPicker value={newColor} onChange={setNewColor} />
-          <Button
-            onClick={handleCreate}
-            disabled={!newName.trim() || create.isPending}
-            className="gradient-primary text-white w-full gap-2"
-          >
-            <Plus size={14} />
-            Создать проект
-          </Button>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted font-medium uppercase tracking-wide">Новый проект</p>
+            <LimitBadge current={projects.length} max={projectLimit} label="проектов" />
+          </div>
+          {atProjectLimit ? (
+            <p className="text-xs text-muted text-center py-2">
+              Лимит {projectLimit} проектов на Free.{" "}
+              <a href="/upgrade" className="text-primary hover:underline">Перейти на Pro →</a>
+            </p>
+          ) : (
+            <>
+              <Input
+                placeholder="Название проекта"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+              />
+              <ColorPicker value={newColor} onChange={setNewColor} />
+              <Button
+                onClick={handleCreate}
+                disabled={!newName.trim() || create.isPending}
+                className="gradient-primary text-white w-full gap-2"
+              >
+                <Plus size={14} />
+                Создать проект
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
