@@ -7,6 +7,7 @@ import {
   Lock,
   MessageSquare,
   Database,
+  LayoutGrid,
   Loader2,
   Upload,
   Plus,
@@ -60,6 +61,7 @@ import {
 } from "@/components/ui/select";
 import { cn, formatDate } from "@/lib/utils";
 import { usePlan } from "@/lib/hooks/usePlan";
+import { useOnboardingStore, MODULES as MODULE_LIST, type AppModule } from "@/lib/stores/onboardingStore";
 import type { User as UserType } from "@/types";
 import type { AxiosError } from "axios";
 
@@ -972,16 +974,74 @@ function SubscriptionTab() {
   );
 }
 
+// ─── Modules Tab ─────────────────────────────────────────────────────────────
+
+function ModulesTab() {
+  const { modules, setModules } = useOnboardingStore();
+  const active = new Set(modules);
+
+  const toggle = (id: AppModule) => {
+    if (active.has(id)) {
+      if (active.size === 1) return;
+      active.delete(id);
+    } else {
+      active.add(id);
+    }
+    setModules([...active] as AppModule[]);
+    toast.success("Разделы обновлены");
+  };
+
+  return (
+    <div className="space-y-5">
+      <GlassCard className="p-5">
+        <h3 className="font-semibold text-text mb-1">Видимые разделы</h3>
+        <p className="text-sm text-muted mb-5">Скрытые разделы не удаляются — данные сохраняются.</p>
+        <div className="grid grid-cols-2 gap-3">
+          {MODULE_LIST.map(({ id, label, desc, icon: Icon, color }) => {
+            const on = active.has(id);
+            return (
+              <button
+                key={id}
+                onClick={() => toggle(id)}
+                className={cn(
+                  "relative p-4 rounded-2xl border text-left transition-all duration-200",
+                  on
+                    ? "border-primary/40 bg-primary/8"
+                    : "border-border bg-white/3 hover:bg-white/6 hover:border-white/15 opacity-50"
+                )}
+              >
+                {on && (
+                  <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <Check size={9} className="text-white" />
+                  </div>
+                )}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2.5"
+                  style={{ background: `${color}18` }}>
+                  <Icon size={18} style={{ color }} />
+                </div>
+                <p className="text-sm font-semibold text-text leading-tight">{label}</p>
+                <p className="text-[11px] text-muted mt-0.5 leading-snug">{desc}</p>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted mt-4">Выбрано: {active.size} из {MODULE_LIST.length}</p>
+      </GlassCard>
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-type SettingsTab = "profile" | "security" | "telegram" | "data" | "subscription";
+type SettingsTab = "profile" | "security" | "telegram" | "modules" | "data" | "subscription";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
-  { id: "profile", label: "Профиль", icon: User },
-  { id: "security", label: "Безопасность", icon: Lock },
-  { id: "telegram", label: "Telegram", icon: MessageSquare },
-  { id: "data", label: "Данные", icon: Database },
-  { id: "subscription", label: "Подписка", icon: CreditCard },
+  { id: "profile",      label: "Профиль",      icon: User },
+  { id: "security",     label: "Безопасность", icon: Lock },
+  { id: "modules",      label: "Разделы",      icon: LayoutGrid },
+  { id: "telegram",     label: "Telegram",     icon: MessageSquare },
+  { id: "data",         label: "Данные",       icon: Database },
+  { id: "subscription", label: "Подписка",     icon: CreditCard },
 ];
 
 export default function ProfilePage() {
@@ -1051,10 +1111,11 @@ export default function ProfilePage() {
 
         {/* Content — fills remaining space */}
         <div className="flex-1 min-w-0">
-          {activeTab === "profile" && <ProfileTab user={user} />}
-          {activeTab === "security" && <SecurityTab />}
-          {activeTab === "telegram" && <TelegramTab />}
-          {activeTab === "data" && <DataTab user={user} />}
+          {activeTab === "profile"      && <ProfileTab user={user} />}
+          {activeTab === "security"     && <SecurityTab />}
+          {activeTab === "modules"      && <ModulesTab />}
+          {activeTab === "telegram"     && <TelegramTab />}
+          {activeTab === "data"         && <DataTab user={user} />}
           {activeTab === "subscription" && <SubscriptionTab />}
         </div>
       </div>
