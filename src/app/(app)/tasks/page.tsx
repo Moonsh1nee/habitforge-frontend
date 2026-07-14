@@ -2,15 +2,18 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Search, ArrowUp, ArrowDown, X, FolderOpen, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, ArrowUp, ArrowDown, X, FolderOpen, Pencil, Trash2, List, LayoutGrid, Grid2x2 } from "lucide-react";
 import { useTasks } from "@/lib/hooks/useTasks";
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/lib/hooks/useProjects";
 import { useTags } from "@/lib/hooks/useTags";
 import { TaskList } from "@/components/tasks/TaskList";
+import { KanbanView } from "@/components/tasks/KanbanView";
+import { MatrixView } from "@/components/tasks/MatrixView";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormDialog } from "@/components/shared/FormDialog";
+import { useTaskViewStore } from "@/lib/stores/taskViewStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -255,11 +258,54 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
 
 // ─── Tasks page ───────────────────────────────────────────────────────────────
 
+function ViewSwitcher() {
+  const { view, setView, kanbanGroupBy, setKanbanGroupBy } = useTaskViewStore();
+  return (
+    <div className="flex items-center gap-1">
+      {([
+        { id: "list",   Icon: List,       title: "Список" },
+        { id: "kanban", Icon: LayoutGrid, title: "Канбан" },
+        { id: "matrix", Icon: Grid2x2,    title: "Матрица" },
+      ] as const).map(({ id, Icon, title }) => (
+        <button
+          key={id}
+          title={title}
+          onClick={() => setView(id)}
+          className={cn(
+            "h-8 w-8 flex items-center justify-center rounded-md border transition-all",
+            view === id
+              ? "border-primary/60 bg-primary/10 text-primary"
+              : "border-border bg-white/5 text-muted hover:text-text hover:border-primary/30"
+          )}
+        >
+          <Icon size={15} />
+        </button>
+      ))}
+      {view === "kanban" && (
+        <Select
+          value={kanbanGroupBy}
+          onValueChange={(v) => v && setKanbanGroupBy(v as "project" | "priority")}
+        >
+          <SelectTrigger size="sm" className="w-36 ml-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="project">По проектам</SelectItem>
+            <SelectItem value="priority">По приоритету</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+  );
+}
+
 function TasksPageInner() {
   const searchParams = useSearchParams();
   const urlProjectId: string | undefined = searchParams.get("project_id") ?? undefined;
   const urlTagId: string | undefined = searchParams.get("tag_id") ?? undefined;
   const urlCreate = searchParams.get("create");
+
+  const { view, kanbanGroupBy } = useTaskViewStore();
 
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | undefined>(undefined);
   const [projectId, setProjectId] = useState<string | undefined>(urlProjectId);
@@ -316,7 +362,7 @@ function TasksPageInner() {
   };
 
   return (
-    <div className="max-w-3xl space-y-5">
+    <div className={cn("space-y-5", view !== "kanban" && "max-w-3xl")}>
       <PageHeader
         title={activeProject ? activeProject.name : "Задачи"}
         subtitle={`${data?.total ?? 0} задач всего`}
@@ -393,6 +439,7 @@ function TasksPageInner() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <ViewSwitcher />
           {/* Tag filter select */}
           {allTags.length > 0 && (
             <Select value={tagId ?? "all"} onValueChange={(v) => setTagId(!v || v === "all" ? undefined : v)}>
@@ -443,6 +490,10 @@ function TasksPageInner() {
 
       {isLoading ? (
         <ListSkeleton count={5} />
+      ) : view === "kanban" ? (
+        <KanbanView tasks={tasks} groupBy={kanbanGroupBy} onEdit={setEditTask} onCreateClick={() => setCreateOpen(true)} />
+      ) : view === "matrix" ? (
+        <MatrixView tasks={tasks} onEdit={setEditTask} />
       ) : (
         <TaskList tasks={tasks} onEdit={setEditTask} onCreateClick={() => setCreateOpen(true)} isDndEnabled={orderBy === "createdAt"} />
       )}
