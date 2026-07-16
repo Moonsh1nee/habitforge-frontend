@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -199,7 +199,7 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       <Button
         type="submit"
         disabled={isPending}
-        className="w-full gradient-primary text-white font-semibold"
+        className="w-full bg-primary text-white font-semibold"
       >
         {isPending && <Loader2 size={16} className="animate-spin mr-2" />}
         {habit ? "Сохранить" : "Создать привычку"}

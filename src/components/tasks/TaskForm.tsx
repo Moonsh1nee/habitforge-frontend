@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -267,7 +267,7 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
         </div>
       </div>
 
-      <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white font-semibold">
+      <Button type="submit" disabled={isPending} className="w-full bg-primary text-white font-semibold">
         {isPending && <Loader2 size={16} className="animate-spin mr-2" />}
         {task ? "Сохранить" : "Создать задачу"}
       </Button>

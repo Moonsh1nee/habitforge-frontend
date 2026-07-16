@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Plus, Target, Trash2, Pencil, CheckCircle2, Archive } from "lucide-react";
@@ -165,7 +165,7 @@ function GoalForm({
         <Input {...register("due_date")} type="date" />
       </div>
 
-      <Button type="submit" disabled={isPending} className="gradient-primary text-white w-full">
+      <Button type="submit" disabled={isPending} className="bg-primary text-white w-full">
         {goal ? "Сохранить" : "Создать цель"}
       </Button>
     </form>
@@ -206,7 +206,7 @@ function ProgressForm({ goal, onClose }: { goal: Goal; onClose: () => void }) {
         <Label>Заметка <span className="text-muted text-xs">(опционально)</span></Label>
         <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Пробежал 5 км сегодня" />
       </div>
-      <Button type="submit" disabled={addProgress.isPending} className="gradient-primary text-white w-full">
+      <Button type="submit" disabled={addProgress.isPending} className="bg-primary text-white w-full">
         Обновить прогресс
       </Button>
     </form>
@@ -350,7 +350,7 @@ export default function GoalsPage() {
         title="Цели"
         subtitle={`${goals.length} ${status === "active" ? "активных" : status === "completed" ? "выполненных" : "в архиве"}`}
         action={
-          <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white gap-2">
+          <Button onClick={() => setFormOpen(true)} className="bg-primary text-white gap-2">
             <Plus size={16} />
             Новая цель
           </Button>
@@ -382,7 +382,7 @@ export default function GoalsPage() {
           }
           action={
             status === "active" ? (
-              <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white">
+              <Button onClick={() => setFormOpen(true)} className="bg-primary text-white">
                 Поставить цель
               </Button>
             ) : undefined

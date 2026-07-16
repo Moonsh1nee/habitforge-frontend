@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Lock, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
@@ -37,7 +37,7 @@ export function UpgradeGate({ children, locked, feature }: UpgradeGateProps) {
         </p>
         <Link
           href="/upgrade"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg gradient-primary text-white text-sm font-medium transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium transition-opacity hover:opacity-90"
         >
           <Sparkles size={13} />
           Перейти на Pro

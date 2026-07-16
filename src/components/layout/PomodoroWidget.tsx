@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -85,7 +85,7 @@ export function PomodoroSidebarSection() {
           className={cn(
             "w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0 transition-all",
             isRunning && isWork
-              ? "gradient-primary"
+              ? "bg-primary"
               : isRunning
               ? "bg-success/20"
               : "bg-white/5"
@@ -167,7 +167,7 @@ export function PomodoroSidebarSection() {
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all",
                     isWork
-                      ? "gradient-primary text-white"
+                      ? "bg-primary text-white"
                       : "bg-success/20 text-success border border-success/30 hover:bg-success/30"
                   )}
                 >

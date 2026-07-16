@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "motion/react";
@@ -63,7 +63,7 @@ function EditExerciseInline({
         <Input name="weight" type="number" min={0} step={0.5} defaultValue={exercise.weightKg ?? ""} placeholder="Кг" className="h-8 text-xs" />
       </div>
       <div className="flex gap-2 pt-1">
-        <Button type="submit" size="sm" className="gradient-primary text-white h-7 text-xs px-3">Сохранить</Button>
+        <Button type="submit" size="sm" className="bg-primary text-white h-7 text-xs px-3">Сохранить</Button>
         <button type="button" onClick={onCancel} className="text-xs text-muted hover:text-text">Отмена</button>
       </div>
     </form>
@@ -114,7 +114,7 @@ function LogForm({
         <Label>Заметки</Label>
         <Textarea name="notes" defaultValue={log?.notes ?? ""} placeholder="Как прошла тренировка?" className="resize-none" rows={3} />
       </div>
-      <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={isPending} className="w-full bg-primary text-white">
         {log ? "Сохранить" : "Записать тренировку"}
       </Button>
     </form>
@@ -176,7 +176,7 @@ function ExerciseForm({
           <Input name="weight" type="number" min={0} step={0.5} placeholder="60" className="h-9" />
         </div>
       </div>
-      <Button type="submit" disabled={isPending} size="sm" className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={isPending} size="sm" className="w-full bg-primary text-white">
         Добавить упражнение
       </Button>
     </form>
@@ -218,7 +218,7 @@ function PlanForm({ plan, onSuccess }: { plan?: WorkoutPlan; onSuccess: () => vo
           <Input name="description" defaultValue={plan?.description ?? ""} placeholder="Необязательно" />
         </div>
       </div>
-      <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={isPending} className="w-full bg-primary text-white">
         {plan ? "Сохранить" : "Создать план"}
       </Button>
     </form>
@@ -247,7 +247,7 @@ function LogCard({ log }: { log: WorkoutLog }) {
       className="glass p-4 group"
     >
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
           <Dumbbell size={18} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
@@ -452,7 +452,7 @@ export default function WorkoutsPage() {
                 Новый план
               </Button>
             )}
-            <Button onClick={() => setLogOpen(true)} className="gradient-primary text-white gap-2">
+            <Button onClick={() => setLogOpen(true)} className="bg-primary text-white gap-2">
               <Plus size={16} />
               Тренировка
             </Button>
@@ -486,7 +486,7 @@ export default function WorkoutsPage() {
               title="Нет планов"
               description="Создайте план для структурированных тренировок"
               action={
-                <Button onClick={() => setPlanOpen(true)} className="gradient-primary text-white">
+                <Button onClick={() => setPlanOpen(true)} className="bg-primary text-white">
                   Создать план
                 </Button>
               }

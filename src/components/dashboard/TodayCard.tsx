@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -77,7 +77,7 @@ export function TodayCard({ pending, overdue }: TodayCardProps) {
       {/* Progress bar */}
       <div className="h-1.5 bg-white/5 rounded-full mb-4 overflow-hidden">
         <motion.div
-          className="h-full rounded-full gradient-primary"
+          className="h-full rounded-full bg-primary"
           initial={{ width: 0 }}
           animate={{ width: `${Math.max(4, (justDone.size / total) * 100)}%` }}
           transition={{ type: "spring", stiffness: 80, damping: 20 }}

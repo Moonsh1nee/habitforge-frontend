@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +47,7 @@ export default function RegisterPage() {
       className="glass p-8"
     >
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gradient mb-2">HabitForge</h1>
+        <h1 className="text-3xl font-bold text-primary mb-2">HabitForge</h1>
         <p className="text-muted text-sm">Создайте свой аккаунт</p>
       </div>
 
@@ -161,7 +161,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={registerMutation.isPending}
-          className="w-full gradient-primary text-white font-semibold hover:opacity-90 transition-opacity mt-2"
+          className="w-full bg-primary text-white font-semibold hover:opacity-90 transition-opacity mt-2"
         >
           {registerMutation.isPending ? (
             <Loader2 size={16} className="animate-spin mr-2" />

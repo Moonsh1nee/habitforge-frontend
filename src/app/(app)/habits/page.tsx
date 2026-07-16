@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -74,7 +74,7 @@ function HabitsPageInner() {
           <Button
             onClick={() => !atHabitLimit && setFormOpen(true)}
             disabled={atHabitLimit}
-            className="gradient-primary text-white gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="bg-primary text-white gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             title={atHabitLimit ? "Лимит достигнут — перейдите на Pro" : undefined}
           >
             <Plus size={16} />
@@ -117,7 +117,7 @@ function HabitsPageInner() {
             </span>
             <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
               <motion.div
-                className={`h-full rounded-full ${allDone ? "bg-success" : "gradient-primary"}`}
+                className={`h-full rounded-full ${allDone ? "bg-success" : "bg-primary"}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${(doneToday / totalToday) * 100}%` }}
                 transition={{ duration: 0.7 }}
@@ -135,7 +135,7 @@ function HabitsPageInner() {
           title="Нет привычек"
           description="Создайте первую привычку для отслеживания прогресса"
           action={
-            <Button onClick={() => setFormOpen(true)} className="gradient-primary text-white">
+            <Button onClick={() => setFormOpen(true)} className="bg-primary text-white">
               Создать привычку
             </Button>
           }

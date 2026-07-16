@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -118,7 +118,7 @@ export function QuickAddFab() {
           onClick={() => setOpen((v) => !v)}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
-          className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-xl glow-primary"
+          className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl glow-primary"
           aria-label="Быстрое добавление"
         >
           <motion.div animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }}>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ function StepWelcome({ name, onNext }: { name: string; onNext: () => void }) {
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
+      <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
         <Zap size={36} className="text-white" />
       </div>
       <h1 className="text-3xl font-extrabold text-text mb-3">
@@ -107,7 +107,7 @@ function StepModules({
         <Button
           onClick={onNext}
           disabled={selected.size === 0 || loading}
-          className="gradient-primary text-white gap-2 px-6"
+          className="bg-primary text-white gap-2 px-6"
         >
           {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
           Готово
@@ -148,7 +148,7 @@ function StepDone({ name, onOpen }: { name: string; onOpen: () => void }) {
       <p className="text-muted mb-8 max-w-xs mx-auto">
         Твой HabitForge настроен. Время начинать!
       </p>
-      <Button onClick={onOpen} className="gradient-primary text-white gap-2 px-8 py-3 text-base">
+      <Button onClick={onOpen} className="bg-primary text-white gap-2 px-8 py-3 text-base">
         Открыть дашборд
         <ArrowRight size={16} />
       </Button>

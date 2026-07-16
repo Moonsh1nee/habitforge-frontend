@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -110,7 +110,7 @@ function EntryForm({ date, existing }: { date: string; existing: DailyEntry | nu
         </div>
       ))}
 
-      <Button type="submit" disabled={saveEntry.isPending} className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={saveEntry.isPending} className="w-full bg-primary text-white">
         Сохранить запись
       </Button>
     </form>

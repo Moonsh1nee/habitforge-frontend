@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "motion/react";
@@ -129,7 +129,7 @@ function AddFoodForm({ date, onSuccess }: { date: string; onSuccess: () => void 
       <Button
         type="submit"
         disabled={create.isPending}
-        className="w-full gradient-primary text-white"
+        className="w-full bg-primary text-white"
       >
         Добавить
       </Button>
@@ -186,7 +186,7 @@ function PlanForm({ plan, onSuccess }: { plan?: NutritionPlan; onSuccess: () => 
           </div>
         ))}
       </div>
-      <Button type="submit" disabled={isPending} className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={isPending} className="w-full bg-primary text-white">
         {plan ? "Сохранить" : "Создать план"}
       </Button>
     </form>
@@ -270,7 +270,7 @@ function MealTemplateForm({
         <Input name="notes" defaultValue={meal?.notes ?? ""} placeholder="Необязательно" className="h-8 text-sm" />
       </div>
       <div className="flex gap-2 pt-1">
-        <Button type="submit" size="sm" disabled={isPending} className="gradient-primary text-white h-7 text-xs px-3">
+        <Button type="submit" size="sm" disabled={isPending} className="bg-primary text-white h-7 text-xs px-3">
           {meal ? "Сохранить" : "Добавить"}
         </Button>
         <button type="button" onClick={onCancel} className="text-xs text-muted hover:text-text">Отмена</button>
@@ -439,12 +439,12 @@ export default function NutritionPage() {
         title="Питание"
         action={
           activeTab === "plans" ? (
-            <Button onClick={() => setPlanOpen(true)} className="gradient-primary text-white gap-2">
+            <Button onClick={() => setPlanOpen(true)} className="bg-primary text-white gap-2">
               <Plus size={16} />
               Новый план
             </Button>
           ) : (
-            <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
+            <Button onClick={() => setAddOpen(true)} className="bg-primary text-white gap-2">
               <Plus size={16} />
               Добавить еду
             </Button>
@@ -625,7 +625,7 @@ export default function NutritionPage() {
               title="Нет планов питания"
               description="Создайте план с целями по макронутриентам и шаблонами приёмов пищи"
               action={
-                <Button onClick={() => setPlanOpen(true)} className="gradient-primary text-white">
+                <Button onClick={() => setPlanOpen(true)} className="bg-primary text-white">
                   Создать план
                 </Button>
               }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -74,7 +74,7 @@ function TodayProgress() {
           </div>
           <div className="h-1 bg-white/5 rounded-full overflow-hidden mx-1">
             <motion.div
-              className={`h-full rounded-full ${allDone ? "bg-success" : "gradient-primary"}`}
+              className={`h-full rounded-full ${allDone ? "bg-success" : "bg-primary"}`}
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{ duration: 0.6 }}
@@ -115,10 +115,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       <div className="flex items-center gap-2 px-6 py-5 border-b border-border shrink-0">
-        <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <Zap size={16} className="text-white" />
         </div>
-        <span className="font-bold text-lg text-gradient">HabitForge</span>
+        <span className="font-bold text-lg text-primary">HabitForge</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">

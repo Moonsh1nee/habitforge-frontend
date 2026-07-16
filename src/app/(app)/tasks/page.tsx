@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -160,7 +160,7 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
                     size="sm"
                     onClick={handleUpdate}
                     disabled={!editName.trim() || update.isPending}
-                    className="gradient-primary text-white"
+                    className="bg-primary text-white"
                   >
                     Сохранить
                   </Button>
@@ -243,7 +243,7 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
               <Button
                 onClick={handleCreate}
                 disabled={!newName.trim() || create.isPending}
-                className="gradient-primary text-white w-full gap-2"
+                className="bg-primary text-white w-full gap-2"
               >
                 <Plus size={14} />
                 Создать проект
@@ -376,7 +376,7 @@ function TasksPageInner() {
               <FolderOpen size={16} />
               <span className="hidden sm:inline">Проекты</span>
             </Button>
-            <Button onClick={() => setCreateOpen(true)} className="gradient-primary text-white gap-2">
+            <Button onClick={() => setCreateOpen(true)} className="bg-primary text-white gap-2">
               <Plus size={16} />
               Новая задача
             </Button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -247,7 +247,7 @@ function AddTransactionDialog({
           <Button
             type="submit"
             disabled={create.isPending}
-            className="w-full gradient-primary text-white"
+            className="w-full bg-primary text-white"
           >
             Добавить
           </Button>
@@ -361,7 +361,7 @@ function EditTransactionDialog({
           <Button
             type="submit"
             disabled={update.isPending}
-            className="w-full gradient-primary text-white"
+            className="w-full bg-primary text-white"
           >
             Сохранить
           </Button>
@@ -466,7 +466,7 @@ function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
               <Label>Цвет</Label>
               <Input name="color" type="color" defaultValue="#6366f1" className="h-10 cursor-pointer" />
             </div>
-            <Button type="submit" disabled={createCat.isPending} className="w-full gradient-primary text-white">
+            <Button type="submit" disabled={createCat.isPending} className="w-full bg-primary text-white">
               Создать
             </Button>
           </form>
@@ -493,7 +493,7 @@ function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
                 <Label>Цвет</Label>
                 <Input name="color" type="color" defaultValue={editTarget.color} className="h-10 cursor-pointer" />
               </div>
-              <Button type="submit" disabled={updateCat.isPending} className="w-full gradient-primary text-white">
+              <Button type="submit" disabled={updateCat.isPending} className="w-full bg-primary text-white">
                 Сохранить
               </Button>
             </form>
@@ -566,7 +566,7 @@ export default function FinancePage() {
         title="Финансы"
         subtitle={`${summary?.transactions_count ?? 0} транзакций`}
         action={
-          <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white gap-2">
+          <Button onClick={() => setAddOpen(true)} className="bg-primary text-white gap-2">
             <Plus size={16} />
             Добавить
           </Button>
@@ -718,7 +718,7 @@ export default function FinancePage() {
             title="Нет транзакций"
             description="Добавьте первую транзакцию"
             action={
-              <Button onClick={() => setAddOpen(true)} className="gradient-primary text-white">
+              <Button onClick={() => setAddOpen(true)} className="bg-primary text-white">
                 Добавить
               </Button>
             }

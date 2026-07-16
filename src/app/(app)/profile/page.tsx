@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -125,7 +125,7 @@ function ProfileTab({ user }: { user: UserType }) {
           className="relative group shrink-0"
           title="Изменить аватар"
         >
-          <div className="w-20 h-20 rounded-2xl overflow-hidden gradient-primary flex items-center justify-center">
+          <div className="w-20 h-20 rounded-2xl overflow-hidden bg-primary flex items-center justify-center">
             {avatarSrc ? (
               <img
                 src={avatarSrc}
@@ -223,7 +223,7 @@ function ProfileTab({ user }: { user: UserType }) {
         <Button
           type="submit"
           disabled={update.isPending}
-          className="gradient-primary text-white"
+          className="bg-primary text-white"
         >
           {update.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
           Сохранить
@@ -306,7 +306,7 @@ function SecurityTab() {
           <Button
             type="submit"
             disabled={changePassword.isPending}
-            className="gradient-primary text-white"
+            className="bg-primary text-white"
           >
             {changePassword.isPending && (
               <Loader2 size={16} className="animate-spin mr-2" />
@@ -551,7 +551,7 @@ function ReminderForm({ onSuccess }: { onSuccess: () => void }) {
         </Label>
         <Input name="cron" placeholder="0 9 * * *" className="font-mono text-sm" />
       </div>
-      <Button type="submit" disabled={create.isPending} className="w-full gradient-primary text-white">
+      <Button type="submit" disabled={create.isPending} className="w-full bg-primary text-white">
         {create.isPending && <Loader2 size={16} className="animate-spin mr-2" />}
         Создать напоминание
       </Button>
@@ -699,7 +699,7 @@ function TelegramTab() {
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 gradient-primary text-white"
+                  className="flex-1 bg-primary text-white"
                   onClick={() => {
                     setLinkCodeOpen(false);
                     setLinkCode(null);
@@ -724,7 +724,7 @@ function TelegramTab() {
           <Button
             size="sm"
             onClick={() => setReminderOpen(true)}
-            className="gradient-primary text-white gap-1.5"
+            className="bg-primary text-white gap-1.5"
           >
             <Plus size={14} />
             Добавить
@@ -828,7 +828,7 @@ function DataTab({ user }: { user: UserType }) {
             placeholder="Europe/Moscow"
             className="flex-1"
           />
-          <Button type="submit" disabled={updateTimezone.isPending} className="gradient-primary text-white">
+          <Button type="submit" disabled={updateTimezone.isPending} className="bg-primary text-white">
             Сохранить
           </Button>
         </form>
@@ -883,7 +883,7 @@ function SubscriptionTab() {
         <div className="flex items-center gap-3 mb-4">
           <div className={cn(
             "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-            isPro ? "gradient-primary" : "bg-white/8"
+            isPro ? "bg-primary" : "bg-white/8"
           )}>
             {isPro ? (
               <Sparkles size={18} className="text-white" />
@@ -915,7 +915,7 @@ function SubscriptionTab() {
               Перейдите на Pro чтобы разблокировать все возможности HabitForge.
             </p>
             <Button
-              className="gradient-primary text-white gap-2"
+              className="bg-primary text-white gap-2"
               onClick={() => router.push("/upgrade")}
             >
               <Sparkles size={15} />
@@ -1079,7 +1079,7 @@ export default function ProfilePage() {
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">
+        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">
           {user.firstName?.[0]?.toUpperCase()}
         </div>
         <div>

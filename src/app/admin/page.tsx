@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -82,7 +82,7 @@ function UserRow({ user }: { user: User }) {
 
   return (
     <div className="flex items-center gap-3 py-3 border-b border-border/50 last:border-0">
-      <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
+      <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
         {user.firstName?.[0]?.toUpperCase()}
       </div>
 

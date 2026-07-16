@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -134,7 +134,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                       className="w-8 h-8 rounded-full object-cover shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold shrink-0">
                       {user.firstName?.[0]?.toUpperCase() ?? "U"}
                     </div>
                   )}

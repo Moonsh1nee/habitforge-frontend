@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,7 +96,7 @@ function ResetPasswordForm() {
         <Button
           type="submit"
           disabled={resetPassword.isPending}
-          className="w-full gradient-primary text-white font-semibold hover:opacity-90 transition-opacity"
+          className="w-full bg-primary text-white font-semibold hover:opacity-90 transition-opacity"
         >
           {resetPassword.isPending ? (
             <Loader2 size={16} className="animate-spin mr-2" />

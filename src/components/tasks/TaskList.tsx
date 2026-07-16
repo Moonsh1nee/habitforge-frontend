@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -127,7 +127,7 @@ export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: 
         description="Создайте первую задачу и начните отслеживать прогресс"
         action={
           onCreateClick ? (
-            <Button onClick={onCreateClick} className="gradient-primary text-white gap-2">
+            <Button onClick={onCreateClick} className="bg-primary text-white gap-2">
               <Plus size={16} />
               Создать задачу
             </Button>

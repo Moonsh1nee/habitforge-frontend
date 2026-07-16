@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +32,7 @@ export default function LoginPage() {
       className="glass p-8"
     >
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gradient mb-2">HabitForge</h1>
+        <h1 className="text-3xl font-bold text-primary mb-2">HabitForge</h1>
         <p className="text-muted text-sm">Войдите в свой аккаунт</p>
       </div>
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           disabled={login.isPending}
-          className="w-full gradient-primary text-white font-semibold hover:opacity-90 transition-opacity"
+          className="w-full bg-primary text-white font-semibold hover:opacity-90 transition-opacity"
         >
           {login.isPending ? (
             <Loader2 size={16} className="animate-spin mr-2" />

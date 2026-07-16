@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Check, X, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
@@ -44,7 +44,7 @@ export function PricingCard({
     >
       {highlighted && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="gradient-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+          <span className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
             Популярный
           </span>
         </div>
@@ -78,7 +78,7 @@ export function PricingCard({
         <Button
           onClick={onUpgrade}
           disabled={isLoading}
-          className="gradient-primary text-white w-full gap-2"
+          className="bg-primary text-white w-full gap-2"
         >
           {isLoading ? (
             <Loader2 size={15} className="animate-spin" />

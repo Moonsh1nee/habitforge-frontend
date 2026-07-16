@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import {
@@ -237,7 +237,7 @@ export default function CalendarPage() {
         action={
           <Button
             onClick={() => setCreateDate(format(new Date(), "yyyy-MM-dd"))}
-            className="gradient-primary text-white gap-2"
+            className="bg-primary text-white gap-2"
           >
             <Plus size={16} />
             Новая задача

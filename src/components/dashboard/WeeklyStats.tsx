@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "motion/react";
 import { GlassCard } from "@/components/shared/GlassCard";
@@ -68,7 +68,7 @@ export function WeeklyStats({ week }: WeeklyStatsProps) {
       maxValue: week.tasks_total || 1,
       display: `${week.tasks_completed}/${week.tasks_total} (${taskRate}%)`,
       color: "violet",
-      barColor: "gradient-primary",
+      barColor: "bg-primary",
       delay: 0.05,
     },
     {
