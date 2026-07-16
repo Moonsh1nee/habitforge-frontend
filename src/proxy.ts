@@ -9,7 +9,7 @@ function isAuthenticated(req: NextRequest): boolean {
   return !!req.cookies.get(AUTH_COOKIE)?.value;
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const authed = isAuthenticated(req);
 
