@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { TOOLTIP_STYLE } from "@/lib/constants/chartStyles";
 import {
   Plus, Apple, Trash2, ChevronLeft, ChevronRight, Pencil,
   ChevronDown, ChevronUp, UtensilsCrossed,
@@ -35,10 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
 import {
   Select,
   SelectContent,
@@ -523,12 +521,7 @@ export default function NutritionPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{
-                      background: "#13131a",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      borderRadius: 8,
-                      color: "#f1f5f9",
-                    }}
+                    contentStyle={TOOLTIP_STYLE}
                   />
                 </PieChart>
               </div>
@@ -648,25 +641,13 @@ export default function NutritionPage() {
         <PlanForm onSuccess={() => setPlanOpen(false)} />
       </FormDialog>
 
-      <AlertDialog open={!!deleteLogConfirmId} onOpenChange={(o) => !o && setDeleteLogConfirmId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удалить запись питания?</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted">
-              Это действие нельзя отменить.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => { deleteLog.mutate(deleteLogConfirmId!); setDeleteLogConfirmId(null); }}
-              className="bg-danger text-white hover:bg-danger/80"
-            >
-              Удалить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={!!deleteLogConfirmId}
+        onOpenChange={(o) => !o && setDeleteLogConfirmId(null)}
+        onConfirm={() => { deleteLog.mutate(deleteLogConfirmId!); setDeleteLogConfirmId(null); }}
+        isPending={deleteLog.isPending}
+        title="Удалить запись питания?"
+      />
     </div>
   );
 }

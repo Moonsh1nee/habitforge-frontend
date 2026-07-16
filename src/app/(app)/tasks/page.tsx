@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { usePlan } from "@/lib/hooks/usePlan";
 import { LimitBadge } from "@/components/shared/LimitBadge";
+import { ColorPicker } from "@/components/shared/ColorPicker";
 import { cn } from "@/lib/utils";
 import type { Task, TaskPriority, Project } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
@@ -67,34 +68,6 @@ const PRIORITY_ACTIVE_CLASS: Record<number, string> = {
   3: "border-muted/40 text-muted bg-muted/10",
 };
 
-const PRESET_COLORS = [
-  "#7c3aed", "#8b5cf6", "#06b6d4", "#0ea5e9",
-  "#22c55e", "#f59e0b", "#f97316", "#ef4444",
-  "#ec4899", "#64748b",
-];
-
-// ─── Color picker ─────────────────────────────────────────────────────────────
-
-function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
-  return (
-    <div className="flex gap-1.5 flex-wrap">
-      {PRESET_COLORS.map((c) => (
-        <button
-          key={c}
-          type="button"
-          onClick={() => onChange(c)}
-          className={cn(
-            "w-6 h-6 rounded-full transition-all shrink-0",
-            value === c
-              ? "ring-2 ring-offset-2 ring-offset-background ring-white scale-110"
-              : "hover:scale-110"
-          )}
-          style={{ background: c }}
-        />
-      ))}
-    </div>
-  );
-}
 
 // ─── Projects manager ─────────────────────────────────────────────────────────
 
@@ -108,7 +81,7 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
   const del = useDeleteProject();
 
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+  const [newColor, setNewColor] = useState("#7c3aed");
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
@@ -117,7 +90,7 @@ function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: 
     if (!newName.trim()) return;
     create.mutate(
       { name: newName.trim(), color: newColor },
-      { onSuccess: () => { setNewName(""); setNewColor(PRESET_COLORS[0]); } }
+      { onSuccess: () => { setNewName(""); setNewColor("#7c3aed"); } }
     );
   };
 

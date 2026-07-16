@@ -38,6 +38,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
 import { cn } from "@/lib/utils";
 import type { ShoppingList, ShoppingListStatus } from "@/types";
 
@@ -684,27 +685,14 @@ function ListDetailSheet({
         />
       )}
 
-      {/* Delete confirm */}
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удалить список?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Список и все товары в нём будут удалены. Это действие нельзя отменить.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteList}
-              className="bg-danger hover:bg-danger/90"
-              disabled={deleteList.isPending}
-            >
-              Удалить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        onConfirm={handleDeleteList}
+        isPending={deleteList.isPending}
+        title="Удалить список?"
+        description="Список и все товары в нём будут удалены. Это действие нельзя отменить."
+      />
     </>
   );
 }

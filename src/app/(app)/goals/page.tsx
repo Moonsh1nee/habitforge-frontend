@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Target, Trash2, Pencil, CheckCircle2, Archive } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { staggerContainer } from "@/lib/constants/motionVariants";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
@@ -336,8 +337,6 @@ function GoalCard({ goal }: { goal: Goal }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-
 export default function GoalsPage() {
   const [status, setStatus] = useState<GoalStatus>("active");
   const [formOpen, setFormOpen] = useState(false);
@@ -390,7 +389,7 @@ export default function GoalsPage() {
         />
       ) : (
         <motion.div
-          variants={container}
+          variants={staggerContainer}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"

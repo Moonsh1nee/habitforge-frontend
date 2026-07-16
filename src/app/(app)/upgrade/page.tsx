@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { staggerContainer, fadeUpItem } from "@/lib/constants/motionVariants";
 import { Sparkles, Shield, Zap, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -38,9 +39,6 @@ const PERKS = [
   { icon: Shield, label: "Приоритет поддержки", desc: "Ответ в течение 24 часов, прямой доступ к команде" },
   { icon: Zap, label: "Всё без лимитов", desc: "Неограниченные привычки, проекты, теги и цели" },
 ];
-
-const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
-const item = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
 export default function UpgradePage() {
   const { isPro } = usePlan();
@@ -88,11 +86,11 @@ export default function UpgradePage() {
       </div>
 
       {/* Pro perks */}
-      <motion.div variants={container} initial="hidden" animate="visible">
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible">
         <h2 className="text-lg font-bold text-text mb-4 text-center">Что входит в Pro</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PERKS.map((perk) => (
-            <motion.div key={perk.label} variants={item}>
+            <motion.div key={perk.label} variants={fadeUpItem}>
               <GlassCard className="p-4 flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <perk.icon size={17} className="text-primary" />

@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { InsightCard, type Insight } from "@/components/stats/InsightCard";
+import { TOOLTIP_STYLE } from "@/lib/constants/chartStyles";
+import { staggerContainer, fadeUpItem } from "@/lib/constants/motionVariants";
 import { useJournalEntries } from "@/lib/hooks/useJournal";
 import { useWorkoutLogs } from "@/lib/hooks/useWorkouts";
 import { useHabits } from "@/lib/hooks/useHabits";
@@ -30,14 +32,6 @@ import { getTodayString } from "@/lib/utils";
 import type { Habit } from "@/types";
 
 type Period = "7" | "30" | "90";
-
-const TT_STYLE = {
-  background: "#13131a",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 8,
-  color: "#f1f5f9",
-  fontSize: 12,
-};
 
 // ─── Habit streak row ──────────────────────────────────────────────────────
 
@@ -103,8 +97,6 @@ function MetricCard({
 
 // ─── Page ─────────────────────────────────────────────────────────────────
 
-const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
-const item = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function StatsPage() {
   const { isPro } = usePlan();
@@ -368,9 +360,9 @@ export default function StatsPage() {
       )}
 
       {!isLoading && (
-      <motion.div key={period} variants={container} initial="hidden" animate="visible" className="space-y-4">
+      <motion.div key={period} variants={staggerContainer} initial="hidden" animate="visible" className="space-y-4">
         {/* Summary metrics */}
-        <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <motion.div variants={fadeUpItem} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <MetricCard icon={Heart} label="Ср. настроение" value={avgMood} suffix="/10" colorClass="text-primary" />
           <MetricCard icon={Zap} label="Ср. энергия" value={avgEnergy} suffix="/10" colorClass="text-accent" />
           <MetricCard icon={Moon} label="Ср. сон (ч)" value={avgSleep} colorClass="text-warning" />
@@ -379,7 +371,7 @@ export default function StatsPage() {
 
         {/* Mood & Energy trend */}
         {moodChartData.length > 1 && (
-          <motion.div variants={item}>
+          <motion.div variants={fadeUpItem}>
             <GlassCard>
               <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
                 <Heart size={14} className="text-primary" />
@@ -411,7 +403,7 @@ export default function StatsPage() {
                     tickLine={false}
                     axisLine={false}
                   />
-                  <Tooltip contentStyle={TT_STYLE} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
                   <Area
                     type="monotone"
                     dataKey="mood"
@@ -439,7 +431,7 @@ export default function StatsPage() {
         )}
 
         {/* Workout + Habits row */}
-        <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <motion.div variants={fadeUpItem} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Workout history */}
           <GlassCard>
             <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
@@ -463,7 +455,7 @@ export default function StatsPage() {
                     axisLine={false}
                   />
                   <Tooltip
-                    contentStyle={TT_STYLE}
+                    contentStyle={TOOLTIP_STYLE}
                     formatter={(v) => [`${v} мин`, "Длительность"]}
                   />
                   <Bar
@@ -511,7 +503,7 @@ export default function StatsPage() {
 
         {/* Journal overview */}
         {moodChartData.length === 0 && habits.length === 0 && workoutsInPeriod.length === 0 && (
-          <motion.div variants={item}>
+          <motion.div variants={fadeUpItem}>
             <GlassCard className="text-center py-12">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <BookOpen size={24} className="text-primary" />
@@ -526,7 +518,7 @@ export default function StatsPage() {
 
         {/* Weight trend */}
         {weightData.length > 1 && (
-          <motion.div variants={item}>
+          <motion.div variants={fadeUpItem}>
             <GlassCard>
               <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
                 <TrendingUp size={14} className="text-accent" />
@@ -549,7 +541,7 @@ export default function StatsPage() {
                     domain={["auto", "auto"]}
                   />
                   <Tooltip
-                    contentStyle={TT_STYLE}
+                    contentStyle={TOOLTIP_STYLE}
                     formatter={(v) => [`${v} кг`, "Вес"]}
                   />
                   <Line

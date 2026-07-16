@@ -23,13 +23,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { staggerContainer, fadeUpItem } from "@/lib/constants/motionVariants";
 import type { Habit } from "@/types";
-
-const container = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
-};
-const item = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
 function HabitsPageInner() {
   const [formOpen, setFormOpen] = useState(false);
@@ -142,13 +137,13 @@ function HabitsPageInner() {
         />
       ) : (
         <motion.div
-          variants={container}
+          variants={staggerContainer}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {habits.map((habit) => (
-            <motion.div key={habit.id} variants={item}>
+            <motion.div key={habit.id} variants={fadeUpItem}>
               <HabitCard
                 habit={habit}
                 onLog={() => logHabit.mutate({ id: habit.id })}

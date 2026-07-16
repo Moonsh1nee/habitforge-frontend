@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { TOOLTIP_STYLE } from "@/lib/constants/chartStyles";
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Pencil, X, CalendarRange,
 } from "lucide-react";
@@ -32,10 +33,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
 import { SelectOption } from "@/components/shared/SelectOption";
 import { cn, getTodayString } from "@/lib/utils";
 import type { TransactionType, FinanceCategory, FinanceTransaction } from "@/types";
@@ -658,7 +656,7 @@ export default function FinancePage() {
                 </Pie>
                 <Tooltip
                   formatter={(v) => formatAmount(v as number)}
-                  contentStyle={{ background: "#13131a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#f1f5f9" }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
               </PieChart>
               <div className="space-y-2 flex-1 min-w-0">
@@ -815,25 +813,13 @@ export default function FinancePage() {
         />
       )}
 
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удалить транзакцию?</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted">
-              Это действие нельзя отменить.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => { deleteTransaction.mutate(deleteConfirmId!); setDeleteConfirmId(null); }}
-              className="bg-danger text-white hover:bg-danger/80"
-            >
-              Удалить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={!!deleteConfirmId}
+        onOpenChange={(o) => !o && setDeleteConfirmId(null)}
+        onConfirm={() => { deleteTransaction.mutate(deleteConfirmId!); setDeleteConfirmId(null); }}
+        isPending={deleteTransaction.isPending}
+        title="Удалить транзакцию?"
+      />
     </div>
   );
 }
