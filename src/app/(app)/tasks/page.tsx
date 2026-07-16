@@ -1,15 +1,17 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Search, ArrowUp, ArrowDown, X, FolderOpen, Pencil, Trash2, List, LayoutGrid, Grid2x2 } from "lucide-react";
+import { Plus, Search, ArrowUp, ArrowDown, X, FolderOpen } from "lucide-react";
 import { useTasks } from "@/lib/hooks/useTasks";
-import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/lib/hooks/useProjects";
+import { useProjects } from "@/lib/hooks/useProjects";
 import { useTags } from "@/lib/hooks/useTags";
 import { TaskList } from "@/components/tasks/TaskList";
 import { KanbanView } from "@/components/tasks/KanbanView";
 import { MatrixView } from "@/components/tasks/MatrixView";
 import { TaskForm } from "@/components/tasks/TaskForm";
+import { ProjectsManager } from "@/components/tasks/ProjectsManager";
+import { ViewSwitcher } from "@/components/tasks/ViewSwitcher";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormDialog } from "@/components/shared/FormDialog";
@@ -23,28 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { usePlan } from "@/lib/hooks/usePlan";
-import { LimitBadge } from "@/components/shared/LimitBadge";
-import { ColorPicker } from "@/components/shared/ColorPicker";
 import { cn } from "@/lib/utils";
-import type { Task, TaskPriority, Project } from "@/types";
+import type { Task, TaskPriority } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
 
 type OrderBy = "createdAt" | "dueDate" | "priority";
@@ -67,210 +49,6 @@ const PRIORITY_ACTIVE_CLASS: Record<number, string> = {
   2: "border-accent/60 text-accent bg-accent/10",
   3: "border-muted/40 text-muted bg-muted/10",
 };
-
-
-// ─── Projects manager ─────────────────────────────────────────────────────────
-
-function ProjectsManager({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const { data: projects = [] } = useProjects();
-  const create = useCreateProject();
-  const { isAtLimit, getLimit } = usePlan();
-  const atProjectLimit = isAtLimit("projects", projects.length);
-  const projectLimit = getLimit("projects");
-  const update = useUpdateProject();
-  const del = useDeleteProject();
-
-  const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState("#7c3aed");
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editColor, setEditColor] = useState("");
-
-  const handleCreate = () => {
-    if (!newName.trim()) return;
-    create.mutate(
-      { name: newName.trim(), color: newColor },
-      { onSuccess: () => { setNewName(""); setNewColor("#7c3aed"); } }
-    );
-  };
-
-  const startEdit = (p: Project) => {
-    setEditId(p.id);
-    setEditName(p.name);
-    setEditColor(p.color);
-  };
-
-  const handleUpdate = () => {
-    if (!editId || !editName.trim()) return;
-    update.mutate(
-      { id: editId, payload: { name: editName.trim(), color: editColor } },
-      { onSuccess: () => setEditId(null) }
-    );
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Управление проектами</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
-          {projects.length === 0 ? (
-            <p className="text-sm text-muted text-center py-6">Пока нет проектов</p>
-          ) : projects.map((p) =>
-            editId === p.id ? (
-              <div key={p.id} className="space-y-3 p-3 rounded-xl bg-white/5 border border-border">
-                <Input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
-                  autoFocus
-                />
-                <ColorPicker value={editColor} onChange={setEditColor} />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={handleUpdate}
-                    disabled={!editName.trim() || update.isPending}
-                    className="bg-primary text-white"
-                  >
-                    Сохранить
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>
-                    Отмена
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                key={p.id}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 group transition-colors"
-              >
-                <div className="w-3 h-3 rounded-full shrink-0" style={{ background: p.color }} />
-                <span className="flex-1 text-sm text-text truncate">{p.name}</span>
-                {p.tasksCount > 0 && (
-                  <span className="text-xs text-muted tabular-nums shrink-0">
-                    {p.tasksDone}/{p.tasksCount}
-                  </span>
-                )}
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                  <button
-                    onClick={() => startEdit(p)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted hover:text-text hover:bg-white/5 transition-colors"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <AlertDialog>
-                    <AlertDialogTrigger
-                      render={
-                        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors">
-                          <Trash2 size={13} />
-                        </button>
-                      }
-                    />
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Удалить «{p.name}»?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Задачи в проекте не удаляются — они просто открепятся от него.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Отмена</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => del.mutate(p.id)}
-                          className="bg-danger text-white hover:bg-danger/80"
-                        >
-                          Удалить
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-
-        {/* Create form */}
-        <div className="border-t border-border pt-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted font-medium uppercase tracking-wide">Новый проект</p>
-            <LimitBadge current={projects.length} max={projectLimit} label="проектов" />
-          </div>
-          {atProjectLimit ? (
-            <p className="text-xs text-muted text-center py-2">
-              Лимит {projectLimit} проектов на Free.{" "}
-              <a href="/upgrade" className="text-primary hover:underline">Перейти на Pro →</a>
-            </p>
-          ) : (
-            <>
-              <Input
-                placeholder="Название проекта"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-              />
-              <ColorPicker value={newColor} onChange={setNewColor} />
-              <Button
-                onClick={handleCreate}
-                disabled={!newName.trim() || create.isPending}
-                className="bg-primary text-white w-full gap-2"
-              >
-                <Plus size={14} />
-                Создать проект
-              </Button>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─── Tasks page ───────────────────────────────────────────────────────────────
-
-function ViewSwitcher() {
-  const { view, setView, kanbanGroupBy, setKanbanGroupBy } = useTaskViewStore();
-  return (
-    <div className="flex items-center gap-1">
-      {([
-        { id: "list",   Icon: List,       title: "Список" },
-        { id: "kanban", Icon: LayoutGrid, title: "Канбан" },
-        { id: "matrix", Icon: Grid2x2,    title: "Матрица" },
-      ] as const).map(({ id, Icon, title }) => (
-        <button
-          key={id}
-          title={title}
-          onClick={() => setView(id)}
-          className={cn(
-            "h-8 w-8 flex items-center justify-center rounded-md border transition-all",
-            view === id
-              ? "border-primary/60 bg-primary/10 text-primary"
-              : "border-border bg-white/5 text-muted hover:text-text hover:border-primary/30"
-          )}
-        >
-          <Icon size={15} />
-        </button>
-      ))}
-      {view === "kanban" && (
-        <Select
-          value={kanbanGroupBy}
-          onValueChange={(v) => v && setKanbanGroupBy(v as "project" | "priority")}
-        >
-          <SelectTrigger size="sm" className="w-36 ml-1">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="project">По проектам</SelectItem>
-            <SelectItem value="priority">По приоритету</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-    </div>
-  );
-}
 
 function TasksPageInner() {
   const searchParams = useSearchParams();
@@ -357,7 +135,6 @@ function TasksPageInner() {
         }
       />
 
-      {/* Search */}
       <div className="relative">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <Input
@@ -373,7 +150,6 @@ function TasksPageInner() {
         )}
       </div>
 
-      {/* Active project / tag badges */}
       {(activeProject || activeTag) && (
         <div className="flex flex-wrap gap-2">
           {activeProject && (
@@ -392,7 +168,6 @@ function TasksPageInner() {
         </div>
       )}
 
-      {/* Priority chips + tag filter + sort */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 flex-wrap">
           {PRIORITY_CHIPS.map(({ label, value }) => (
@@ -413,7 +188,6 @@ function TasksPageInner() {
 
         <div className="ml-auto flex items-center gap-2">
           <ViewSwitcher />
-          {/* Tag filter select */}
           {allTags.length > 0 && (
             <Select value={tagId ?? "all"} onValueChange={(v) => setTagId(!v || v === "all" ? undefined : v)}>
               <SelectTrigger size="sm" className="w-28 sm:w-32">
