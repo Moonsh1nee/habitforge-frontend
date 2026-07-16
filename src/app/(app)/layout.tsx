@@ -9,12 +9,15 @@ import { AuthBootstrap } from "@/components/layout/AuthBootstrap";
 import { QuickAddFab } from "@/components/layout/QuickAddFab";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PomodoroTicker } from "@/components/layout/PomodoroWidget";
+import { FullPageSkeleton } from "@/components/shared/FullPageSkeleton";
 import { useRealtimeEvents } from "@/lib/hooks/useRealtimeEvents";
+import { useMe } from "@/lib/hooks/useAuth";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   useRealtimeEvents();
+  const { isPending } = useMe();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -27,6 +30,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [router]);
+
+  if (isPending) return <FullPageSkeleton />;
 
   return (
     <>

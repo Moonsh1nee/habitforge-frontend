@@ -13,4 +13,4 @@ export const journalEntrySchema = z.object({
   improvements: z.string().optional(),
 });
 
-export type JournalEntryInput = z.infer<typeof journalEntrySchema>;
+export type JournalEntryInput = z.input<typeof journalEntrySchema>;
