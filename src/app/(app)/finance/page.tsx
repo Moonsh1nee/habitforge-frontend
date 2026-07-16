@@ -1,42 +1,32 @@
-﻿"use client";
+"use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { TOOLTIP_STYLE } from "@/lib/constants/chartStyles";
+import { useState } from "react";
+import { motion } from "motion/react";
 import {
-  TrendingUp, TrendingDown, Wallet, Plus, Trash2, Pencil, X, CalendarRange,
+  TrendingUp, TrendingDown, Wallet, Plus, CalendarRange,
 } from "lucide-react";
 import {
   addDays, endOfMonth, endOfYear, format, parseISO,
   startOfMonth, startOfWeek, startOfYear,
 } from "date-fns";
-import { ru } from "date-fns/locale";
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import {
-  useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory,
-  useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction,
+  useCategories, useTransactions, useDeleteTransaction,
   useFinanceSummary,
 } from "@/lib/hooks/useFinance";
+import { CategoryManager } from "@/components/finance/CategoryManager";
+import { TransactionDialog } from "@/components/finance/TransactionDialog";
+import { TransactionList } from "@/components/finance/TransactionList";
+import { ExpensePieChart } from "@/components/finance/ExpensePieChart";
 import { GlassCard } from "@/components/shared/GlassCard";
-import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FilterTabs } from "@/components/shared/FilterTabs";
 import { StatCard } from "@/components/shared/StatCard";
-import { CardSkeleton, ListSkeleton } from "@/components/shared/LoadingSkeleton";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+import { CardSkeleton } from "@/components/shared/LoadingSkeleton";
 import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
-import { SelectOption } from "@/components/shared/SelectOption";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { cn, getTodayString } from "@/lib/utils";
-import type { TransactionType, FinanceCategory, FinanceTransaction } from "@/types";
+import type { TransactionType, FinanceTransaction } from "@/types";
 
 type Period = "day" | "week" | "month" | "year";
 type TxFilter = "all" | "income" | "expense";
@@ -62,463 +52,20 @@ function getPeriodDateRange(period: Period, refDate: string): { start: string; e
   }
 }
 
-// ─── Emoji Picker ─────────────────────────────────────────────────────────────
-
-const EMOJI_GROUPS = [
-  { label: "Финансы",      emojis: ["💰","💳","🏦","💵","🪙","📊","📈","💹","🏧","💸","🤑","💎"] },
-  { label: "Еда",          emojis: ["🍕","🍔","🍜","🍣","☕","🍺","🥗","🥐","🍱","🍎","🧃","🛒"] },
-  { label: "Транспорт",    emojis: ["🚗","✈️","🚌","🚇","🚲","🛵","⛽","🚕","🛳️","🚁"] },
-  { label: "Дом",          emojis: ["🏠","🔧","💡","🧹","🪴","🛁","🪑","🔑"] },
-  { label: "Здоровье",     emojis: ["💊","🏥","🏃","💪","🧘","🦷","🧴","❤️"] },
-  { label: "Развлечения",  emojis: ["🎮","🎬","🎵","🎭","📚","🎯","🎲","🎸"] },
-  { label: "Покупки",      emojis: ["👕","👗","👠","💄","🛍️","👒","💍","🧢"] },
-  { label: "Работа",       emojis: ["💼","🖥️","📱","🖊️","📝","🗂️","⚙️","🔬"] },
-];
-
-function EmojiPicker({
-  value,
-  onChange,
-}: {
-  value: string | null;
-  onChange: (emoji: string | null) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "w-10 h-10 rounded-xl border text-lg flex items-center justify-center transition-all",
-          open
-            ? "border-primary/50 bg-primary/10"
-            : "border-border bg-white/5 hover:border-primary/30 hover:bg-white/8"
-        )}
-      >
-        {value ?? <span className="text-muted text-sm">+</span>}
-      </button>
-
-      {open && (
-        <div className="absolute left-0 top-12 z-50 w-72 rounded-xl border border-border bg-popover/95 shadow-2xl backdrop-blur-xl p-3 space-y-3 max-h-72 overflow-y-auto scrollbar-thin">
-          {/* Clear option */}
-          <button
-            type="button"
-            onClick={() => { onChange(null); setOpen(false); }}
-            className="w-full text-left text-xs text-muted hover:text-text px-2 py-1 rounded-lg hover:bg-white/5 transition-colors"
-          >
-            Без иконки
-          </button>
-
-          {EMOJI_GROUPS.map((group) => (
-            <div key={group.label}>
-              <p className="text-[10px] text-muted uppercase tracking-wider mb-1.5 px-1">{group.label}</p>
-              <div className="grid grid-cols-8 gap-0.5">
-                {group.emojis.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => { onChange(emoji); setOpen(false); }}
-                    className={cn(
-                      "w-8 h-8 rounded-lg text-base flex items-center justify-center transition-all hover:bg-white/10",
-                      value === emoji && "bg-primary/20 ring-1 ring-primary/50"
-                    )}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Add Transaction Dialog ───────────────────────────────────────────────────
-
-function AddTransactionDialog({
-  open,
-  onClose,
-  categories,
-}: {
-  open: boolean;
-  onClose: () => void;
-  categories: FinanceCategory[];
-}) {
-  const [type, setType] = useState<TransactionType>("expense");
-  const create = useCreateTransaction();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    create.mutate(
-      {
-        type,
-        amount: Number(fd.get("amount")),
-        date: (fd.get("date") as string) || getTodayString(),
-        description: (fd.get("description") as string) || undefined,
-        categoryId: (fd.get("categoryId") as string) || null,
-      },
-      { onSuccess: onClose }
-    );
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Новая транзакция</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            {(["income", "expense"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setType(t)}
-                className={cn(
-                  "py-2.5 rounded-xl text-sm font-medium border transition-all",
-                  type === t
-                    ? t === "income"
-                      ? "bg-success/15 border-success/50 text-success"
-                      : "bg-danger/15 border-danger/50 text-danger"
-                    : "border-border text-muted hover:text-text"
-                )}
-              >
-                {t === "income" ? "↑ Доход" : "↓ Расход"}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Сумма</Label>
-            <Input
-              name="amount"
-              type="number"
-              min={0}
-              step={0.01}
-              required
-              placeholder="0.00"
-              className="text-lg"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Категория</Label>
-            <Select name="categoryId">
-              <SelectTrigger>
-                <SelectValue placeholder="Без категории" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Без категории</SelectItem>
-                {categories.map((c) => (
-                  <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Описание</Label>
-            <Input name="description" placeholder="Необязательно" />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Дата</Label>
-            <DatePicker name="date" defaultValue={getTodayString()} />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={create.isPending}
-            className="w-full bg-primary text-white"
-          >
-            Добавить
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─── Edit Transaction Dialog ──────────────────────────────────────────────────
-
-function EditTransactionDialog({
-  transaction,
-  onClose,
-  categories,
-}: {
-  transaction: FinanceTransaction;
-  onClose: () => void;
-  categories: FinanceCategory[];
-}) {
-  const [type, setType] = useState<TransactionType>(transaction.type);
-  const update = useUpdateTransaction();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    update.mutate(
-      {
-        id: transaction.id,
-        payload: {
-          type,
-          amount: Number(fd.get("amount")),
-          date: (fd.get("date") as string) || getTodayString(),
-          description: (fd.get("description") as string) || undefined,
-          categoryId: (fd.get("categoryId") as string) || null,
-        },
-      },
-      { onSuccess: onClose }
-    );
-  };
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Редактировать транзакцию</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            {(["income", "expense"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setType(t)}
-                className={cn(
-                  "py-2.5 rounded-xl text-sm font-medium border transition-all",
-                  type === t
-                    ? t === "income"
-                      ? "bg-success/15 border-success/50 text-success"
-                      : "bg-danger/15 border-danger/50 text-danger"
-                    : "border-border text-muted hover:text-text"
-                )}
-              >
-                {t === "income" ? "↑ Доход" : "↓ Расход"}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Сумма</Label>
-            <Input
-              name="amount"
-              type="number"
-              min={0}
-              step={0.01}
-              required
-              defaultValue={transaction.amount}
-              className="text-lg"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Категория</Label>
-            <Select name="categoryId" defaultValue={transaction.categoryId ?? ""}>
-              <SelectTrigger>
-                <SelectValue placeholder="Без категории" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Без категории</SelectItem>
-                {categories.map((c) => (
-                  <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Описание</Label>
-            <Input
-              name="description"
-              placeholder="Необязательно"
-              defaultValue={transaction.description ?? ""}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Дата</Label>
-            <DatePicker name="date" defaultValue={transaction.date} />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={update.isPending}
-            className="w-full bg-primary text-white"
-          >
-            Сохранить
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─── Category Manager ─────────────────────────────────────────────────────────
-
-function CategoryManager({ categories }: { categories: FinanceCategory[] }) {
-  const [addOpen, setAddOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<FinanceCategory | null>(null);
-  const [addIcon, setAddIcon] = useState<string | null>(null);
-  const [editIcon, setEditIcon] = useState<string | null>(null);
-  const createCat = useCreateCategory();
-  const updateCat = useUpdateCategory();
-  const deleteCat = useDeleteCategory();
-
-  const handleOpenEdit = (cat: FinanceCategory) => {
-    setEditTarget(cat);
-    setEditIcon(cat.icon);
-  };
-
-  const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    createCat.mutate(
-      { name: fd.get("name") as string, icon: addIcon, color: fd.get("color") as string },
-      { onSuccess: () => { setAddOpen(false); setAddIcon(null); } }
-    );
-  };
-
-  const handleEdit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editTarget) return;
-    const fd = new FormData(e.currentTarget);
-    updateCat.mutate(
-      { id: editTarget.id, payload: { name: fd.get("name") as string, icon: editIcon, color: fd.get("color") as string } },
-      { onSuccess: () => setEditTarget(null) }
-    );
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted font-medium uppercase tracking-wide">Категории</p>
-        <button
-          onClick={() => setAddOpen(true)}
-          className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-        >
-          <Plus size={12} />
-          Добавить
-        </button>
-      </div>
-
-      {categories.length === 0 && (
-        <p className="text-xs text-muted py-2">Нет категорий</p>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-border group text-sm"
-          >
-            <div
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ background: cat.color }}
-            />
-            {cat.icon && <span className="text-xs">{cat.icon}</span>}
-            <span className="text-text/80 text-xs">{cat.name}</span>
-            <div className="hidden group-hover:flex items-center gap-0.5 ml-1">
-              <button onClick={() => handleOpenEdit(cat)} aria-label="Редактировать категорию" className="text-muted hover:text-primary transition-colors">
-                <Pencil size={11} />
-              </button>
-              <button onClick={() => deleteCat.mutate(cat.id)} aria-label="Удалить категорию" className="text-muted hover:text-danger transition-colors">
-                <X size={11} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add dialog */}
-      <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setAddIcon(null); } }}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Новая категория</DialogTitle></DialogHeader>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-2">
-                <Label>Название</Label>
-                <Input name="name" required placeholder="Еда" />
-              </div>
-              <div className="space-y-2">
-                <Label>Иконка</Label>
-                <EmojiPicker value={addIcon} onChange={setAddIcon} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Цвет</Label>
-              <Input name="color" type="color" defaultValue="#6366f1" className="h-10 cursor-pointer" />
-            </div>
-            <Button type="submit" disabled={createCat.isPending} className="w-full bg-primary text-white">
-              Создать
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit dialog */}
-      <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Редактировать категорию</DialogTitle></DialogHeader>
-          {editTarget && (
-            <form onSubmit={handleEdit} className="space-y-4">
-              <div className="flex items-end gap-3">
-                <div className="flex-1 space-y-2">
-                  <Label>Название</Label>
-                  <Input name="name" required defaultValue={editTarget.name} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Иконка</Label>
-                  <EmojiPicker value={editIcon} onChange={setEditIcon} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Цвет</Label>
-                <Input name="color" type="color" defaultValue={editTarget.color} className="h-10 cursor-pointer" />
-              </div>
-              <Button type="submit" disabled={updateCat.isPending} className="w-full bg-primary text-white">
-                Сохранить
-              </Button>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function FinancePage() {
   const [period, setPeriod] = useState<Period>("month");
   const [summaryMode, setSummaryMode] = useState<SummaryMode>("period");
   const [rangeStart, setRangeStart] = useState(getTodayString());
   const [rangeEnd, setRangeEnd] = useState(getTodayString());
-
   const [txFilter, setTxFilter] = useState<TxFilter>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
-  const resetLimit = () => setTxLimit(50);
-
   const [addOpen, setAddOpen] = useState(false);
   const [editTx, setEditTx] = useState<FinanceTransaction | null>(null);
   const [txLimit, setTxLimit] = useState(50);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const today = getTodayString();
+  const resetLimit = () => setTxLimit(50);
 
   const summaryParams =
     summaryMode === "range"
@@ -540,9 +87,11 @@ export default function FinancePage() {
     limit: txLimit,
   });
   const deleteTransaction = useDeleteTransaction();
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
   const hasMore = transactions.length >= txLimit;
-  const loadMore = () => setTxLimit((n) => n + 50);
+
+  const formatAmount = (n: number) =>
+    new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(n);
 
   const chartData = (summary?.by_category ?? [])
     .filter((c) => c.type === "expense" && c.total > 0)
@@ -551,12 +100,6 @@ export default function FinancePage() {
       value: c.total,
       color: c.categoryColor ?? "#6366f1",
     }));
-
-  const formatAmount = (n: number) =>
-    new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(n);
-
-  const getCategoryForTx = (categoryId: string | null) =>
-    categories.find((c) => c.id === categoryId) ?? null;
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -571,12 +114,11 @@ export default function FinancePage() {
         }
       />
 
-      {/* Period / Range toggle */}
       <div className="flex items-center gap-3 flex-wrap">
         {summaryMode === "period" ? (
           <FilterTabs
             value={period}
-            onChange={(v) => { setPeriod(v); resetLimit(); }}
+            onChange={(v) => { setPeriod(v as Period); resetLimit(); }}
             options={(Object.keys(PERIOD_LABELS) as Period[]).map((p) => ({
               value: p,
               label: PERIOD_LABELS[p],
@@ -584,20 +126,9 @@ export default function FinancePage() {
           />
         ) : (
           <div className="flex items-center gap-2">
-            <DatePicker
-              value={rangeStart}
-              onChange={setRangeStart}
-              max={rangeEnd}
-              className="w-44"
-            />
+            <DatePicker value={rangeStart} onChange={setRangeStart} max={rangeEnd} className="w-44" />
             <span className="text-muted text-sm">—</span>
-            <DatePicker
-              value={rangeEnd}
-              onChange={setRangeEnd}
-              min={rangeStart}
-              max={today}
-              className="w-44"
-            />
+            <DatePicker value={rangeEnd} onChange={setRangeEnd} min={rangeStart} max={today} className="w-44" />
           </div>
         )}
         <button
@@ -614,13 +145,16 @@ export default function FinancePage() {
         </button>
       </div>
 
-      {/* Summary cards */}
       {loadingSummary ? (
         <div className="grid grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => <CardSkeleton key={i} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-3 gap-4"
+        >
           <StatCard label="Доходы" value={summary?.total_income ?? 0} icon={<TrendingUp size={18} />} color="text-success" bg="bg-success/10" suffix=" ₽" />
           <StatCard label="Расходы" value={summary?.total_expense ?? 0} icon={<TrendingDown size={18} />} color="text-danger" bg="bg-danger/10" suffix=" ₽" />
           <StatCard
@@ -631,185 +165,44 @@ export default function FinancePage() {
             bg={(summary?.balance ?? 0) >= 0 ? "bg-success/10" : "bg-danger/10"}
             suffix=" ₽"
           />
-        </div>
+        </motion.div>
       )}
 
-      {/* Chart + categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GlassCard>
-          <h3 className="font-semibold text-text mb-4">Расходы по категориям</h3>
-          {chartData.length > 0 ? (
-            <div className="flex items-center gap-6">
-              <PieChart width={180} height={180}>
-                <Pie
-                  data={chartData}
-                  cx={90}
-                  cy={90}
-                  innerRadius={50}
-                  outerRadius={80}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {chartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(v) => formatAmount(v as number)}
-                  contentStyle={TOOLTIP_STYLE}
-                />
-              </PieChart>
-              <div className="space-y-2 flex-1 min-w-0">
-                {chartData.slice(0, 5).map((item) => (
-                  <div key={item.name} className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: item.color }} />
-                      <span className="text-xs text-text/80 truncate">{item.name}</span>
-                    </div>
-                    <span className="text-xs text-danger shrink-0">{formatAmount(item.value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted text-center py-8">Нет расходов за период</p>
-          )}
-        </GlassCard>
-
+        <ExpensePieChart data={chartData} formatAmount={formatAmount} />
         <GlassCard>
           <CategoryManager categories={categories} />
         </GlassCard>
       </div>
 
-      {/* Transactions */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <FilterTabs
-            value={txFilter}
-            onChange={(v) => { setTxFilter(v); resetLimit(); }}
-            options={[
-              { value: "all", label: "Все" },
-              { value: "income", label: "Доходы" },
-              { value: "expense", label: "Расходы" },
-            ]}
-          />
+      <TransactionList
+        transactions={transactions}
+        categories={categories}
+        isLoading={loadingTx}
+        txFilter={txFilter}
+        onTxFilterChange={(v) => { setTxFilter(v); resetLimit(); }}
+        catFilter={catFilter}
+        onCatFilterChange={(v) => { setCatFilter(v); resetLimit(); }}
+        hasMore={hasMore}
+        onLoadMore={() => setTxLimit((n) => n + 50)}
+        onEdit={setEditTx}
+        onDelete={setDeleteConfirmId}
+        onAddClick={() => setAddOpen(true)}
+        formatAmount={formatAmount}
+      />
 
-          {/* Category filter */}
-          <Select value={catFilter} onValueChange={(v) => { setCatFilter(v ?? "all"); resetLimit(); }}>
-            <SelectTrigger className="w-48" size="sm">
-              <SelectValue placeholder="Все категории" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все категории</SelectItem>
-              {categories.map((c) => (
-                <SelectOption key={c.id} value={c.id} label={c.name} icon={c.icon} color={c.color} />
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <TransactionDialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        categories={categories}
+      />
 
-        {loadingTx ? (
-          <ListSkeleton count={4} />
-        ) : transactions.length === 0 ? (
-          <EmptyState
-            icon={<Wallet />}
-            title="Нет транзакций"
-            description="Добавьте первую транзакцию"
-            action={
-              <Button onClick={() => setAddOpen(true)} className="bg-primary text-white">
-                Добавить
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-2">
-            <AnimatePresence initial={false}>
-              {transactions.map((tx, i) => {
-                const cat = getCategoryForTx(tx.categoryId);
-                const isIncome = tx.type === "income";
-                return (
-                  <motion.div
-                    key={tx.id}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ delay: i * 0.02 }}
-                    className={cn("glass p-4 flex items-center gap-3 group border-l-2", isIncome ? "border-l-success/60" : "border-l-danger/60")}
-                  >
-                    {/* Category icon */}
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg"
-                      style={{ background: cat ? `${cat.color}22` : "rgba(255,255,255,0.05)" }}
-                    >
-                      {cat?.icon ? (
-                        <span>{cat.icon}</span>
-                      ) : (
-                        <Wallet size={18} className="text-muted" />
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text truncate">
-                        {tx.description ?? cat?.name ?? (isIncome ? "Доход" : "Расход")}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        {cat && (
-                          <span className="text-xs text-muted">{cat.name}</span>
-                        )}
-                        <span className="text-xs text-muted">
-                          {format(new Date(tx.date), "d MMM", { locale: ru })}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Amount + actions */}
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-sm font-semibold", isIncome ? "text-success" : "text-danger")}>
-                        {isIncome ? "+" : "-"}{formatAmount(tx.amount)}
-                      </span>
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setEditTx(tx)}
-                          aria-label="Редактировать транзакцию"
-                          className="text-muted hover:text-primary transition-colors p-1"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(tx.id)}
-                          aria-label="Удалить транзакцию"
-                          className="text-muted hover:text-danger transition-colors p-1"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            {hasMore && (
-              <button
-                onClick={loadMore}
-                disabled={loadingTx}
-                className="w-full mt-2 py-2.5 text-sm text-muted hover:text-primary border border-border hover:border-primary/40 rounded-xl transition-all"
-              >
-                {loadingTx ? "Загрузка..." : "Загрузить ещё"}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      <AddTransactionDialog open={addOpen} onClose={() => setAddOpen(false)} categories={categories} />
       {editTx && (
-        <EditTransactionDialog
-          transaction={editTx}
+        <TransactionDialog
+          open
           onClose={() => setEditTx(null)}
           categories={categories}
+          transaction={editTx}
         />
       )}
 
