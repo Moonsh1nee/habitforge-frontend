@@ -71,7 +71,7 @@ src/
 │   │   ├── login/page.tsx
 │   │   └── register/page.tsx
 │   ├── (app)/               ← защищённые маршруты
-│   │   ├── layout.tsx       ← Sidebar + Topbar + PageTransition + PomodoroTicker
+│   │   ├── layout.tsx       ← Sidebar + Topbar + PageTransition + PomodoroTicker + FullPageSkeleton
 │   │   ├── dashboard/page.tsx
 │   │   ├── tasks/page.tsx
 │   │   ├── habits/page.tsx
@@ -79,44 +79,69 @@ src/
 │   │   ├── nutrition/page.tsx
 │   │   ├── journal/page.tsx
 │   │   ├── finance/page.tsx
+│   │   ├── shopping/page.tsx
 │   │   ├── stats/page.tsx
 │   │   ├── calendar/page.tsx
+│   │   ├── goals/page.tsx
+│   │   ├── upgrade/page.tsx
+│   │   ├── achievements/page.tsx
+│   │   ├── onboarding/page.tsx
+│   │   ├── admin/page.tsx
 │   │   └── profile/page.tsx
 │   ├── layout.tsx           ← root: Providers + Geist font + dark class
 │   ├── page.tsx             ← redirect → /dashboard
 │   ├── globals.css          ← @theme {} + .glass + animations
 │   └── Providers.tsx        ← QueryClientProvider + Sonner Toaster
+├── middleware.ts            ← Edge: refresh_token cookie → protect (app)/* routes
 ├── components/
 │   ├── ui/                  ← shadcn генерирует сюда (не трогать вручную)
 │   ├── layout/
 │   │   ├── Sidebar.tsx      ← motion layoutId + PomodoroSidebarSection + ProjectsSection
 │   │   ├── Topbar.tsx
+│   │   ├── AuthBootstrap.tsx ← fetches /users/me, syncs user+plan to stores, redirects
 │   │   ├── PageTransition.tsx ← AnimatePresence по pathname
 │   │   ├── QuickAddFab.tsx  ← плавающая кнопка быстрого создания
 │   │   ├── GlobalSearch.tsx ← Ctrl/⌘K поиск
 │   │   └── PomodoroWidget.tsx ← экспортирует PomodoroTicker (null-render, в layout) + PomodoroSidebarSection (UI, в Sidebar)
 │   ├── dashboard/           ← TodayCard, HabitProgressRing, MacroBar, WeeklyStats
-│   ├── tasks/               ← TaskCard (subtasks, project, tags), TaskList (DnD), TaskForm
+│   ├── tasks/               ← TaskCard (subtasks, project, tags), TaskList (DnD), TaskForm, ProjectsManager, ViewSwitcher
 │   ├── habits/              ← HabitCard (freeze btn), HabitForm, HabitCalendar
-│   └── shared/              ← GlassCard, AnimatedNumber, ProgressRing, EmptyState, LoadingSkeleton
+│   ├── workouts/            ← LogCard, PlanCard, LogForm, PlanForm, ExerciseForm
+│   ├── finance/             ← EmojiPicker, CategoryManager, TransactionDialog, TransactionList, ExpensePieChart
+│   ├── nutrition/           ← AddFoodForm, NutritionPlanForm, MealTemplateForm, NutritionPlanCard
+│   ├── shopping/            ← ShoppingListCard, ListFormDialog, CompleteDialog, AddItemForm, ListDetailSheet, helpers.ts
+│   ├── profile/             ← ProfileTab, SecurityTab, PushNotificationsCard, TelegramReminderForm, TelegramTab, DataTab, SubscriptionTab, ModulesTab
+│   ├── stats/               ← MetricCard, HabitStreakRow, MoodEnergyChart, WorkoutHistoryChart, WeightTrendChart
+│   ├── billing/             ← PricingCard, FeatureComparisonTable, UpgradePrompt
+│   ├── gamification/        ← XpBar, AchievementCard, AchievementGrid
+│   ├── goals/               ← GoalCard, GoalForm
+│   └── shared/              ← GlassCard, AnimatedNumber, ProgressRing, EmptyState, LoadingSkeleton, FullPageSkeleton, ConfirmDeleteDialog, ColorPicker, PageHeader, FormDialog, FilterTabs, SelectOption, CollapsibleBody, StatCard
 ├── lib/
 │   ├── api/
-│   │   ├── client.ts        ← Axios instance + Bearer interceptor + 401 refresh
+│   │   ├── client.ts        ← Axios instance + withCredentials:true + 401 refresh (cookie-based)
 │   │   ├── auth.ts, tasks.ts, habits.ts, workouts.ts
-│   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts
+│   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts, finance.ts, shopping.ts
 │   │   ├── projects.ts      ← CRUD /projects
 │   │   ├── tags.ts          ← CRUD /tags + POST /tasks/{id}/tags
+│   │   ├── telegram.ts      ← bot link + reminders
 │   │   └── push.ts          ← VAPID key + subscribe /push/*
-│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags
+│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, useNutrition, useShopping, usePlan, useWorkouts, useInsights
 │   ├── stores/
-│   │   ├── authStore.ts     ← Zustand + persist ("habitforge-auth" в localStorage)
-│   │   └── pomodoroStore.ts ← Zustand: phase, timeLeft, selectedTaskId, sessionCount
-│   ├── schemas/             ← Zod v4 схемы (auth, task, habit, journal)
-│   └── utils.ts             ← cn(), formatDate(), getGreeting(), getPriorityColor()
+│   │   ├── authStore.ts     ← Zustand + persist (user объект; cookies держат сессию)
+│   │   ├── pomodoroStore.ts ← Zustand: phase, timeLeft, selectedTaskId, sessionCount
+│   │   ├── planStore.ts     ← Zustand: plan ("free"|"pro"), limits
+│   │   ├── taskViewStore.ts ← Zustand: viewMode (list/kanban/matrix), kanbanGroupBy
+│   │   └── onboardingStore.ts ← Zustand + persist: modules[], setModules, MODULES const
+│   ├── constants/
+│   │   ├── chartStyles.ts   ← TOOLTIP_STYLE для Recharts
+│   │   └── motionVariants.ts ← staggerContainer, fadeUpItem
+│   ├── schemas/             ← Zod v4 схемы; всегда z.input<> для типов форм (не z.infer)
+│   └── utils.ts             ← cn(), formatDate(), getGreeting(), getPriorityColor(), getTodayString()
 ├── types/
-│   └── api.ts               ← все TypeScript-типы (User, Task, Habit, Project, Tag, ...)
+│   └── api.ts               ← все TypeScript-типы (User, Task, Habit, Project, Tag, FoodLog, DailySummary, ShoppingList, ...)
 └── public/
-    └── sw.js                ← Service Worker для Web Push уведомлений
+    ├── sw.js                ← Service Worker для Web Push уведомлений
+    └── icon.svg             ← логотип (используется в sw.js для уведомлений)
 ```
 
 ## Pomodoro — архитектура
@@ -233,11 +258,13 @@ const value = data?.nested?.field ?? 0;
 ```
 
 ## Auth-флоу
-1. `useAuthStore` (Zustand + persist) хранит `accessToken`, `refreshToken`, `user` в localStorage под ключом `habitforge-auth`
-2. Axios interceptor в `client.ts` автоматически добавляет `Authorization: Bearer <token>` к каждому запросу
-3. При 401 — interceptor делает `POST /auth/refresh`, обновляет токены и повторяет запрос
-4. При ошибке refresh — `clear()` + redirect на `/login`
-5. Нет middleware для защиты роутов — при желании добавить `middleware.ts` в корень `src/`
+1. Сессия хранится в HTTP-only cookies (устанавливаются бэкендом при логине/регистрации)
+2. `useAuthStore` (Zustand + persist) хранит только объект `user` (не токены — они в cookies)
+3. `Axios` настроен с `withCredentials: true` — браузер автоматически передаёт cookies
+4. При 401 — interceptor делает `POST /auth/refresh` (тоже с cookies) и повторяет запрос
+5. При ошибке refresh — `clear()` + redirect на `/login`
+6. `AuthBootstrap` в app layout вызывает `GET /users/me` при старте — синхронизирует user+plan в stores
+7. `src/middleware.ts` — Edge-middleware проверяет cookie `refresh_token`: защищённые роуты без cookie → `/login`
 
 ## Переменные окружения
 ```bash
