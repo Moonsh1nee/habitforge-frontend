@@ -2,6 +2,12 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
 
+function clearAuthSentinel() {
+  if (typeof document !== "undefined") {
+    document.cookie = "auth_ok=; path=/; max-age=0";
+  }
+}
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export const mediaUrl = (path: string | null | undefined): string | null =>
   path ? `${API_URL}${path}` : null;
@@ -64,6 +70,7 @@ api.interceptors.response.use(
       } catch {
         refreshPromise = null;
         useAuthStore.getState().clear();
+        clearAuthSentinel();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

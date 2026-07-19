@@ -23,7 +23,7 @@ export function useMe() {
 function setAuthSentinel() {
   document.cookie = "auth_ok=1; path=/; SameSite=Lax; max-age=86400";
 }
-function clearAuthSentinel() {
+export function clearAuthSentinel() {
   document.cookie = "auth_ok=; path=/; max-age=0";
 }
 

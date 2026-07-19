@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMe } from "@/lib/hooks/useAuth";
+import { useMe, clearAuthSentinel } from "@/lib/hooks/useAuth";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { usePlanStore } from "@/lib/stores/planStore";
 
@@ -25,6 +25,7 @@ export function AuthBootstrap() {
   useEffect(() => {
     if (isError) {
       clear();
+      clearAuthSentinel();
       router.replace("/login");
     }
   }, [isError, clear, router]);
