@@ -25,6 +25,7 @@ api.interceptors.response.use(
       const data = error.response.data;
       if (data?.code === "PLAN_LIMIT_REACHED") {
         const labels: Record<string, string> = {
+          tasks:    "задач",
           habits:   "привычек",
           projects: "проектов",
           tags:     "тегов",
