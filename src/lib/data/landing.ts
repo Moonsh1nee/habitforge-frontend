@@ -26,7 +26,7 @@ export const FREE_FEATURES = [
   { label: "Аналитика за 7 дней",  included: true  },
   { label: "Задачи и журнал",      included: true  },
   { label: "Тренировки и питание", included: true  },
-  { label: "Telegram-бот",         included: true  },
+  { label: "Push-уведомления",     included: true  },
   { label: "Годовой хитмап",       included: false },
   { label: "Шаблоны программ",     included: false },
 ];
@@ -37,7 +37,7 @@ export const PRO_FEATURES = [
   { label: "Аналитика за 90 дней",   included: true },
   { label: "Задачи и журнал",        included: true },
   { label: "Тренировки и питание",   included: true },
-  { label: "Telegram-бот",           included: true },
+  { label: "Push-уведомления",       included: true },
   { label: "Годовой хитмап",         included: true },
   { label: "Шаблоны программ",       included: true },
 ];

@@ -311,15 +311,6 @@ export interface SearchResponse {
   query: string;
 }
 
-// ─── Telegram ─────────────────────────────────────────────────────────────────
-
-export interface TelegramLink {
-  chatId: number;
-  username: string | null;
-  isActive: boolean;
-  linkedAt: string;
-}
-
 // ─── Finance ──────────────────────────────────────────────────────────────────
 
 export type TransactionType = "income" | "expense";

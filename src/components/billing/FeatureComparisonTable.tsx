@@ -12,7 +12,6 @@ const rows: { label: string; free: string | boolean; pro: string | boolean }[] =
   { label: "Шаблоны привычек/тренировок", free: false, pro: true },
   { label: "Экспорт данных", free: true, pro: true },
   { label: "PWA / мобильный доступ", free: true, pro: true },
-  { label: "Telegram-бот", free: true, pro: true },
   { label: "Push-уведомления", free: true, pro: true },
   { label: "Приоритетная поддержка", free: false, pro: true },
 ];
