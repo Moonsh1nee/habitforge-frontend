@@ -2,26 +2,24 @@
 
 import React, { useState } from "react";
 import {
-  User, Lock, MessageSquare, Database, LayoutGrid, CreditCard,
+  User, Lock, Database, LayoutGrid, CreditCard,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useMe } from "@/lib/hooks/useAuth";
 import { ProfileTab } from "@/components/profile/ProfileTab";
 import { SecurityTab } from "@/components/profile/SecurityTab";
-import { TelegramTab } from "@/components/profile/TelegramTab";
 import { DataTab } from "@/components/profile/DataTab";
 import { SubscriptionTab } from "@/components/profile/SubscriptionTab";
 import { ModulesTab } from "@/components/profile/ModulesTab";
 import { CardSkeleton } from "@/components/shared/LoadingSkeleton";
 import { cn } from "@/lib/utils";
 
-type SettingsTab = "profile" | "security" | "telegram" | "modules" | "data" | "subscription";
+type SettingsTab = "profile" | "security" | "modules" | "data" | "subscription";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: "profile",      label: "Профиль",      icon: User },
   { id: "security",     label: "Безопасность", icon: Lock },
   { id: "modules",      label: "Разделы",      icon: LayoutGrid },
-  { id: "telegram",     label: "Telegram",     icon: MessageSquare },
   { id: "data",         label: "Данные",       icon: Database },
   { id: "subscription", label: "Подписка",     icon: CreditCard },
 ];
@@ -92,7 +90,6 @@ export default function ProfilePage() {
           {activeTab === "profile"      && <ProfileTab user={user} />}
           {activeTab === "security"     && <SecurityTab />}
           {activeTab === "modules"      && <ModulesTab />}
-          {activeTab === "telegram"     && <TelegramTab />}
           {activeTab === "data"         && <DataTab user={user} />}
           {activeTab === "subscription" && <SubscriptionTab />}
         </div>

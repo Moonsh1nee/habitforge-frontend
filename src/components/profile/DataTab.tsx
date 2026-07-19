@@ -9,6 +9,7 @@ import { usersApi } from "@/lib/api/users";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PushNotificationsCard } from "./PushNotificationsCard";
 import type { User } from "@/types";
 
 export function DataTab({ user }: { user: User }) {
@@ -48,6 +49,8 @@ export function DataTab({ user }: { user: User }) {
 
   return (
     <div className="space-y-5">
+      <PushNotificationsCard />
+
       <GlassCard>
         <h3 className="font-semibold text-text mb-4">Часовой пояс</h3>
         <form onSubmit={handleTimezoneSubmit} className="flex gap-3">

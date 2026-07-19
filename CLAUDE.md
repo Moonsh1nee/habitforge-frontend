@@ -92,7 +92,7 @@ src/
 │   ├── page.tsx             ← redirect → /dashboard
 │   ├── globals.css          ← @theme {} + .glass + animations
 │   └── Providers.tsx        ← QueryClientProvider + Sonner Toaster
-├── middleware.ts            ← Edge: refresh_token cookie → protect (app)/* routes
+├── proxy.ts                 ← Edge: auth_ok sentinel cookie → protect (app)/* routes
 ├── components/
 │   ├── ui/                  ← shadcn генерирует сюда (не трогать вручную)
 │   ├── layout/
@@ -110,7 +110,7 @@ src/
 │   ├── finance/             ← EmojiPicker, CategoryManager, TransactionDialog, TransactionList, ExpensePieChart
 │   ├── nutrition/           ← AddFoodForm, NutritionPlanForm, MealTemplateForm, NutritionPlanCard
 │   ├── shopping/            ← ShoppingListCard, ListFormDialog, CompleteDialog, AddItemForm, ListDetailSheet, helpers.ts
-│   ├── profile/             ← ProfileTab, SecurityTab, PushNotificationsCard, TelegramReminderForm, TelegramTab, DataTab, SubscriptionTab, ModulesTab
+│   ├── profile/             ← ProfileTab, SecurityTab, PushNotificationsCard, DataTab, SubscriptionTab, ModulesTab
 │   ├── stats/               ← MetricCard, HabitStreakRow, MoodEnergyChart, WorkoutHistoryChart, WeightTrendChart
 │   ├── billing/             ← PricingCard, FeatureComparisonTable, UpgradePrompt
 │   ├── gamification/        ← XpBar, AchievementCard, AchievementGrid
@@ -123,7 +123,6 @@ src/
 │   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts, finance.ts, shopping.ts
 │   │   ├── projects.ts      ← CRUD /projects
 │   │   ├── tags.ts          ← CRUD /tags + POST /tasks/{id}/tags
-│   │   ├── telegram.ts      ← bot link + reminders
 │   │   └── push.ts          ← VAPID key + subscribe /push/*
 │   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, useNutrition, useShopping, usePlan, useWorkouts, useInsights
 │   ├── stores/
@@ -264,7 +263,7 @@ const value = data?.nested?.field ?? 0;
 4. При 401 — interceptor делает `POST /auth/refresh` (тоже с cookies) и повторяет запрос
 5. При ошибке refresh — `clear()` + redirect на `/login`
 6. `AuthBootstrap` в app layout вызывает `GET /users/me` при старте — синхронизирует user+plan в stores
-7. `src/middleware.ts` — Edge-middleware проверяет cookie `refresh_token`: защищённые роуты без cookie → `/login`
+7. `src/proxy.ts` — Edge-middleware проверяет sentinel cookie `auth_ok`: защищённые роуты без cookie → `/login`
 
 ## Переменные окружения
 ```bash
@@ -300,4 +299,4 @@ uvicorn src.main:app --reload
 | Стрик-заморозка | `POST /habits/{id}/freeze` |
 | Push-уведомления | `GET /push/vapid-key`, `POST /push/subscribe`, `DELETE /push/unsubscribe` |
 
-Service worker регистрируется в `src/app/(app)/profile/page.tsx` при включении push-уведомлений. Файл `public/sw.js` обрабатывает `push` event и `notificationclick`.
+Service worker регистрируется в `PushNotificationsCard` (в табе "Данные" профиля) при включении push-уведомлений. Файл `public/sw.js` обрабатывает `push` event и `notificationclick`.
