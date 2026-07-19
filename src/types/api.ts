@@ -16,6 +16,14 @@ export interface User {
   updatedAt: string;
 }
 
+// ─── Integrations ─────────────────────────────────────────────────────────────
+
+export interface GoogleCalendarStatus {
+  connected: boolean;
+  calendarId?: string;
+  lastSyncedAt?: string;
+}
+
 export interface AuthResponse {
   user: User;
 }

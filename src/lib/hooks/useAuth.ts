@@ -17,6 +17,16 @@ export function useMe() {
   });
 }
 
+// The backend sets auth tokens as HttpOnly cookies on its own port.
+// Browsers don't share HttpOnly cookies across ports on localhost, so we set a
+// plain sentinel cookie from the frontend domain that the proxy can read.
+function setAuthSentinel() {
+  document.cookie = "auth_ok=1; path=/; SameSite=Lax; max-age=86400";
+}
+function clearAuthSentinel() {
+  document.cookie = "auth_ok=; path=/; max-age=0";
+}
+
 export function useLogin() {
   const router = useRouter();
   const { setUser } = useAuthStore();
@@ -25,6 +35,7 @@ export function useLogin() {
       authApi.login(email, password),
     onSuccess: (data) => {
       setUser(data.user);
+      setAuthSentinel();
       router.push("/dashboard");
     },
     onError: () => toast.error("Неверный email или пароль"),
@@ -48,6 +59,7 @@ export function useRegister() {
     }) => authApi.register(email, password, username, firstName),
     onSuccess: (data) => {
       setUser(data.user);
+      setAuthSentinel();
       router.push(data.user.onboardingCompleted ? "/dashboard" : "/onboarding");
     },
     onError: () => toast.error("Ошибка регистрации. Попробуйте снова."),
@@ -61,6 +73,7 @@ export function useLogout() {
     mutationFn: authApi.logout,
     onSettled: () => {
       clear();
+      clearAuthSentinel();
       router.push("/login");
     },
   });

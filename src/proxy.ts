@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// The HTTP-only cookie name set by the backend on login/refresh.
-// Update this if the backend uses a different name.
-const AUTH_COOKIE = "refresh_token";
+// "auth_ok" is a plain (non-HttpOnly) sentinel cookie set by the frontend after login.
+// The backend's HttpOnly "access_token" is port-isolated on localhost and not visible
+// to Next.js proxy, so we use this sentinel instead. It carries no secret — only "1".
+const AUTH_SENTINEL = "auth_ok";
 
 function isAuthenticated(req: NextRequest): boolean {
-  return !!req.cookies.get(AUTH_COOKIE)?.value;
+  return !!req.cookies.get(AUTH_SENTINEL)?.value;
 }
 
 export function proxy(req: NextRequest) {
@@ -21,7 +22,8 @@ export function proxy(req: NextRequest) {
       pathname.startsWith("/stats") || pathname.startsWith("/calendar") ||
       pathname.startsWith("/profile") || pathname.startsWith("/goals") ||
       pathname.startsWith("/achievements") || pathname.startsWith("/upgrade") ||
-      pathname.startsWith("/onboarding") || pathname.startsWith("/admin")) {
+      pathname.startsWith("/onboarding") || pathname.startsWith("/admin") ||
+      pathname.startsWith("/settings")) {
     if (!authed) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
