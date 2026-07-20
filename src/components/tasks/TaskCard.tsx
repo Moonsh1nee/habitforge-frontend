@@ -3,17 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown } from "lucide-react";
+import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown, MessageSquare, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
 import { useUpdateTask, useDeleteTask } from "@/lib/hooks/useTasks";
 import { SubtaskList } from "./SubtaskList";
-import type { Task } from "@/types";
+import { TaskComments } from "./TaskComments";
+import type { Task, TaskStatus } from "@/types";
 
 const PRIORITY_ACCENT: Record<number, string> = {
   1: "border-l-danger",
   2: "border-l-warning",
   3: "border-l-muted/30",
+};
+
+const STATUS_BADGE: Partial<Record<TaskStatus, { label: string; className: string }>> = {
+  in_progress: { label: "В работе",     className: "bg-accent/10 text-accent border-accent/30" },
+  review:      { label: "На проверке",  className: "bg-warning/10 text-warning border-warning/30" },
+  cancelled:   { label: "Отменено",     className: "bg-muted/10 text-muted border-muted/20" },
 };
 
 interface TaskCardProps {
@@ -27,6 +34,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
   const deleteTask = useDeleteTask();
   const [justCompleted, setJustCompleted] = useState(false);
   const [subtasksOpen, setSubtasksOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
 
   const hasSubtasks = (task.subtasksCount ?? 0) > 0;
@@ -38,12 +46,14 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     if (completing) setJustCompleted(true);
     updateTask.mutate({
       id: task.id,
-      payload: {
-        completed: completing,
-        completedAt: completing ? new Date().toISOString() : null,
-      },
+      payload: { status: completing ? "done" : "todo" },
     });
   };
+
+  const statusBadge = STATUS_BADGE[task.status ?? "todo"];
+  const commentsCount = task.commentsCount ?? 0;
+  const estimatedMinutes = task.estimatedMinutes ?? 0;
+  const timeSpentMinutes = task.timeSpentMinutes ?? 0;
 
   return (
     <motion.div
@@ -56,6 +66,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         PRIORITY_ACCENT[task.priority],
         task.completed && "opacity-60"
       )}
+      style={task.coverColor ? { borderTopColor: task.coverColor, borderTopWidth: 2 } : {}}
     >
       <div className="flex items-start gap-3">
         {/* Checkbox */}
@@ -87,6 +98,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
 
         <div className="flex-1 min-w-0">
           <p className={cn("text-sm font-medium transition-all duration-300", task.completed ? "line-through text-muted" : "text-text")}>
+            {task.icon && <span className="mr-1.5">{task.icon}</span>}
             {task.title}
           </p>
 
@@ -109,6 +121,41 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
 
             {task.isRecurring && (
               <span className="text-[10px] text-accent/70">↺ {task.recurrence}</span>
+            )}
+
+            {/* Status badge */}
+            {statusBadge && (
+              <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full border", statusBadge.className)}>
+                {statusBadge.label}
+              </span>
+            )}
+
+            {/* Time */}
+            {(estimatedMinutes > 0 || timeSpentMinutes > 0) && (
+              <span className="flex items-center gap-1 text-[10px] text-muted">
+                <Clock size={9} />
+                {timeSpentMinutes > 0 && estimatedMinutes > 0
+                  ? `${timeSpentMinutes}м / ${estimatedMinutes}м`
+                  : estimatedMinutes > 0
+                  ? `~${estimatedMinutes}м`
+                  : `${timeSpentMinutes}м`}
+              </span>
+            )}
+
+            {/* Comments */}
+            {commentsCount > 0 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setCommentsOpen((v) => !v); }}
+                className={cn(
+                  "flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border transition-all",
+                  commentsOpen
+                    ? "border-primary/40 text-primary bg-primary/8"
+                    : "border-border text-muted hover:border-primary/40 hover:text-primary"
+                )}
+              >
+                <MessageSquare size={9} />
+                <span>{commentsCount}</span>
+              </button>
             )}
 
             {/* Subtasks progress badge */}
@@ -164,6 +211,11 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       {/* Subtasks expandable */}
       <AnimatePresence>
         {subtasksOpen && <SubtaskList taskId={task.id} />}
+      </AnimatePresence>
+
+      {/* Comments expandable */}
+      <AnimatePresence>
+        {commentsOpen && <TaskComments taskId={task.id} />}
       </AnimatePresence>
     </motion.div>
   );

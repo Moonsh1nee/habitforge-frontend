@@ -53,15 +53,22 @@ export interface Project {
 
 // 1=high, 2=medium, 3=low
 export type TaskPriority = 1 | 2 | 3;
+export type TaskStatus = "todo" | "in_progress" | "review" | "done" | "cancelled";
 
 export interface Task {
   id: string;
   userId: string;
   parentId: string | null;
   projectId: string | null;
+  goalId: string | null;
   title: string;
   description: string | null;
   priority: TaskPriority;
+  status: TaskStatus;
+  icon: string | null;
+  coverColor: string | null;
+  estimatedMinutes: number | null;
+  timeSpentMinutes: number;
   dueDate: string | null;
   completed: boolean;
   completedAt: string | null;
@@ -69,9 +76,20 @@ export interface Task {
   recurrence: "daily" | "weekly" | "monthly" | null;
   subtasksCount: number;
   subtasksDone: number;
+  commentsCount: number;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: { username: string; firstName: string | null };
 }
 
 // ─── Habits ──────────────────────────────────────────────────────────────────

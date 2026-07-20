@@ -62,6 +62,10 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
           title: task.title,
           description: task.description ?? undefined,
           priority: task.priority,
+          status: task.status ?? "todo",
+          icon: task.icon ?? undefined,
+          coverColor: task.coverColor ?? undefined,
+          estimatedMinutes: task.estimatedMinutes ?? undefined,
           dueDate: task.dueDate?.split("T")[0],
           isRecurring: task.isRecurring,
           recurrence: task.recurrence ?? undefined,
@@ -69,6 +73,7 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
         }
       : {
           priority: 2,
+          status: "todo",
           isRecurring: false,
           dueDate: defaultDueDate,
           projectId: defaultProjectId,
@@ -87,10 +92,10 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
 
   const onSubmit = async (data: TaskInput) => {
     if (task) {
-      const updated = await updateTask.mutateAsync({ id: task.id, payload: data as Partial<Task> });
+      const updated = await updateTask.mutateAsync({ id: task.id, payload: { ...data, estimatedMinutes: data.estimatedMinutes ?? null } as Partial<Task> });
       await syncTags(updated.id);
     } else {
-      const created = await createTask.mutateAsync(data as Partial<Task>);
+      const created = await createTask.mutateAsync({ ...data, estimatedMinutes: data.estimatedMinutes ?? null } as Partial<Task>);
       await syncTags(created.id);
     }
     onSuccess?.();
@@ -174,11 +179,70 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
         </div>
 
         <div className="space-y-2">
+          <Label>Статус</Label>
+          <Select
+            value={watch("status") ?? "todo"}
+            onValueChange={(v) => setValue("status", (v ?? "todo") as TaskInput["status"])}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todo">К работе</SelectItem>
+              <SelectItem value="in_progress">В работе</SelectItem>
+              <SelectItem value="review">На проверке</SelectItem>
+              <SelectItem value="done">Готово</SelectItem>
+              <SelectItem value="cancelled">Отменено</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Label>Дедлайн</Label>
           <DatePicker
             value={watch("dueDate") ?? ""}
             onChange={(v) => { setValue("dueDate", v || undefined); setDetectedDate(null); }}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Оценка времени (мин)</Label>
+          <Input
+            type="number"
+            min={1}
+            placeholder="30"
+            {...register("estimatedMinutes", { valueAsNumber: true })}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Иконка (emoji)</Label>
+          <Input placeholder="📌" maxLength={10} {...register("icon")} />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Цвет карточки</Label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={watch("coverColor") ?? "#7c3aed"}
+              onChange={(e) => setValue("coverColor", e.target.value)}
+              className="w-9 h-9 rounded cursor-pointer bg-transparent border border-border"
+            />
+            <Input
+              placeholder="#7c3aed"
+              value={watch("coverColor") ?? ""}
+              onChange={(e) => setValue("coverColor", e.target.value || undefined)}
+              className="flex-1"
+            />
+            {watch("coverColor") && (
+              <button type="button" onClick={() => setValue("coverColor", undefined)} className="text-muted hover:text-text text-xs shrink-0">
+                ✕
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

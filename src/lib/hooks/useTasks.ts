@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { tasksApi, type TaskFilters } from "@/lib/api/tasks";
-import type { Task } from "@/types";
+import type { Task, TaskComment } from "@/types";
 
 export function useTasks(filters?: TaskFilters) {
   return useQuery({
@@ -76,5 +76,51 @@ export function useCreateSubtask() {
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => toast.error("Ошибка создания подзадачи"),
+  });
+}
+
+export function useTaskComments(taskId: string) {
+  return useQuery({
+    queryKey: ["tasks", taskId, "comments"],
+    queryFn: () => tasksApi.getComments(taskId),
+    enabled: !!taskId,
+  });
+}
+
+export function useCreateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, body }: { taskId: string; body: string }) =>
+      tasksApi.createComment(taskId, body),
+    onSuccess: (_, { taskId }) => {
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "comments"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => toast.error("Ошибка добавления комментария"),
+  });
+}
+
+export function useUpdateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, commentId, body }: { taskId: string; commentId: string; body: string }) =>
+      tasksApi.updateComment(taskId, commentId, body),
+    onSuccess: (comment) => {
+      qc.invalidateQueries({ queryKey: ["tasks", comment.taskId, "comments"] });
+    },
+    onError: () => toast.error("Ошибка редактирования комментария"),
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, commentId }: { taskId: string; commentId: string }) =>
+      tasksApi.deleteComment(taskId, commentId),
+    onSuccess: (_, { taskId }) => {
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "comments"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => toast.error("Ошибка удаления комментария"),
   });
 }
