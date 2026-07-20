@@ -10,6 +10,7 @@ import { TaskList } from "@/components/tasks/TaskList";
 import { KanbanView } from "@/components/tasks/KanbanView";
 import { MatrixView } from "@/components/tasks/MatrixView";
 import { TaskForm } from "@/components/tasks/TaskForm";
+import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { ProjectsManager } from "@/components/tasks/ProjectsManager";
 import { ViewSwitcher } from "@/components/tasks/ViewSwitcher";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
@@ -26,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { Task, TaskPriority } from "@/types";
+import type { Task, TaskPriority, TaskStatus } from "@/types";
 import type { TaskFilters } from "@/lib/api/tasks";
 
 type OrderBy = "createdAt" | "dueDate" | "priority";
@@ -36,6 +37,13 @@ const PRIORITY_CHIPS: { label: string; value: TaskPriority | undefined }[] = [
   { label: "Высокий", value: 1 },
   { label: "Средний", value: 2 },
   { label: "Низкий", value: 3 },
+];
+
+const STATUS_CHIPS: { label: string; value: TaskStatus | undefined }[] = [
+  { label: "Все", value: undefined },
+  { label: "К работе", value: "todo" },
+  { label: "В работе", value: "in_progress" },
+  { label: "На проверке", value: "review" },
 ];
 
 const ORDER_BY_LABELS: Record<string, string> = {
@@ -50,6 +58,12 @@ const PRIORITY_ACTIVE_CLASS: Record<number, string> = {
   3: "border-muted/40 text-muted bg-muted/10",
 };
 
+const STATUS_ACTIVE_CLASS: Record<string, string> = {
+  todo:        "border-muted/50 text-muted bg-muted/10",
+  in_progress: "border-accent/60 text-accent bg-accent/10",
+  review:      "border-warning/60 text-warning bg-warning/10",
+};
+
 function TasksPageInner() {
   const searchParams = useSearchParams();
   const urlProjectId: string | undefined = searchParams.get("project_id") ?? undefined;
@@ -59,6 +73,7 @@ function TasksPageInner() {
   const { view, kanbanGroupBy } = useTaskViewStore();
 
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | undefined>(undefined);
   const [projectId, setProjectId] = useState<string | undefined>(urlProjectId);
   const [tagId, setTagId] = useState<string | undefined>(urlTagId);
   const [orderBy, setOrderBy] = useState<OrderBy>("createdAt");
@@ -67,6 +82,7 @@ function TasksPageInner() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [detailTask, setDetailTask] = useState<Task | null>(null);
   const [projectsOpen, setProjectsOpen] = useState(false);
 
   const { data: projects = [] } = useProjects();
@@ -82,6 +98,7 @@ function TasksPageInner() {
 
   const filters: TaskFilters = {
     ...(priorityFilter !== undefined && { priority: priorityFilter }),
+    ...(statusFilter !== undefined && { status: statusFilter }),
     ...(debouncedSearch && { search: debouncedSearch }),
     ...(projectId && { project_id: projectId }),
     ...(tagId && { tag_id: tagId }),
@@ -97,6 +114,7 @@ function TasksPageInner() {
 
   const hasActiveFilters =
     priorityFilter !== undefined ||
+    statusFilter !== undefined ||
     search !== "" ||
     projectId !== undefined ||
     tagId !== undefined ||
@@ -105,6 +123,7 @@ function TasksPageInner() {
 
   const resetFilters = () => {
     setPriorityFilter(undefined);
+    setStatusFilter(undefined);
     setProjectId(undefined);
     setTagId(undefined);
     setSearch("");
@@ -168,6 +187,7 @@ function TasksPageInner() {
         </div>
       )}
 
+      {/* Priority chips */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 flex-wrap">
           {PRIORITY_CHIPS.map(({ label, value }) => (
@@ -235,14 +255,32 @@ function TasksPageInner() {
         </div>
       </div>
 
+      {/* Status filter chips */}
+      <div className="flex items-center gap-1.5 flex-wrap -mt-2">
+        {STATUS_CHIPS.map(({ label, value }) => (
+          <button
+            key={label}
+            onClick={() => setStatusFilter(value)}
+            className={cn(
+              "text-xs px-2.5 py-1 rounded-full border transition-all",
+              statusFilter === value
+                ? value !== undefined ? STATUS_ACTIVE_CLASS[value] : "border-primary/60 text-primary bg-primary/10"
+                : "border-border text-muted hover:text-text"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <ListSkeleton count={5} />
       ) : view === "kanban" ? (
-        <KanbanView tasks={tasks} groupBy={kanbanGroupBy} onEdit={setEditTask} onCreateClick={() => setCreateOpen(true)} />
+        <KanbanView tasks={tasks} groupBy={kanbanGroupBy} onEdit={setEditTask} onCardClick={setDetailTask} onCreateClick={() => setCreateOpen(true)} />
       ) : view === "matrix" ? (
-        <MatrixView tasks={tasks} onEdit={setEditTask} />
+        <MatrixView tasks={tasks} onEdit={setEditTask} onCardClick={setDetailTask} />
       ) : (
-        <TaskList tasks={tasks} onEdit={setEditTask} onCreateClick={() => setCreateOpen(true)} isDndEnabled={orderBy === "createdAt"} />
+        <TaskList tasks={tasks} onEdit={setEditTask} onCardClick={setDetailTask} onCreateClick={() => setCreateOpen(true)} isDndEnabled={orderBy === "createdAt"} />
       )}
 
       <FormDialog open={createOpen} onOpenChange={setCreateOpen} title="Новая задача">
@@ -252,6 +290,13 @@ function TasksPageInner() {
       <FormDialog open={!!editTask} onOpenChange={(o) => !o && setEditTask(null)} title="Редактировать задачу">
         {editTask && <TaskForm task={editTask} onSuccess={() => setEditTask(null)} />}
       </FormDialog>
+
+      <TaskDetailSheet
+        task={detailTask}
+        open={!!detailTask}
+        onOpenChange={(o) => !o && setDetailTask(null)}
+        onEdit={(task) => { setDetailTask(null); setEditTask(task); }}
+      />
 
       <ProjectsManager open={projectsOpen} onOpenChange={setProjectsOpen} />
     </div>

@@ -17,18 +17,17 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { TaskCard } from "./TaskCard";
 import { useUpdateTask } from "@/lib/hooks/useTasks";
 import { useProjects } from "@/lib/hooks/useProjects";
-import type { Task, TaskPriority } from "@/types";
+import type { Task, TaskPriority, TaskStatus } from "@/types";
 
 // ─── Column configs ────────────────────────────────────────────────────────────
 
-type ColumnId = string; // projectId | "null" for no-project | "1"|"2"|"3" for priority
+type ColumnId = string;
 
 interface Column {
   id: ColumnId;
@@ -43,9 +42,24 @@ const PRIORITY_COLUMNS: Omit<Column, "tasks">[] = [
   { id: "3", title: "Низкий",   color: "#64748b" },
 ];
 
+const STATUS_COLUMNS: Omit<Column, "tasks">[] = [
+  { id: "todo",        title: "К работе",   color: "#64748b" },
+  { id: "in_progress", title: "В работе",    color: "#06b6d4" },
+  { id: "review",      title: "На проверке", color: "#f59e0b" },
+  { id: "done",        title: "Готово",      color: "#22c55e" },
+];
+
 // ─── Sortable card inside a Kanban column ─────────────────────────────────────
 
-function KanbanCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => void }) {
+function KanbanCard({
+  task,
+  onEdit,
+  onCardClick,
+}: {
+  task: Task;
+  onEdit: (t: Task) => void;
+  onCardClick?: (t: Task) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id, data: { type: "task", task } });
 
@@ -69,7 +83,7 @@ function KanbanCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => void })
         <GripVertical size={13} />
       </button>
       <div className="flex-1 min-w-0">
-        <TaskCard task={task} onEdit={onEdit} />
+        <TaskCard task={task} onEdit={onEdit} onCardClick={onCardClick} />
       </div>
     </div>
   );
@@ -80,10 +94,12 @@ function KanbanCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => void })
 function KanbanColumn({
   column,
   onEdit,
+  onCardClick,
   onAddTask,
 }: {
   column: Column;
   onEdit: (t: Task) => void;
+  onCardClick?: (t: Task) => void;
   onAddTask?: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id, data: { type: "column" } });
@@ -110,14 +126,14 @@ function KanbanColumn({
       >
         <SortableContext items={active.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {active.map((task) => (
-            <KanbanCard key={task.id} task={task} onEdit={onEdit} />
+            <KanbanCard key={task.id} task={task} onEdit={onEdit} onCardClick={onCardClick} />
           ))}
         </SortableContext>
         {done.length > 0 && (
           <div className="pt-1 border-t border-border/50">
             {done.map((task) => (
               <div key={task.id} className="opacity-50">
-                <TaskCard task={task} onEdit={onEdit} />
+                <TaskCard task={task} onEdit={onEdit} onCardClick={onCardClick} />
               </div>
             ))}
           </div>
@@ -146,12 +162,13 @@ function KanbanColumn({
 
 interface KanbanViewProps {
   tasks: Task[];
-  groupBy: "project" | "priority";
+  groupBy: "project" | "priority" | "status";
   onEdit: (task: Task) => void;
+  onCardClick?: (task: Task) => void;
   onCreateClick?: () => void;
 }
 
-export function KanbanView({ tasks, groupBy, onEdit, onCreateClick }: KanbanViewProps) {
+export function KanbanView({ tasks, groupBy, onEdit, onCardClick, onCreateClick }: KanbanViewProps) {
   const { data: projects = [] } = useProjects();
   const updateTask = useUpdateTask();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -161,6 +178,11 @@ export function KanbanView({ tasks, groupBy, onEdit, onCreateClick }: KanbanView
     ? PRIORITY_COLUMNS.map((col) => ({
         ...col,
         tasks: tasks.filter((t) => String(t.priority) === col.id),
+      }))
+    : groupBy === "status"
+    ? STATUS_COLUMNS.map((col) => ({
+        ...col,
+        tasks: tasks.filter((t) => (t.status ?? "todo") === col.id),
       }))
     : [
         ...projects.map((p) => ({
@@ -202,13 +224,10 @@ export function KanbanView({ tasks, groupBy, onEdit, onCreateClick }: KanbanView
       const activeTaskId = String(active.id);
       const overId = String(over.id);
 
-      // Determine target column
       let targetColumnId: string;
       if (allColumnIds.has(overId)) {
-        // Dropped directly on a column
         targetColumnId = overId;
       } else {
-        // Dropped on another task — find its column
         const targetCol = findColumn(overId);
         if (!targetCol) return;
         targetColumnId = targetCol.id;
@@ -216,16 +235,13 @@ export function KanbanView({ tasks, groupBy, onEdit, onCreateClick }: KanbanView
 
       const sourceCol = findColumn(activeTaskId);
       if (!sourceCol) return;
+      if (sourceCol.id === targetColumnId) return;
 
-      if (sourceCol.id === targetColumnId) {
-        // Reorder within same column — local only (no API for kanban order)
-        return;
-      }
-
-      // Cross-column move — update via API
       if (groupBy === "priority") {
         const newPriority = Number(targetColumnId) as TaskPriority;
         updateTask.mutate({ id: activeTaskId, payload: { priority: newPriority } });
+      } else if (groupBy === "status") {
+        updateTask.mutate({ id: activeTaskId, payload: { status: targetColumnId as TaskStatus } });
       } else {
         const newProjectId = targetColumnId === "null" ? null : targetColumnId;
         updateTask.mutate({ id: activeTaskId, payload: { projectId: newProjectId } as Partial<Task> });
@@ -248,6 +264,7 @@ export function KanbanView({ tasks, groupBy, onEdit, onCreateClick }: KanbanView
             key={col.id}
             column={col}
             onEdit={onEdit}
+            onCardClick={onCardClick}
             onAddTask={col.id !== "null" && groupBy === "project" ? onCreateClick : undefined}
           />
         ))}

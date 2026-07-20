@@ -58,7 +58,7 @@ export function SubtaskList({ taskId }: SubtaskListProps) {
                 onClick={() =>
                   updateTask.mutate({
                     id: sub.id,
-                    payload: { completed: !sub.completed },
+                    payload: { status: sub.completed ? "todo" : "done" },
                   })
                 }
                 className={cn(

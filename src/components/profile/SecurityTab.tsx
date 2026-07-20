@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Monitor, Smartphone, Globe } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { usersApi } from "@/lib/api/users";
 import { authApi } from "@/lib/api/auth";
+import { useSessions, useRevokeSession, useRevokeAllSessions } from "@/lib/hooks/useSessions";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +21,56 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+function SessionRow({ session }: { session: { id: string; device: string | null; browser: string | null; os: string | null; ip: string | null; lastActiveAt: string; isCurrent: boolean } }) {
+  const revoke = useRevokeSession();
+
+  const icon = session.device?.toLowerCase().includes("mobile")
+    ? <Smartphone size={14} className="text-muted" />
+    : <Monitor size={14} className="text-muted" />;
+
+  const label = [session.browser, session.os].filter(Boolean).join(" · ") || "Неизвестное устройство";
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border last:border-0">
+      <div className="flex items-center gap-2.5 min-w-0">
+        {icon}
+        <div className="min-w-0">
+          <p className="text-sm text-text truncate flex items-center gap-1.5">
+            {label}
+            {session.isCurrent && (
+              <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                Текущая
+              </span>
+            )}
+          </p>
+          <p className="text-xs text-muted">
+            {session.ip && <span className="mr-2">{session.ip}</span>}
+            {format(new Date(session.lastActiveAt), "d MMM, HH:mm", { locale: ru })}
+          </p>
+        </div>
+      </div>
+      {!session.isCurrent && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => revoke.mutate(session.id)}
+          disabled={revoke.isPending}
+          className="shrink-0 text-xs border-border text-muted hover:text-danger hover:border-danger/40"
+        >
+          {revoke.isPending ? <Loader2 size={12} className="animate-spin" /> : "Завершить"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function SecurityTab() {
   const router = useRouter();
   const { clear } = useAuthStore();
   const [deletePassword, setDeletePassword] = useState("");
+
+  const { data: sessions = [], isLoading: sessionsLoading } = useSessions();
+  const revokeAll = useRevokeAllSessions();
 
   const logoutAll = useMutation({
     mutationFn: authApi.logoutAll,
@@ -59,6 +108,8 @@ export function SecurityTab() {
     changePassword.mutate({ current: fd.get("current") as string, next });
   };
 
+  const otherSessions = sessions.filter((s) => !s.isCurrent);
+
   return (
     <div className="space-y-6">
       <GlassCard>
@@ -82,17 +133,49 @@ export function SecurityTab() {
       </GlassCard>
 
       <GlassCard>
-        <h3 className="font-semibold text-text mb-2">Активные сессии</h3>
-        <p className="text-sm text-muted mb-4">Выйти из аккаунта на всех устройствах, включая текущее.</p>
-        <Button
-          variant="outline"
-          onClick={() => logoutAll.mutate()}
-          disabled={logoutAll.isPending}
-          className="border-border text-text hover:bg-white/5 gap-2"
-        >
-          {logoutAll.isPending && <Loader2 size={15} className="animate-spin" />}
-          Выйти на всех устройствах
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-text mb-0.5">Активные сессии</h3>
+            <p className="text-xs text-muted">Устройства с активным доступом к аккаунту</p>
+          </div>
+          {otherSessions.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => revokeAll.mutate()}
+              disabled={revokeAll.isPending}
+              className="border-border text-muted hover:text-danger hover:border-danger/40 text-xs"
+            >
+              {revokeAll.isPending ? <Loader2 size={12} className="animate-spin" /> : "Завершить все"}
+            </Button>
+          )}
+        </div>
+        {sessionsLoading ? (
+          <div className="flex items-center gap-2 text-muted text-sm py-2">
+            <Loader2 size={14} className="animate-spin" /> Загрузка...
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="flex items-center gap-2 text-muted text-sm py-2">
+            <Globe size={14} /> Нет активных сессий
+          </div>
+        ) : (
+          <div>
+            {sessions.map((s) => (
+              <SessionRow key={s.id} session={s} />
+            ))}
+          </div>
+        )}
+        <div className="mt-4 pt-4 border-t border-border">
+          <Button
+            variant="outline"
+            onClick={() => logoutAll.mutate()}
+            disabled={logoutAll.isPending}
+            className="border-border text-text hover:bg-white/5 gap-2"
+          >
+            {logoutAll.isPending && <Loader2 size={15} className="animate-spin" />}
+            Выйти на всех устройствах
+          </Button>
+        </div>
       </GlassCard>
 
       <GlassCard className="border-danger/20">

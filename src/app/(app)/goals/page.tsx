@@ -222,9 +222,7 @@ function GoalCard({ goal }: { goal: Goal }) {
   const deleteGoal = useDeleteGoal();
   const updateGoal = useUpdateGoal();
 
-  const pct = goal.targetValue > 0
-    ? Math.min(Math.round((goal.currentValue / goal.targetValue) * 100), 100)
-    : 0;
+  const pct = Math.min(Math.round(goal.progressPct ?? (goal.targetValue > 0 ? (goal.currentValue / goal.targetValue) * 100 : 0)), 100);
 
   const ringColor =
     pct >= 100 ? "var(--color-success)"
@@ -232,7 +230,7 @@ function GoalCard({ goal }: { goal: Goal }) {
     : pct >= 30 ? "var(--color-warning)"
     : "var(--color-muted)";
 
-  const isCompleted = goal.status === "completed";
+  const isCompleted = goal.isCompleted || goal.status === "completed";
   const isArchived = goal.status === "archived";
 
   return (

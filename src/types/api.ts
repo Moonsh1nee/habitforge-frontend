@@ -307,18 +307,17 @@ export interface WeekStats {
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export interface SearchResultItem {
-  type: "task" | "habit" | "journal" | "finance_transaction" | "finance_category";
+  type: "task" | "habit" | "journal" | "finance_transaction" | "finance_category" | "goal";
   id: string;
   title: string;
+  subtitle: string | null;
+  url: string;
   description?: string | null;
-  // task-specific
   completed?: boolean;
   priority?: TaskPriority;
   dueDate?: string | null;
-  // journal-specific
   date?: string;
   notes?: string;
-  // finance_transaction-specific
   amount?: number | null;
   transactionType?: TransactionType | null;
 }
@@ -432,14 +431,277 @@ export interface Goal {
   id: string;
   userId: string;
   title: string;
+  description: string | null;
   category: GoalCategory;
   targetValue: number;
   currentValue: number;
   unit: string;
   status: GoalStatus;
+  color: string | null;
+  icon: string | null;
   dueDate: string | null;
+  isCompleted: boolean;
+  completedAt: string | null;
+  progressPct: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface GoalProgress {
+  id: string;
+  goalId: string;
+  value: number;
+  note: string | null;
+  loggedAt: string;
+}
+
+// ─── Billing / Subscription ──────────────────────────────────────────────────
+
+export interface Subscription {
+  plan: "free" | "pro";
+  status: "active" | "canceled" | "past_due" | "trialing" | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
+// ─── Reminders ───────────────────────────────────────────────────────────────
+
+export type ReminderEntityType = "task" | "habit" | "goal";
+export type ReminderRecurrence = "once" | "daily" | "weekly";
+
+export interface Reminder {
+  id: string;
+  userId: string;
+  title: string;
+  entityType: ReminderEntityType | null;
+  entityId: string | null;
+  remindAt: string;
+  recurrence: ReminderRecurrence;
+  recurrenceTime: string | null;
+  daysOfWeek: number[] | null;
+  isActive: boolean;
+  lastSentAt: string | null;
+  createdAt: string;
+}
+
+// ─── Time Tracking ───────────────────────────────────────────────────────────
+
+export interface TimeEntry {
+  id: string;
+  taskId: string;
+  userId: string;
+  startedAt: string;
+  endedAt: string | null;
+  durationMinutes: number | null;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface TimerStatus {
+  isRunning: boolean;
+  currentEntry: TimeEntry | null;
+  taskId: string | null;
+  elapsedMinutes: number;
+}
+
+export interface TimeTrackingToday {
+  totalMinutes: number;
+  entries: TimeEntry[];
+  byTask: { taskId: string; taskTitle: string; minutes: number }[];
+}
+
+export interface TimeTrackingSummary {
+  period: string;
+  totalMinutes: number;
+  byDay: { date: string; minutes: number }[];
+  topTasks: { taskId: string; taskTitle: string; minutes: number }[];
+}
+
+// ─── Task Activity ────────────────────────────────────────────────────────────
+
+export type TaskActivityType =
+  | "created"
+  | "status_changed"
+  | "priority_changed"
+  | "due_date_changed"
+  | "assigned"
+  | "comment_added"
+  | "subtask_added";
+
+export interface TaskActivity {
+  id: string;
+  taskId: string;
+  userId: string;
+  type: TaskActivityType;
+  oldValue: string | null;
+  newValue: string | null;
+  createdAt: string;
+  author?: { username: string; firstName: string | null };
+}
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+
+export type CalendarEventType = "task" | "habit" | "workout" | "journal" | "reminder";
+
+export interface CalendarEvent {
+  id: string;
+  type: CalendarEventType;
+  title: string;
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+  color: string | null;
+  completed: boolean;
+  entityId: string;
+  url: string | null;
+}
+
+// ─── Sessions ────────────────────────────────────────────────────────────────
+
+export interface Session {
+  id: string;
+  userId: string;
+  device: string | null;
+  browser: string | null;
+  os: string | null;
+  ip: string | null;
+  lastActiveAt: string;
+  createdAt: string;
+  isCurrent: boolean;
+}
+
+// ─── Budgets ─────────────────────────────────────────────────────────────────
+
+export interface Budget {
+  id: string;
+  userId: string;
+  categoryId: string | null;
+  name: string;
+  amount: number;
+  period: "monthly" | "weekly" | "yearly";
+  startDate: string;
+  endDate: string | null;
+  createdAt: string;
+}
+
+export interface BudgetStatus extends Budget {
+  spent: number;
+  remaining: number;
+  percentUsed: number;
+  categoryName: string | null;
+  categoryColor: string | null;
+}
+
+// ─── Exercise Library & PRs ──────────────────────────────────────────────────
+
+export type MuscleGroup =
+  | "chest"
+  | "back"
+  | "shoulders"
+  | "biceps"
+  | "triceps"
+  | "legs"
+  | "glutes"
+  | "core"
+  | "cardio"
+  | "full_body"
+  | "other";
+
+export type Equipment = "barbell" | "dumbbell" | "machine" | "bodyweight" | "cable" | "other";
+export type RecordType = "max_weight" | "max_reps" | "max_volume";
+
+export interface ExerciseTemplate {
+  id: string;
+  name: string;
+  muscleGroup: MuscleGroup;
+  equipment: Equipment;
+  description: string | null;
+  isPublic: boolean;
+  userId: string | null;
+}
+
+export interface PersonalRecord {
+  id: string;
+  userId: string;
+  exerciseName: string;
+  recordType: RecordType;
+  value: number;
+  unit: string;
+  achievedAt: string;
+  workoutLogId: string | null;
+  notes: string | null;
+}
+
+// ─── Food Search ─────────────────────────────────────────────────────────────
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  brand: string | null;
+  caloriesPer100g: number | null;
+  proteinPer100g: number | null;
+  carbsPer100g: number | null;
+  fatPer100g: number | null;
+  servingSizeG: number | null;
+  source: "openfoodfacts" | "custom";
+}
+
+// ─── XP & Achievements ───────────────────────────────────────────────────────
+
+export type XPSource =
+  | "task_completed"
+  | "habit_completed"
+  | "journal_entry"
+  | "workout_logged"
+  | "goal_progress"
+  | "goal_completed"
+  | "streak_bonus"
+  | "achievement_unlocked";
+
+export interface XPEvent {
+  id: string;
+  userId: string;
+  source: XPSource;
+  xpAmount: number;
+  entityId: string | null;
+  createdAt: string;
+}
+
+export interface UserXP {
+  totalXp: number;
+  level: number;
+  xpInCurrentLevel: number;
+  xpToNextLevel: number;
+  levelProgressPct: number;
+}
+
+export type AchievementCategory =
+  | "habits"
+  | "tasks"
+  | "streaks"
+  | "health"
+  | "finance"
+  | "social"
+  | "milestones";
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  xpReward: number;
+  category: AchievementCategory;
+  isUnlocked: boolean;
+  unlockedAt: string | null;
+  progress: number | null;
+  progressTarget: number | null;
+}
+
+export interface UserAchievements {
+  unlocked: Achievement[];
+  locked: Achievement[];
+  totalXpFromAchievements: number;
+  recentUnlock: Achievement | null;
 }
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

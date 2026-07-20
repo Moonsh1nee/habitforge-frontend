@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { WorkoutPlan, WorkoutPlanWithExercises, WorkoutLog, WorkoutLogWithExercises, PlanExercise, ExerciseLog } from "@/types";
+import type { WorkoutPlan, WorkoutPlanWithExercises, WorkoutLog, WorkoutLogWithExercises, PlanExercise, ExerciseLog, ExerciseTemplate, PersonalRecord, MuscleGroup, Equipment } from "@/types";
 
 export const workoutsApi = {
   getPlans: async (): Promise<WorkoutPlan[]> => {
@@ -119,5 +119,25 @@ export const workoutsApi = {
 
   deleteLogExercise: async (logId: string, exerciseId: string): Promise<void> => {
     await api.delete(`/workouts/logs/${logId}/exercises/${exerciseId}`);
+  },
+
+  getLibrary: async (params?: { muscleGroup?: MuscleGroup; equipment?: Equipment; search?: string }): Promise<ExerciseTemplate[]> => {
+    const { data } = await api.get<ExerciseTemplate[]>("/workouts/library", { params });
+    return data ?? [];
+  },
+
+  addToLibrary: async (payload: Partial<ExerciseTemplate>): Promise<ExerciseTemplate> => {
+    const { data } = await api.post<ExerciseTemplate>("/workouts/library", payload);
+    return data;
+  },
+
+  getRecords: async (): Promise<PersonalRecord[]> => {
+    const { data } = await api.get<PersonalRecord[]>("/workouts/records");
+    return data ?? [];
+  },
+
+  addRecord: async (payload: Partial<PersonalRecord>): Promise<PersonalRecord> => {
+    const { data } = await api.post<PersonalRecord>("/workouts/records", payload);
+    return data;
   },
 };

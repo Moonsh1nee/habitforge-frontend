@@ -37,7 +37,7 @@ export function ViewSwitcher() {
       {view === "kanban" && (
         <Select
           value={kanbanGroupBy}
-          onValueChange={(v) => v && setKanbanGroupBy(v as "project" | "priority")}
+          onValueChange={(v) => v && setKanbanGroupBy(v as "project" | "priority" | "status")}
         >
           <SelectTrigger size="sm" className="w-36 ml-1">
             <SelectValue />
@@ -45,6 +45,7 @@ export function ViewSwitcher() {
           <SelectContent>
             <SelectItem value="project">По проектам</SelectItem>
             <SelectItem value="priority">По приоритету</SelectItem>
+            <SelectItem value="status">По статусу</SelectItem>
           </SelectContent>
         </Select>
       )}

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 export function useRealtimeEvents() {
@@ -21,8 +22,6 @@ export function useRealtimeEvents() {
       if (destroyed) return;
 
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
-      // Cookies are sent automatically by the browser on WS upgrade (HTTP standard).
-      // No token query param needed when using HttpOnly cookies.
       ws = new WebSocket(`${wsUrl}/ws/events`);
 
       ws.onopen = () => {
@@ -35,8 +34,8 @@ export function useRealtimeEvents() {
       ws.onmessage = (e) => {
         if (e.data === "pong") return;
         try {
-          const { type } = JSON.parse(e.data as string) as { type: string };
-          switch (type) {
+          const msg = JSON.parse(e.data as string) as { type: string; [k: string]: unknown };
+          switch (msg.type) {
             case "task.updated":
             case "task.deleted":
               qc.invalidateQueries({ queryKey: ["tasks"] });
@@ -62,6 +61,7 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["finance-categories"] });
               qc.invalidateQueries({ queryKey: ["finance-transactions"] });
               qc.invalidateQueries({ queryKey: ["finance-summary"] });
+              qc.invalidateQueries({ queryKey: ["budgets"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
             case "workout.updated":
@@ -69,6 +69,44 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["workout-logs"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
+            case "goal.updated":
+              qc.invalidateQueries({ queryKey: ["goals"] });
+              break;
+            case "xp.earned": {
+              const { xpAmount, totalXp, level, leveledUp, source } = msg as unknown as {
+                xpAmount: number;
+                totalXp: number;
+                level: number;
+                leveledUp: boolean;
+                source: string;
+              };
+              qc.invalidateQueries({ queryKey: ["xp"] });
+              qc.invalidateQueries({ queryKey: ["achievements"] });
+              if (leveledUp) {
+                toast.success(`🎉 Уровень ${level}! +${xpAmount} XP`, {
+                  description: `Всего XP: ${totalXp}`,
+                  duration: 5000,
+                });
+              } else if (xpAmount > 0 && source !== "habit_completed") {
+                toast(`+${xpAmount} XP`, { duration: 2000 });
+              }
+              break;
+            }
+            case "achievement.unlocked": {
+              const { title, icon, xpReward } = msg as unknown as {
+                achievementId: string;
+                title: string;
+                icon: string;
+                xpReward: number;
+              };
+              qc.invalidateQueries({ queryKey: ["achievements"] });
+              qc.invalidateQueries({ queryKey: ["xp"] });
+              toast.success(`${icon} Достижение разблокировано!`, {
+                description: `${title} · +${xpReward} XP`,
+                duration: 6000,
+              });
+              break;
+            }
           }
         } catch { /* ignore malformed */ }
       };

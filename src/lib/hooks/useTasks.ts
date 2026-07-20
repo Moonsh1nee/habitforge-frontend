@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { tasksApi, type TaskFilters } from "@/lib/api/tasks";
-import type { Task, TaskComment } from "@/types";
+import type { Task, TaskComment, TaskActivity } from "@/types";
 
 export function useTasks(filters?: TaskFilters) {
   return useQuery({
@@ -122,5 +122,79 @@ export function useDeleteComment() {
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => toast.error("Ошибка удаления комментария"),
+  });
+}
+
+export function useTaskActivity(taskId: string) {
+  return useQuery<TaskActivity[]>({
+    queryKey: ["tasks", taskId, "activity"],
+    queryFn: () => tasksApi.getActivity(taskId),
+    enabled: !!taskId,
+  });
+}
+
+export function useBulkDeleteTasks() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: string[]) => tasksApi.bulkDelete(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Задачи удалены");
+    },
+    onError: () => toast.error("Ошибка удаления задач"),
+  });
+}
+
+export function useBulkUpdateStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, status }: { ids: string[]; status: string }) =>
+      tasksApi.bulkUpdateStatus(ids, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Статус обновлён");
+    },
+    onError: () => toast.error("Ошибка обновления статуса"),
+  });
+}
+
+export function useTaskTimer(taskId: string) {
+  return useQuery({
+    queryKey: ["tasks", taskId, "timer"],
+    queryFn: () => tasksApi.getTimerStatus(taskId),
+    enabled: !!taskId,
+    refetchInterval: (query) => (query.state.data?.isRunning ? 10_000 : false),
+  });
+}
+
+export function useStartTimer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId: string) => tasksApi.startTimer(taskId),
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "timer"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => toast.error("Не удалось запустить таймер"),
+  });
+}
+
+export function useStopTimer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId: string) => tasksApi.stopTimer(taskId),
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "timer"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => toast.error("Не удалось остановить таймер"),
+  });
+}
+
+export function useTimeTrackingToday() {
+  return useQuery({
+    queryKey: ["time-tracking", "today"],
+    queryFn: tasksApi.getTimeTracking,
+    staleTime: 60_000,
   });
 }

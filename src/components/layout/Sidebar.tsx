@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
   Apple, BookOpen, User, Zap, Wallet, CalendarDays,
-  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, ShoppingCart, Settings,
+  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, ShoppingCart, Settings, Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -37,6 +37,7 @@ const navItems = [
   { href: "/habits", icon: Repeat2, label: "Привычки" },
   { href: "/goals", icon: Target, label: "Цели" },
   { href: "/stats", icon: BarChart2, label: "Аналитика" },
+  { href: "/achievements", icon: Trophy, label: "Достижения" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
   { href: "/finance", icon: Wallet, label: "Финансы" },

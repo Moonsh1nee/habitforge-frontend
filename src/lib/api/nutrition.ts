@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { FoodLog, NutritionPlan, MealTemplate, DailySummary } from "@/types";
+import type { FoodLog, FoodItem, NutritionPlan, MealTemplate, DailySummary } from "@/types";
 
 export const nutritionApi = {
   getPlans: async (): Promise<NutritionPlan[]> => {
@@ -68,5 +68,12 @@ export const nutritionApi = {
 
   deletePlanMeal: async (planId: string, mealId: string): Promise<void> => {
     await api.delete(`/nutrition/plans/${planId}/meals/${mealId}`);
+  },
+
+  searchFood: async (query: string, limit = 20): Promise<FoodItem[]> => {
+    const { data } = await api.get<FoodItem[]>("/nutrition/food/search", {
+      params: { q: query, limit },
+    });
+    return data ?? [];
   },
 };

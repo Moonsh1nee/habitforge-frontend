@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { workoutsApi } from "@/lib/api/workouts";
-import type { WorkoutPlan, WorkoutPlanWithExercises, WorkoutLog, WorkoutLogWithExercises, PlanExercise, ExerciseLog } from "@/types";
+import type { WorkoutPlan, WorkoutPlanWithExercises, WorkoutLog, WorkoutLogWithExercises, PlanExercise, ExerciseLog, ExerciseTemplate, PersonalRecord, MuscleGroup, Equipment } from "@/types";
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
 
@@ -190,5 +190,48 @@ export function useDeleteLogExercise() {
       toast.success("Упражнение удалено");
     },
     onError: () => toast.error("Ошибка удаления упражнения"),
+  });
+}
+
+// ─── Exercise Library ─────────────────────────────────────────────────────────
+
+export function useExerciseLibrary(params?: { muscleGroup?: MuscleGroup; equipment?: Equipment; search?: string }) {
+  return useQuery<ExerciseTemplate[]>({
+    queryKey: ["exercise-library", params],
+    queryFn: () => workoutsApi.getLibrary(params),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useAddToLibrary() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<ExerciseTemplate>) => workoutsApi.addToLibrary(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["exercise-library"] });
+      toast.success("Упражнение добавлено в библиотеку");
+    },
+    onError: () => toast.error("Ошибка добавления в библиотеку"),
+  });
+}
+
+// ─── Personal Records ─────────────────────────────────────────────────────────
+
+export function usePersonalRecords() {
+  return useQuery<PersonalRecord[]>({
+    queryKey: ["personal-records"],
+    queryFn: workoutsApi.getRecords,
+  });
+}
+
+export function useAddPersonalRecord() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<PersonalRecord>) => workoutsApi.addRecord(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["personal-records"] });
+      toast.success("Рекорд сохранён");
+    },
+    onError: () => toast.error("Не удалось сохранить рекорд"),
   });
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, CalendarClock, X, Tag as TagIcon } from "lucide-react";
+import { Loader2, CalendarClock, X, Tag as TagIcon, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { taskSchema, type TaskInput } from "@/lib/schemas/task.schema";
 import { useCreateTask, useUpdateTask } from "@/lib/hooks/useTasks";
@@ -11,6 +11,7 @@ import { useProjects } from "@/lib/hooks/useProjects";
 import { useTags } from "@/lib/hooks/useTags";
 import { tagsApi } from "@/lib/api/tags";
 import { cn, parseNaturalDate } from "@/lib/utils";
+import { CollapsibleBody } from "@/components/shared/CollapsibleBody";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -39,6 +40,7 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
   const { data: allTags = [] } = useTags();
   const isPending = createTask.isPending || updateTask.isPending;
 
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [detectedDate, setDetectedDate] = useState<{
     date: string;
     label: string;
@@ -196,54 +198,12 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Дедлайн</Label>
-          <DatePicker
-            value={watch("dueDate") ?? ""}
-            onChange={(v) => { setValue("dueDate", v || undefined); setDetectedDate(null); }}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Оценка времени (мин)</Label>
-          <Input
-            type="number"
-            min={1}
-            placeholder="30"
-            {...register("estimatedMinutes", { valueAsNumber: true })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Иконка (emoji)</Label>
-          <Input placeholder="📌" maxLength={10} {...register("icon")} />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Цвет карточки</Label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={watch("coverColor") ?? "#7c3aed"}
-              onChange={(e) => setValue("coverColor", e.target.value)}
-              className="w-9 h-9 rounded cursor-pointer bg-transparent border border-border"
-            />
-            <Input
-              placeholder="#7c3aed"
-              value={watch("coverColor") ?? ""}
-              onChange={(e) => setValue("coverColor", e.target.value || undefined)}
-              className="flex-1"
-            />
-            {watch("coverColor") && (
-              <button type="button" onClick={() => setValue("coverColor", undefined)} className="text-muted hover:text-text text-xs shrink-0">
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
+      <div className="space-y-2">
+        <Label>Дедлайн</Label>
+        <DatePicker
+          value={watch("dueDate") ?? ""}
+          onChange={(v) => { setValue("dueDate", v || undefined); setDetectedDate(null); }}
+        />
       </div>
 
       {/* Project */}
@@ -301,35 +261,88 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
         </div>
       )}
 
-      {/* Recurrence */}
-      <div className="space-y-2">
-        <Label className="text-sm">Повторение</Label>
-        <div className="flex flex-wrap gap-2">
-          {(["daily", "weekly", "monthly"] as const).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => {
-                if (watch("recurrence") === r) {
-                  setValue("isRecurring", false);
-                  setValue("recurrence", undefined);
-                } else {
-                  setValue("isRecurring", true);
-                  setValue("recurrence", r);
-                }
-              }}
-              className={cn(
-                "text-xs px-3 py-1.5 rounded-full border transition-all",
-                watch("recurrence") === r
-                  ? "border-primary/60 text-primary bg-primary/10"
-                  : "border-border text-muted hover:text-text hover:border-border/80"
-              )}
-            >
-              {r === "daily" ? "Ежедневно" : r === "weekly" ? "Еженедельно" : "Ежемесячно"}
-            </button>
-          ))}
+      {/* Advanced toggle */}
+      <button
+        type="button"
+        onClick={() => setAdvancedOpen((v) => !v)}
+        className="flex items-center gap-1.5 text-xs text-muted hover:text-text transition-colors"
+      >
+        <motion.span animate={{ rotate: advancedOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown size={12} />
+        </motion.span>
+        Дополнительно
+      </button>
+
+      <CollapsibleBody expanded={advancedOpen}>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Иконка (emoji)</Label>
+            <Input placeholder="📌" maxLength={10} {...register("icon")} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Оценка времени (мин)</Label>
+            <Input
+              type="number"
+              min={1}
+              placeholder="30"
+              {...register("estimatedMinutes", { valueAsNumber: true })}
+            />
+          </div>
         </div>
-      </div>
+
+        <div className="space-y-2">
+          <Label>Цвет карточки</Label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={watch("coverColor") ?? "#7c3aed"}
+              onChange={(e) => setValue("coverColor", e.target.value)}
+              className="w-9 h-9 rounded cursor-pointer bg-transparent border border-border"
+            />
+            <Input
+              placeholder="#7c3aed"
+              value={watch("coverColor") ?? ""}
+              onChange={(e) => setValue("coverColor", e.target.value || undefined)}
+              className="flex-1"
+            />
+            {watch("coverColor") && (
+              <button type="button" onClick={() => setValue("coverColor", undefined)} className="text-muted hover:text-text text-xs shrink-0">
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Повторение</Label>
+          <div className="flex flex-wrap gap-2">
+            {(["daily", "weekly", "monthly"] as const).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => {
+                  if (watch("recurrence") === r) {
+                    setValue("isRecurring", false);
+                    setValue("recurrence", undefined);
+                  } else {
+                    setValue("isRecurring", true);
+                    setValue("recurrence", r);
+                  }
+                }}
+                className={cn(
+                  "text-xs px-3 py-1.5 rounded-full border transition-all",
+                  watch("recurrence") === r
+                    ? "border-primary/60 text-primary bg-primary/10"
+                    : "border-border text-muted hover:text-text hover:border-border/80"
+                )}
+              >
+                {r === "daily" ? "Ежедневно" : r === "weekly" ? "Еженедельно" : "Ежемесячно"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </CollapsibleBody>
 
       <Button type="submit" disabled={isPending} className="w-full bg-primary text-white font-semibold">
         {isPending && <Loader2 size={16} className="animate-spin mr-2" />}

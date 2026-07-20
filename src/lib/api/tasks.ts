@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { Task, TaskComment, PaginatedResponse } from "@/types";
+import type { Task, TaskComment, TaskActivity, TimeEntry, TimerStatus, TimeTrackingToday, PaginatedResponse } from "@/types";
 
 export interface TaskFilters {
   completed?: boolean;
@@ -108,5 +108,38 @@ export const tasksApi = {
 
   deleteComment: async (taskId: string, commentId: string): Promise<void> => {
     await api.delete(`/tasks/${taskId}/comments/${commentId}`);
+  },
+
+  getActivity: async (taskId: string): Promise<TaskActivity[]> => {
+    const { data } = await api.get<TaskActivity[]>(`/tasks/${taskId}/activity`);
+    return data ?? [];
+  },
+
+  bulkDelete: async (ids: string[]): Promise<void> => {
+    await api.post("/tasks/bulk-delete", { ids });
+  },
+
+  bulkUpdateStatus: async (ids: string[], status: string): Promise<void> => {
+    await api.post("/tasks/bulk-status", { ids, status });
+  },
+
+  startTimer: async (taskId: string): Promise<TimeEntry> => {
+    const { data } = await api.post<TimeEntry>(`/tasks/${taskId}/timer/start`);
+    return data;
+  },
+
+  stopTimer: async (taskId: string): Promise<TimeEntry> => {
+    const { data } = await api.post<TimeEntry>(`/tasks/${taskId}/timer/stop`);
+    return data;
+  },
+
+  getTimerStatus: async (taskId: string): Promise<TimerStatus> => {
+    const { data } = await api.get<TimerStatus>(`/tasks/${taskId}/timer`);
+    return data;
+  },
+
+  getTimeTracking: async (): Promise<TimeTrackingToday> => {
+    const { data } = await api.get<TimeTrackingToday>("/tasks/time-tracking/today");
+    return data;
   },
 };

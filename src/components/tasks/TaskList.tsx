@@ -52,7 +52,7 @@ function applyOrder(tasks: Task[], savedOrder: string[]): Task[] {
 
 // ─── Sortable row ──────────────────────────────────────────────────────────────
 
-function SortableTaskCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => void }) {
+function SortableTaskCard({ task, onEdit, onCardClick }: { task: Task; onEdit: (t: Task) => void; onCardClick?: (t: Task) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
 
@@ -74,7 +74,7 @@ function SortableTaskCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => v
         <GripVertical size={14} />
       </button>
       <div className="flex-1 min-w-0">
-        <TaskCard task={task} onEdit={onEdit} />
+        <TaskCard task={task} onEdit={onEdit} onCardClick={onCardClick} />
       </div>
     </div>
   );
@@ -85,11 +85,12 @@ function SortableTaskCard({ task, onEdit }: { task: Task; onEdit: (t: Task) => v
 interface TaskListProps {
   tasks: Task[];
   onEdit: (task: Task) => void;
+  onCardClick?: (task: Task) => void;
   onCreateClick?: () => void;
   isDndEnabled?: boolean;
 }
 
-export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onCardClick, onCreateClick, isDndEnabled = true }: TaskListProps) {
   const [ordered, setOrdered] = useState<Task[]>([]);
   const [completedOpen, setCompletedOpen] = useState(false);
 
@@ -147,7 +148,7 @@ export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: 
               <div className="space-y-2">
                 <AnimatePresence initial={false}>
                   {ordered.map((task) => (
-                    <SortableTaskCard key={task.id} task={task} onEdit={onEdit} />
+                    <SortableTaskCard key={task.id} task={task} onEdit={onEdit} onCardClick={onCardClick} />
                   ))}
                 </AnimatePresence>
               </div>
@@ -157,7 +158,7 @@ export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: 
           <div className="space-y-2">
             <AnimatePresence initial={false}>
               {ordered.map((task) => (
-                <TaskCard key={task.id} task={task} onEdit={onEdit} />
+                <TaskCard key={task.id} task={task} onEdit={onEdit} onCardClick={onCardClick} />
               ))}
             </AnimatePresence>
           </div>
@@ -198,7 +199,7 @@ export function TaskList({ tasks, onEdit, onCreateClick, isDndEnabled = true }: 
                 <div className="space-y-2 mt-2">
                   <AnimatePresence initial={false}>
                     {done.map((task) => (
-                      <TaskCard key={task.id} task={task} onEdit={onEdit} />
+                      <TaskCard key={task.id} task={task} onEdit={onEdit} onCardClick={onCardClick} />
                     ))}
                   </AnimatePresence>
                 </div>

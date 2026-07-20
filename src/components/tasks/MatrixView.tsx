@@ -53,18 +53,18 @@ function isImportant(t: Task) {
   return t.priority === 1;
 }
 
-function MatrixTaskRow({ task, onEdit }: { task: Task; onEdit: (t: Task) => void }) {
+function MatrixTaskRow({ task, onEdit, onCardClick }: { task: Task; onEdit: (t: Task) => void; onCardClick?: (t: Task) => void }) {
   const update = useUpdateTask();
 
   const toggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    update.mutate({ id: task.id, payload: { completed: !task.completed } });
+    update.mutate({ id: task.id, payload: { status: task.completed ? "todo" : "done" } });
   };
 
   return (
     <div
       className="flex items-center gap-2 py-1.5 px-1 rounded-lg hover:bg-white/5 transition-colors group cursor-pointer"
-      onClick={() => onEdit(task)}
+      onClick={() => onCardClick ? onCardClick(task) : onEdit(task)}
     >
       <button onClick={toggle} className="shrink-0 text-muted hover:text-success transition-colors">
         {task.completed
@@ -82,9 +82,10 @@ function MatrixTaskRow({ task, onEdit }: { task: Task; onEdit: (t: Task) => void
 interface MatrixViewProps {
   tasks: Task[];
   onEdit: (task: Task) => void;
+  onCardClick?: (task: Task) => void;
 }
 
-export function MatrixView({ tasks, onEdit }: MatrixViewProps) {
+export function MatrixView({ tasks, onEdit, onCardClick }: MatrixViewProps) {
   const active = tasks.filter((t) => !t.completed);
 
   return (
@@ -111,7 +112,7 @@ export function MatrixView({ tasks, onEdit }: MatrixViewProps) {
                 <p className="text-[11px] text-muted/50 text-center py-4">Нет задач</p>
               ) : (
                 quadTasks.map((t) => (
-                  <MatrixTaskRow key={t.id} task={t} onEdit={onEdit} />
+                  <MatrixTaskRow key={t.id} task={t} onEdit={onEdit} onCardClick={onCardClick} />
                 ))
               )}
             </div>

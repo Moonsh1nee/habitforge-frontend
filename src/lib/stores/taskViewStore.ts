@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 type TaskView = "list" | "kanban" | "matrix";
-type KanbanGroupBy = "project" | "priority";
+type KanbanGroupBy = "project" | "priority" | "status";
 
 interface TaskViewState {
   view: TaskView;

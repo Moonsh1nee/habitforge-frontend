@@ -12,6 +12,14 @@ export function useGoals(status?: GoalStatus) {
   });
 }
 
+export function useGoalTimeline(id: string) {
+  return useQuery({
+    queryKey: ["goals", id, "timeline"],
+    queryFn: () => goalsApi.getTimeline(id),
+    enabled: !!id,
+  });
+}
+
 export function useCreateGoal() {
   const qc = useQueryClient();
   return useMutation({
