@@ -8,6 +8,7 @@ export function useXP() {
     queryKey: ["xp"],
     queryFn: xpApi.getXP,
     staleTime: 60_000,
+    retry: false,
   });
 }
 
@@ -16,5 +17,6 @@ export function useAchievements() {
     queryKey: ["achievements"],
     queryFn: xpApi.getAchievements,
     staleTime: 2 * 60_000,
+    retry: false,
   });
 }
