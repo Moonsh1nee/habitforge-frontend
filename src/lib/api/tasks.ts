@@ -73,8 +73,9 @@ export const tasksApi = {
     await api.delete(`/tasks/${id}`);
   },
 
-  bulkComplete: async (ids: string[]): Promise<void> => {
-    await api.post("/tasks/bulk-complete", { ids });
+  bulkComplete: async (ids: string[]): Promise<Task[]> => {
+    const { data } = await api.post<Task[]>("/tasks/bulk-complete", { ids });
+    return data;
   },
 
   reorder: async (ids: string[]): Promise<void> => {
@@ -116,11 +117,11 @@ export const tasksApi = {
   },
 
   bulkDelete: async (ids: string[]): Promise<void> => {
-    await api.post("/tasks/bulk-delete", { ids });
+    await api.post("/tasks/bulk", { ids, action: "delete" });
   },
 
   bulkUpdateStatus: async (ids: string[], status: string): Promise<void> => {
-    await api.post("/tasks/bulk-status", { ids, status });
+    await api.post("/tasks/bulk", { ids, action: "set_status", payload: { status } });
   },
 
   startTimer: async (taskId: string): Promise<TimeEntry> => {
