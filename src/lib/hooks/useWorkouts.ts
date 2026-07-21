@@ -227,7 +227,8 @@ export function usePersonalRecords() {
 export function useAddPersonalRecord() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Partial<PersonalRecord>) => workoutsApi.addRecord(payload),
+    mutationFn: ({ exerciseId, ...payload }: Partial<PersonalRecord> & { exerciseId: string }) =>
+      workoutsApi.addRecord(exerciseId, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["personal-records"] });
       toast.success("Рекорд сохранён");

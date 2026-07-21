@@ -7,8 +7,8 @@ export const xpApi = {
     return data;
   },
 
-  recalculateXP: async (): Promise<UserXP> => {
-    const { data } = await api.post<UserXP>("/users/me/xp/recalculate");
+  recalculateXP: async (): Promise<{ message: string }> => {
+    const { data } = await api.post<{ message: string }>("/users/me/xp/recalculate");
     return data;
   },
 

@@ -122,22 +122,22 @@ export const workoutsApi = {
   },
 
   getLibrary: async (params?: { muscleGroup?: MuscleGroup; equipment?: Equipment; search?: string }): Promise<ExerciseTemplate[]> => {
-    const { data } = await api.get<ExerciseTemplate[]>("/workouts/library", { params });
+    const { data } = await api.get<ExerciseTemplate[]>("/workouts/exercises/library", { params });
     return data ?? [];
   },
 
   addToLibrary: async (payload: Partial<ExerciseTemplate>): Promise<ExerciseTemplate> => {
-    const { data } = await api.post<ExerciseTemplate>("/workouts/library", payload);
+    const { data } = await api.post<ExerciseTemplate>("/workouts/exercises/library", payload);
     return data;
   },
 
   getRecords: async (): Promise<PersonalRecord[]> => {
-    const { data } = await api.get<PersonalRecord[]>("/workouts/records");
+    const { data } = await api.get<PersonalRecord[]>("/workouts/records/summary");
     return data ?? [];
   },
 
-  addRecord: async (payload: Partial<PersonalRecord>): Promise<PersonalRecord> => {
-    const { data } = await api.post<PersonalRecord>("/workouts/records", payload);
+  addRecord: async (exerciseId: string, payload: Omit<Partial<PersonalRecord>, "exerciseName">): Promise<PersonalRecord> => {
+    const { data } = await api.post<PersonalRecord>(`/workouts/exercises/${exerciseId}/records`, payload);
     return data;
   },
 };
