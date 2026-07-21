@@ -113,8 +113,8 @@ export default function AchievementsPage() {
   const { data: xp } = useXP();
 
   const allItems: Achievement[] = [
-    ...(achievements?.unlocked ?? []),
-    ...(achievements?.locked ?? []),
+    ...(achievements?.unlocked ?? []).map((a) => ({ ...a, isUnlocked: true })),
+    ...(achievements?.locked ?? []).map((a) => ({ ...a, isUnlocked: false })),
   ];
 
   const filtered = allItems
