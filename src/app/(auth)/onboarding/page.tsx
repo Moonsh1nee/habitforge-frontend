@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { Zap, Check, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -166,6 +167,7 @@ function StepDone({ name, onOpen }: { name: string; onOpen: () => void }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { setModules } = useOnboardingStore();
@@ -204,6 +206,7 @@ export default function OnboardingPage() {
     try {
       const updated = await usersApi.updateMe({ onboardingCompleted: true });
       setUser(updated);
+      qc.setQueryData(["me"], updated); // sync TanStack cache so AuthBootstrap doesn't re-redirect
       setModules([...selected] as AppModule[]);
       setStep(2);
     } catch {
