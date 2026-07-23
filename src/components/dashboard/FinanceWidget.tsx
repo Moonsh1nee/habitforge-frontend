@@ -18,7 +18,7 @@ export function FinanceWidget() {
           <Wallet size={16} className="text-success" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-text leading-tight">Финансы</h3>
+          <h2 className="text-sm font-semibold text-text leading-tight">Финансы</h2>
           <p className="text-[10px] text-muted">за эту неделю</p>
         </div>
       </div>

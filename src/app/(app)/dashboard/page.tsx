@@ -64,7 +64,7 @@ function SortableWidget({ id, span }: { id: string; span: "half" | "full" }) {
         {...attributes}
         {...listeners}
         aria-label="Переместить виджет"
-        className="absolute top-2 right-2 z-10 p-1 rounded-md text-muted/0 group-hover/widget:text-muted/50 hover:text-muted! cursor-grab active:cursor-grabbing transition-colors touch-none"
+        className="absolute top-1.5 right-1.5 z-10 min-w-6 min-h-6 flex items-center justify-center rounded-md text-muted/0 group-hover/widget:text-muted/50 hover:text-muted! cursor-grab active:cursor-grabbing transition-colors touch-none"
       >
         <GripVertical size={14} />
       </button>

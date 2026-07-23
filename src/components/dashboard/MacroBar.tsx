@@ -22,7 +22,7 @@ export function MacroBar({ calories = 0, targets }: MacroBarProps) {
         <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
           <Utensils size={13} className="text-warning" />
         </div>
-        <h3 className="text-sm font-semibold text-text">Питание</h3>
+        <h2 className="text-sm font-semibold text-text">Питание</h2>
       </div>
 
       <div className="space-y-2.5">

@@ -18,7 +18,7 @@ export function HabitProgressRing({ habits }: HabitProgressRingProps) {
   if (habits.length === 0) {
     return (
       <GlassCard>
-        <h3 className="font-semibold text-text mb-3">Привычки</h3>
+        <h2 className="font-semibold text-text mb-3">Привычки</h2>
         <p className="text-xs text-muted text-center py-4">Нет привычек на сегодня</p>
       </GlassCard>
     );
@@ -27,7 +27,7 @@ export function HabitProgressRing({ habits }: HabitProgressRingProps) {
   return (
     <GlassCard>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-text">Привычки сегодня</h3>
+        <h2 className="font-semibold text-text">Привычки сегодня</h2>
         <span className="text-xs font-semibold tabular-nums" style={{ color: pct === 100 ? "var(--color-success)" : "var(--color-muted)" }}>
           {completed}/{habits.length}
         </span>

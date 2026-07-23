@@ -85,10 +85,10 @@ export function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 text-muted hover:text-text transition-colors p-1.5 rounded-lg hover:bg-white/5"
-        aria-label="Поиск (Ctrl+K)"
+        aria-label={`Поиск (${isMac ? "⌘" : "Ctrl"} K)`}
       >
         <Search size={18} />
-        <kbd className="hidden sm:inline-flex items-center gap-0.5 text-xs text-muted/60 bg-white/5 border border-border rounded px-1.5 py-0.5">
+        <kbd className="hidden sm:inline-flex items-center gap-0.5 text-xs text-muted bg-white/5 border border-border rounded px-1.5 py-0.5">
           {isMac ? "⌘" : "Ctrl"} K
         </kbd>
       </button>

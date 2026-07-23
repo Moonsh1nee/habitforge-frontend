@@ -62,7 +62,7 @@ export function TodayCard({ pending, overdue }: TodayCardProps) {
   return (
     <GlassCard className="col-span-2">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-text">Задачи на сегодня</h3>
+        <h2 className="font-semibold text-text">Задачи на сегодня</h2>
         <div className="flex items-center gap-2">
           {overdue.length > 0 && (
             <span className="flex items-center gap-1 text-xs text-danger">

@@ -126,7 +126,7 @@ export function WeeklyStats({ week }: WeeklyStatsProps) {
   return (
     <GlassCard>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-text">Итоги недели</h3>
+        <h2 className="font-semibold text-text">Итоги недели</h2>
         <span className="text-xs text-muted/60 font-mono">
           {week.week_start ? week.week_start.slice(5).replace("-", ".") : ""} — {week.week_end ? week.week_end.slice(5).replace("-", ".") : ""}
         </span>

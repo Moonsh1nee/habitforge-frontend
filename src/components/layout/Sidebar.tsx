@@ -120,7 +120,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <Zap size={16} className="text-white" />
         </div>
-        <span className="font-bold text-lg text-primary">HabitForge</span>
+        <span className="font-bold text-lg text-primary-text">HabitForge</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
@@ -135,9 +135,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/10 text-primary-text"
                     : highlight
-                    ? "text-primary hover:bg-primary/10"
+                    ? "text-primary-text hover:bg-primary/10"
                     : "text-muted hover:text-text hover:bg-white/5"
                 )}
               >
@@ -156,7 +156,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   </span>
                 )}
                 {highlight && !active && (
-                  <span className="text-[10px] font-bold bg-primary/15 text-primary rounded-full px-1.5 py-0.5 leading-none">
+                  <span className="text-[10px] font-bold bg-primary/15 text-primary-text rounded-full px-1.5 py-0.5 leading-none">
                     NEW
                   </span>
                 )}
@@ -189,7 +189,7 @@ function ProjectsSection({ onNavigate }: { onNavigate?: () => void }) {
             <Link key={p.id} href={href} onClick={onNavigate}>
               <div className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-colors",
-                active ? "bg-primary/10 text-primary" : "text-muted hover:text-text hover:bg-white/5"
+                active ? "bg-primary/10 text-primary-text" : "text-muted hover:text-text hover:bg-white/5"
               )}>
                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
                 <span className="flex-1 truncate">{p.name}</span>

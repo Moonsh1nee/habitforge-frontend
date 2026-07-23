@@ -18,7 +18,7 @@ export function ShoppingWidget() {
           <ShoppingCart size={16} className="text-accent" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-text leading-tight">Покупки</h3>
+          <h2 className="text-sm font-semibold text-text leading-tight">Покупки</h2>
           <p className="text-[10px] text-muted">активные списки</p>
         </div>
       </div>
