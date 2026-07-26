@@ -11,6 +11,8 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import { usersApi } from "@/lib/api/users";
 import { authApi } from "@/lib/api/auth";
 import { useSessions, useRevokeSession, useRevokeAllSessions } from "@/lib/hooks/useSessions";
+import { parseDeviceInfo } from "@/lib/utils";
+import type { Session } from "@/types";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,14 +23,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-function SessionRow({ session }: { session: { id: string; device: string | null; browser: string | null; os: string | null; ip: string | null; lastActiveAt: string; isCurrent: boolean } }) {
+function SessionRow({ session }: { session: Session }) {
   const revoke = useRevokeSession();
 
-  const icon = session.device?.toLowerCase().includes("mobile")
+  const { label, isMobile } = parseDeviceInfo(session.deviceInfo);
+  const icon = isMobile
     ? <Smartphone size={14} className="text-muted" />
     : <Monitor size={14} className="text-muted" />;
-
-  const label = [session.browser, session.os].filter(Boolean).join(" · ") || "Неизвестное устройство";
+  const activeAt = session.lastActiveAt ?? session.createdAt;
 
   return (
     <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border last:border-0">
@@ -44,8 +46,8 @@ function SessionRow({ session }: { session: { id: string; device: string | null;
             )}
           </p>
           <p className="text-xs text-muted">
-            {session.ip && <span className="mr-2">{session.ip}</span>}
-            {format(new Date(session.lastActiveAt), "d MMM, HH:mm", { locale: ru })}
+            {session.ipAddress && <span className="mr-2">{session.ipAddress}</span>}
+            {format(new Date(activeAt), "d MMM, HH:mm", { locale: ru })}
           </p>
         </div>
       </div>

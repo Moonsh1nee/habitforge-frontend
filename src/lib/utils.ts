@@ -62,6 +62,29 @@ export function parseNaturalDate(
   };
 }
 
+export function parseDeviceInfo(ua: string | null): { label: string; isMobile: boolean } {
+  if (!ua) return { label: "Неизвестное устройство", isMobile: false };
+
+  const isMobile = /Mobile|Android|iPhone|iPad/i.test(ua);
+
+  let os = "";
+  if (/Windows NT/i.test(ua)) os = "Windows";
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+  else if (/Mac OS X/i.test(ua)) os = "macOS";
+  else if (/Android/i.test(ua)) os = "Android";
+  else if (/Linux/i.test(ua)) os = "Linux";
+
+  let browser = "";
+  if (/Edg\//i.test(ua)) browser = "Edge";
+  else if (/OPR\/|Opera/i.test(ua)) browser = "Opera";
+  else if (/Firefox\//i.test(ua)) browser = "Firefox";
+  else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browser = "Chrome";
+  else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browser = "Safari";
+
+  const label = [browser, os].filter(Boolean).join(" · ");
+  return { label: label || "Неизвестное устройство", isMobile };
+}
+
 export function getMoodColor(mood: number): string {
   if (mood >= 8) return "#22c55e";
   if (mood >= 6) return "#84cc16";

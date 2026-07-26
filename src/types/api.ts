@@ -560,13 +560,10 @@ export interface CalendarEvent {
 
 export interface Session {
   id: string;
-  userId: string;
-  device: string | null;
-  browser: string | null;
-  os: string | null;
-  ip: string | null;
-  lastActiveAt: string;
+  deviceInfo: string | null;
+  ipAddress: string | null;
   createdAt: string;
+  lastActiveAt: string | null;
   isCurrent: boolean;
 }
 
