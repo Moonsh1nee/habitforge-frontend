@@ -12,6 +12,7 @@ import { MatrixView } from "@/components/tasks/MatrixView";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { ProjectsManager } from "@/components/tasks/ProjectsManager";
+import { ReminderMigrationBanner } from "@/components/tasks/ReminderMigrationBanner";
 import { ViewSwitcher } from "@/components/tasks/ViewSwitcher";
 import { ListSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -152,6 +153,10 @@ function TasksPageInner() {
             </Button>
           </div>
         }
+      />
+
+      <ReminderMigrationBanner
+        show={tasks.some((t) => t.dueDate && !t.completed && (!t.reminderMode || t.reminderMode === "none"))}
       />
 
       <div className="relative">

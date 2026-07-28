@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, CalendarClock, X, Tag as TagIcon, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { format } from "date-fns";
 import { taskSchema, type TaskInput } from "@/lib/schemas/task.schema";
 import { useCreateTask, useUpdateTask } from "@/lib/hooks/useTasks";
 import { useProjects } from "@/lib/hooks/useProjects";
@@ -17,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -72,6 +74,10 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
           isRecurring: task.isRecurring,
           recurrence: task.recurrence ?? undefined,
           projectId: task.projectId ?? undefined,
+          isAllDay: task.isAllDay,
+          reminderMode: task.reminderMode ?? "none",
+          reminderAt: task.reminderAt ? format(new Date(task.reminderAt), "yyyy-MM-dd'T'HH:mm") : undefined,
+          reminderMinutesBefore: task.reminderMinutesBefore ?? undefined,
         }
       : {
           priority: 2,
@@ -79,6 +85,8 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
           isRecurring: false,
           dueDate: defaultDueDate,
           projectId: defaultProjectId,
+          isAllDay: false,
+          reminderMode: "none",
         },
   });
 
@@ -93,11 +101,18 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
   };
 
   const onSubmit = async (data: TaskInput) => {
+    const reminderMode = data.reminderMode ?? "none";
+    const normalized = {
+      ...data,
+      estimatedMinutes: data.estimatedMinutes ?? null,
+      reminderAt: reminderMode === "at_time" ? data.reminderAt : null,
+      reminderMinutesBefore: reminderMode === "before_due" ? data.reminderMinutesBefore : null,
+    };
     if (task) {
-      const updated = await updateTask.mutateAsync({ id: task.id, payload: { ...data, estimatedMinutes: data.estimatedMinutes ?? null } as Partial<Task> });
+      const updated = await updateTask.mutateAsync({ id: task.id, payload: normalized as Partial<Task> });
       await syncTags(updated.id);
     } else {
-      const created = await createTask.mutateAsync({ ...data, estimatedMinutes: data.estimatedMinutes ?? null } as Partial<Task>);
+      const created = await createTask.mutateAsync(normalized as Partial<Task>);
       await syncTags(created.id);
     }
     onSuccess?.();
@@ -204,6 +219,75 @@ export function TaskForm({ task, defaultDueDate, defaultProjectId, onSuccess }: 
           value={watch("dueDate") ?? ""}
           onChange={(v) => { setValue("dueDate", v || undefined); setDetectedDate(null); }}
         />
+      </div>
+
+      {/* All-day / reminder */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={watch("isAllDay") ?? false}
+            onCheckedChange={(checked) => {
+              setValue("isAllDay", checked);
+              if (checked) {
+                setValue("reminderMode", "none");
+                setValue("reminderAt", undefined);
+                setValue("reminderMinutesBefore", undefined);
+              }
+            }}
+          />
+          <Label className="mb-0! font-normal cursor-pointer" onClick={() => setValue("isAllDay", !(watch("isAllDay") ?? false))}>
+            Весь день (без личного напоминания, попадёт в общий дайджест)
+          </Label>
+        </div>
+
+        {!watch("isAllDay") && (
+          <div className="space-y-2">
+            <Label>Напоминание</Label>
+            <Select
+              value={watch("reminderMode") ?? "none"}
+              onValueChange={(v) => {
+                const mode = (v ?? "none") as TaskInput["reminderMode"];
+                setValue("reminderMode", mode);
+                if (mode !== "at_time") setValue("reminderAt", undefined);
+                if (mode !== "before_due") setValue("reminderMinutesBefore", undefined);
+              }}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Без напоминания</SelectItem>
+                <SelectItem value="at_time">В конкретное время</SelectItem>
+                <SelectItem value="before_due">За N минут до дедлайна</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.reminderMode && <p className="text-danger text-xs">{errors.reminderMode.message}</p>}
+
+            {watch("reminderMode") === "at_time" && (
+              <div className="space-y-1">
+                <Input
+                  type="datetime-local"
+                  value={watch("reminderAt") ?? ""}
+                  onChange={(e) => setValue("reminderAt", e.target.value || undefined)}
+                />
+                {errors.reminderAt && <p className="text-danger text-xs">{errors.reminderAt.message}</p>}
+              </div>
+            )}
+
+            {watch("reminderMode") === "before_due" && (
+              <div className="space-y-1">
+                <Input
+                  type="number"
+                  min={1}
+                  max={1440}
+                  placeholder="Например, 15"
+                  value={watch("reminderMinutesBefore") ?? ""}
+                  onChange={(e) => setValue("reminderMinutesBefore", e.target.value ? Number(e.target.value) : undefined)}
+                />
+                <p className="text-xs text-muted">Требуется дедлайн</p>
+                {errors.reminderMinutesBefore && <p className="text-danger text-xs">{errors.reminderMinutesBefore.message}</p>}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Project */}

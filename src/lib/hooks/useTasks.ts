@@ -191,6 +191,19 @@ export function useStopTimer() {
   });
 }
 
+export function useSnoozeReminder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, minutes }: { taskId: string; minutes: number }) =>
+      tasksApi.snoozeReminder(taskId, minutes),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Напоминание отложено");
+    },
+    onError: () => toast.error("Не удалось отложить напоминание"),
+  });
+}
+
 export function useTimeTrackingToday() {
   return useQuery({
     queryKey: ["time-tracking", "today"],

@@ -17,6 +17,7 @@ export const usersApi = {
     bio?: string;
     timezone?: string;
     onboardingCompleted?: boolean;
+    dailyDigestTime?: string | null;
   }): Promise<User> => {
     const { data } = await api.patch<User>("/users/me", payload);
     return data;

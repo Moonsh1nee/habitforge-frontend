@@ -21,7 +21,7 @@ export function ProfileTab({ user }: { user: User }) {
   const [preview, setPreview] = useState<string | null>(null);
 
   const update = useMutation({
-    mutationFn: (payload: { firstName?: string; lastName?: string; bio?: string; timezone?: string }) =>
+    mutationFn: (payload: { firstName?: string; lastName?: string; bio?: string; timezone?: string; dailyDigestTime?: string | null }) =>
       usersApi.updateMe(payload),
     onSuccess: (data) => {
       setUser(data);
@@ -59,6 +59,7 @@ export function ProfileTab({ user }: { user: User }) {
       lastName: fd.get("lastName") as string,
       bio: fd.get("bio") as string,
       timezone: fd.get("timezone") as string,
+      dailyDigestTime: fd.get("dailyDigestTime") as string,
     });
   };
 
@@ -123,6 +124,13 @@ export function ProfileTab({ user }: { user: User }) {
           <Label>Часовой пояс</Label>
           <Input name="timezone" defaultValue={user.timezone ?? "Europe/Moscow"} placeholder="Europe/Moscow" />
           <p className="text-xs text-muted">IANA timezone: Europe/Moscow, UTC, America/New_York</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Время дневного дайджеста</Label>
+          <Input name="dailyDigestTime" type="time" defaultValue={user.dailyDigestTime ?? ""} className="w-40" />
+          <p className="text-xs text-muted">
+            Общее уведомление по задачам «весь день» и невыполненным на сегодня привычкам. Оставьте пустым, чтобы отключить.
+          </p>
         </div>
         <Button type="submit" disabled={update.isPending} className="bg-primary text-white">
           {update.isPending && <Loader2 size={16} className="animate-spin mr-2" />}

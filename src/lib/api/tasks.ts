@@ -44,6 +44,10 @@ export const tasksApi = {
       dueDate: payload.dueDate ?? null,
       isRecurring: payload.isRecurring ?? false,
       recurrence: payload.recurrence ?? null,
+      isAllDay: payload.isAllDay ?? false,
+      reminderMode: payload.reminderMode ?? "none",
+      ...(payload.reminderAt !== undefined && { reminderAt: payload.reminderAt }),
+      ...(payload.reminderMinutesBefore !== undefined && { reminderMinutesBefore: payload.reminderMinutesBefore }),
       ...(payload.projectId !== undefined && { projectId: payload.projectId }),
       ...(payload.goalId !== undefined && { goalId: payload.goalId }),
     });
@@ -65,6 +69,10 @@ export const tasksApi = {
       ...(payload.coverColor !== undefined && { coverColor: payload.coverColor }),
       ...(payload.estimatedMinutes !== undefined && { estimatedMinutes: payload.estimatedMinutes }),
       ...(payload.goalId !== undefined && { goalId: payload.goalId }),
+      ...(payload.isAllDay !== undefined && { isAllDay: payload.isAllDay }),
+      ...(payload.reminderMode !== undefined && { reminderMode: payload.reminderMode }),
+      ...(payload.reminderAt !== undefined && { reminderAt: payload.reminderAt }),
+      ...(payload.reminderMinutesBefore !== undefined && { reminderMinutesBefore: payload.reminderMinutesBefore }),
     });
     return data;
   },
@@ -141,6 +149,11 @@ export const tasksApi = {
 
   getTimeTracking: async (): Promise<TimeTrackingToday> => {
     const { data } = await api.get<TimeTrackingToday>("/tasks/time-tracking/today");
+    return data;
+  },
+
+  snoozeReminder: async (taskId: string, minutes: number): Promise<Task> => {
+    const { data } = await api.post<Task>(`/tasks/${taskId}/reminder/snooze`, { minutes });
     return data;
   },
 };

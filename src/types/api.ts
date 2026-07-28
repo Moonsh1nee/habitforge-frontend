@@ -12,6 +12,7 @@ export interface User {
   plan: "free" | "pro";
   role: "user" | "admin";
   onboardingCompleted: boolean;
+  dailyDigestTime: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,6 +55,7 @@ export interface Project {
 // 1=high, 2=medium, 3=low
 export type TaskPriority = 1 | 2 | 3;
 export type TaskStatus = "todo" | "in_progress" | "review" | "done" | "cancelled";
+export type TaskReminderMode = "none" | "at_time" | "before_due";
 
 export interface Task {
   id: string;
@@ -74,6 +76,11 @@ export interface Task {
   completedAt: string | null;
   isRecurring: boolean;
   recurrence: "daily" | "weekly" | "monthly" | null;
+  isAllDay: boolean;
+  reminderMode: TaskReminderMode;
+  reminderAt: string | null;
+  reminderMinutesBefore: number | null;
+  reminderSnoozedUntil: string | null;
   subtasksCount: number;
   subtasksDone: number;
   commentsCount: number;

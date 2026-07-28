@@ -3,11 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown, MessageSquare, Clock } from "lucide-react";
+import { Calendar, Pencil, Trash2, CheckCircle2, Circle, ChevronDown, MessageSquare, Clock, Bell, BellOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
 import { cn, formatDate, isOverdue, getPriorityColor, getPriorityLabel } from "@/lib/utils";
-import { useUpdateTask, useDeleteTask } from "@/lib/hooks/useTasks";
+import { useUpdateTask, useDeleteTask, useSnoozeReminder } from "@/lib/hooks/useTasks";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { SubtaskList } from "./SubtaskList";
 import { TaskComments } from "./TaskComments";
@@ -43,6 +49,7 @@ export function TaskCard({ task, onEdit, onCardClick }: TaskCardProps) {
   const router = useRouter();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const snoozeReminder = useSnoozeReminder();
   const { data: projects = [] } = useProjects();
   const [justCompleted, setJustCompleted] = useState(false);
   const [subtasksOpen, setSubtasksOpen] = useState(false);
@@ -142,6 +149,42 @@ export function TaskCard({ task, onEdit, onCardClick }: TaskCardProps) {
               {task.isRecurring && (
                 <span className="text-[10px] text-accent/70">↺ {task.recurrence}</span>
               )}
+
+              {/* Reminder */}
+              {task.reminderSnoozedUntil ? (
+                <span className="flex items-center gap-1 text-[10px] text-warning">
+                  <BellOff size={10} />
+                  Отложено до {formatDate(task.reminderSnoozedUntil, "HH:mm")}
+                </span>
+              ) : task.reminderMode && task.reminderMode !== "none" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border border-border text-muted hover:border-primary/40 hover:text-primary transition-all"
+                        aria-label="Отложить напоминание"
+                      >
+                        <Bell size={10} />
+                      </button>
+                    }
+                  />
+                  <DropdownMenuContent align="start" className="w-40">
+                    {[15, 30, 60].map((minutes) => (
+                      <DropdownMenuItem
+                        key={minutes}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          snoozeReminder.mutate({ taskId: task.id, minutes });
+                        }}
+                        className="cursor-pointer text-xs px-3 py-1.5"
+                      >
+                        Отложить на {minutes} мин
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
 
               {/* Status badge — clickable to cycle */}
               {statusBadge && (
