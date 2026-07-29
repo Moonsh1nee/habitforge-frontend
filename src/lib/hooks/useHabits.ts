@@ -96,3 +96,20 @@ export function useFreezeHabit() {
     onError: () => toast.error("Нет доступных заморозок"),
   });
 }
+
+/** Fetches per-habit stats for all active habits, for streak leaderboard-style widgets. */
+export function useHabitStreaks() {
+  const { data: habitsPage } = useHabits({ archived: false });
+  const habits = habitsPage?.items ?? [];
+  return useQuery({
+    queryKey: ["habits", "streaks", habits.map((h) => h.id)],
+    queryFn: async () => {
+      const stats = await Promise.all(
+        habits.map(async (h) => ({ habit: h, stats: await habitsApi.getStats(h.id) }))
+      );
+      return stats.sort((a, b) => b.stats.current_streak - a.stats.current_streak);
+    },
+    enabled: habits.length > 0,
+    staleTime: 60_000,
+  });
+}

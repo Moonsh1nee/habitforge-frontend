@@ -174,7 +174,10 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [selected, setSelected] = useState<Set<AppModule>>(
-    new Set(["tasks", "habits", "finance", "workouts", "nutrition", "journal", "shopping", "stats"])
+    new Set([
+      "tasks", "habits", "goals", "finance", "workouts",
+      "nutrition", "journal", "shopping", "stats", "achievements",
+    ])
   );
   const [loading, setLoading] = useState(false);
 
@@ -204,7 +207,10 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setLoading(true);
     try {
-      const updated = await usersApi.updateMe({ onboardingCompleted: true });
+      const updated = await usersApi.updateMe({
+        onboardingCompleted: true,
+        enabledModules: [...selected],
+      });
       setUser(updated);
       qc.setQueryData(["me"], updated); // sync TanStack cache so AuthBootstrap doesn't re-redirect
       setModules([...selected] as AppModule[]);

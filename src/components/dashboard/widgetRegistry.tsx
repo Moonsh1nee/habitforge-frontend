@@ -12,6 +12,16 @@ import { MacroBar } from "./MacroBar";
 import { FinanceWidget } from "./FinanceWidget";
 import { ShoppingWidget } from "./ShoppingWidget";
 import { TimeTrackingWidget } from "./TimeTrackingWidget";
+import { GoalsWidget } from "./GoalsWidget";
+import { JournalTrendWidget } from "./JournalTrendWidget";
+import { WorkoutsWidget } from "./WorkoutsWidget";
+import { AchievementsWidget } from "./AchievementsWidget";
+import { RemindersWidget } from "./RemindersWidget";
+import { MiniCalendarWidget } from "./MiniCalendarWidget";
+import { BudgetsWidget } from "./BudgetsWidget";
+import { ActivityFeedWidget } from "./ActivityFeedWidget";
+import { HabitStreaksWidget } from "./HabitStreaksWidget";
+import type { WidgetSpan } from "@/types";
 
 // ─── Self-contained wrappers ───────────────────────────────────────────────────
 
@@ -67,7 +77,7 @@ export interface WidgetConfig {
   label: string;
   desc: string;
   component: React.ComponentType;
-  span: "half" | "full";
+  span: WidgetSpan;
 }
 
 export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {
@@ -123,6 +133,60 @@ export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {
     label: "Учёт времени",
     desc: "Затраченное время на задачи сегодня",
     component: TimeTrackingWidget,
+    span: "half",
+  },
+  "goals": {
+    label: "Цели",
+    desc: "Прогресс по активным целям",
+    component: GoalsWidget,
+    span: "half",
+  },
+  "journal-trend": {
+    label: "Настроение",
+    desc: "Тренд настроения по дневнику за 14 дней",
+    component: JournalTrendWidget,
+    span: "half",
+  },
+  "workouts": {
+    label: "Тренировки",
+    desc: "Тренировки за последнюю неделю",
+    component: WorkoutsWidget,
+    span: "half",
+  },
+  "achievements": {
+    label: "Достижения",
+    desc: "Уровень, XP и открытые награды",
+    component: AchievementsWidget,
+    span: "half",
+  },
+  "reminders": {
+    label: "Напоминания",
+    desc: "Ближайшие активные напоминания",
+    component: RemindersWidget,
+    span: "half",
+  },
+  "mini-calendar": {
+    label: "Мини-календарь",
+    desc: "Месяц с отметками событий",
+    component: MiniCalendarWidget,
+    span: "full",
+  },
+  "budgets": {
+    label: "Бюджеты",
+    desc: "Использование лимитов по категориям",
+    component: BudgetsWidget,
+    span: "half",
+  },
+  "activity-feed": {
+    label: "Лента активности",
+    desc: "Последние события по всем модулям",
+    component: ActivityFeedWidget,
+    span: "half",
+  },
+  "habit-streaks": {
+    label: "Стрики привычек",
+    desc: "Рейтинг привычек по длине серии",
+    component: HabitStreaksWidget,
     span: "half",
   },
 };

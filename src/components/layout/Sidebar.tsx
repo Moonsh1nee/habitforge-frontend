@@ -18,16 +18,17 @@ import { useOnboardingStore } from "@/lib/stores/onboardingStore";
 
 // module key → href (пустая строка = всегда видно)
 const MODULE_MAP: Record<string, string> = {
-  "/tasks":     "tasks",
-  "/calendar":  "tasks",   // calendar идёт вместе с tasks
-  "/habits":    "habits",
-  "/goals":     "",         // всегда
-  "/stats":     "stats",
-  "/workouts":  "workouts",
-  "/nutrition": "nutrition",
-  "/finance":   "finance",
-  "/shopping":  "shopping",
-  "/journal":   "journal",
+  "/tasks":        "tasks",
+  "/calendar":     "tasks",   // calendar идёт вместе с tasks
+  "/habits":       "habits",
+  "/goals":        "goals",
+  "/stats":        "stats",
+  "/achievements": "achievements",
+  "/workouts":     "workouts",
+  "/nutrition":    "nutrition",
+  "/finance":      "finance",
+  "/shopping":     "shopping",
+  "/journal":      "journal",
 };
 
 const navItems = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { TrendingUp, Settings2, GripVertical } from "lucide-react";
@@ -28,10 +28,19 @@ import { OnboardingBanner } from "@/components/layout/OnboardingBanner";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
 import { getGreeting, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { usersApi } from "@/lib/api/users";
+import type { WidgetSpan } from "@/types";
 
 // ─── Sortable widget shell ─────────────────────────────────────────────────────
 
-function SortableWidget({ id, span }: { id: string; span: "half" | "full" }) {
+// Uses a 6-column grid so third (2/6), half (3/6), and full (6/6) all divide evenly.
+const SPAN_COL_CLASS: Record<WidgetSpan, string> = {
+  third: "col-span-6 sm:col-span-3 lg:col-span-2",
+  half: "col-span-6 sm:col-span-3",
+  full: "col-span-6",
+};
+
+function SortableWidget({ id, span }: { id: string; span: WidgetSpan }) {
   const cfg = WIDGET_REGISTRY[id];
   const {
     attributes,
@@ -54,10 +63,7 @@ function SortableWidget({ id, span }: { id: string; span: "half" | "full" }) {
         opacity: isDragging ? 0.5 : 1,
         zIndex: isDragging ? 50 : undefined,
       }}
-      className={cn(
-        "relative group/widget",
-        span === "full" ? "col-span-2" : "col-span-1"
-      )}
+      className={cn("relative group/widget", SPAN_COL_CLASS[span])}
     >
       {/* Drag handle */}
       <button
@@ -78,10 +84,31 @@ function SortableWidget({ id, span }: { id: string; span: "half" | "full" }) {
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const { data: today } = useDashboardToday();
-  const { widgets, setWidgets } = useDashboardStore();
+  const { widgets, setWidgets, hydrated } = useDashboardStore();
   const [customizerOpen, setCustomizerOpen] = useState(false);
 
   const visible = widgets.filter((w) => w.visible);
+
+  // Debounced sync of widget layout/visibility/span changes to the backend
+  // (dumb JSON blob — backend doesn't interpret widget shape). Skipped until
+  // the store has hydrated from the server to avoid overwriting it with
+  // stale localStorage-cached defaults on first paint.
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipFirst = useRef(true);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (skipFirst.current) {
+      skipFirst.current = false;
+      return;
+    }
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      usersApi.updateMe({ dashboardLayout: widgets }).catch(() => {});
+    }, 800);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [widgets, hydrated]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -145,11 +172,11 @@ export default function DashboardPage() {
       {/* Widget grid */}
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <SortableContext items={visible.map((w) => w.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 gap-4">
-            {visible.map(({ id }) => {
+          <div className="grid grid-cols-6 gap-4">
+            {visible.map(({ id, span }) => {
               const cfg = WIDGET_REGISTRY[id];
               if (!cfg) return null;
-              return <SortableWidget key={id} id={id} span={cfg.span} />;
+              return <SortableWidget key={id} id={id} span={span ?? cfg.span} />;
             })}
           </div>
         </SortableContext>

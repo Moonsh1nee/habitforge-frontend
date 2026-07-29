@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { User } from "@/types";
+import type { User, DashboardWidgetConfig } from "@/types";
 
 export interface AvatarResponse {
   avatarUrl: string;
@@ -18,6 +18,8 @@ export const usersApi = {
     timezone?: string;
     onboardingCompleted?: boolean;
     dailyDigestTime?: string | null;
+    dashboardLayout?: DashboardWidgetConfig[] | null;
+    enabledModules?: string[] | null;
   }): Promise<User> => {
     const { data } = await api.patch<User>("/users/me", payload);
     return data;

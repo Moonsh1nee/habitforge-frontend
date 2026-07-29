@@ -24,6 +24,13 @@ export function getTodayString(): string {
   return format(new Date(), "yyyy-MM-dd");
 }
 
+/** Local-date-safe "N days ago" string (avoids the UTC-day bug of toISOString().slice(0,10)). */
+export function dateNDaysAgoString(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return format(d, "yyyy-MM-dd");
+}
+
 export function getGreeting(name: string): string {
   const hour = new Date().getHours();
   if (hour < 12) return `Доброе утро, ${name}`;

@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { useOnboardingStore, MODULES as MODULE_LIST, type AppModule } from "@/lib/stores/onboardingStore";
+import { usersApi } from "@/lib/api/users";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { cn } from "@/lib/utils";
 
@@ -10,15 +11,21 @@ export function ModulesTab() {
   const { modules, setModules } = useOnboardingStore();
   const active = new Set(modules);
 
-  const toggle = (id: AppModule) => {
+  const toggle = async (id: AppModule) => {
     if (active.has(id)) {
       if (active.size === 1) return;
       active.delete(id);
     } else {
       active.add(id);
     }
-    setModules([...active] as AppModule[]);
-    toast.success("Разделы обновлены");
+    const next = [...active] as AppModule[];
+    setModules(next);
+    try {
+      await usersApi.updateMe({ enabledModules: next });
+      toast.success("Разделы обновлены");
+    } catch {
+      toast.error("Не удалось сохранить на сервере");
+    }
   };
 
   return (

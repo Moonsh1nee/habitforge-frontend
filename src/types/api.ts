@@ -13,8 +13,19 @@ export interface User {
   role: "user" | "admin";
   onboardingCompleted: boolean;
   dailyDigestTime: string | null;
+  dashboardLayout: DashboardWidgetConfig[] | null;
+  enabledModules: string[] | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export type WidgetSpan = "third" | "half" | "full";
+
+export interface DashboardWidgetConfig {
+  id: string;
+  visible: boolean;
+  span?: WidgetSpan;
+  settings?: Record<string, unknown>;
 }
 
 // ─── Integrations ─────────────────────────────────────────────────────────────
