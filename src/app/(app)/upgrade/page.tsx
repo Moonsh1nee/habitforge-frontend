@@ -56,7 +56,7 @@ export default function UpgradePage() {
       <div className="text-center space-y-3 py-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
           <Sparkles size={14} />
-          HabitForge Pro
+          GetGrip Pro
         </div>
         <h1 className="text-3xl font-bold text-text">
           Разблокируй весь потенциал

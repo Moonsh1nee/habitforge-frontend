@@ -120,7 +120,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <Zap size={16} className="text-white" />
         </div>
-        <span className="font-bold text-lg text-primary-text">HabitForge</span>
+        <span className="font-bold text-lg text-primary-text">GetGrip</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">

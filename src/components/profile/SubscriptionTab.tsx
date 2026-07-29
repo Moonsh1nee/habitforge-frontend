@@ -40,7 +40,7 @@ export function SubscriptionTab() {
             {isPro ? <Sparkles size={18} className="text-white" /> : <CreditCard size={18} className="text-muted" />}
           </div>
           <div>
-            <h3 className="font-semibold text-text">{isPro ? "HabitForge Pro" : "Бесплатный план"}</h3>
+            <h3 className="font-semibold text-text">{isPro ? "GetGrip Pro" : "Бесплатный план"}</h3>
             <p className="text-xs text-muted">
               {subscription?.status
                 ? STATUS_LABELS[subscription.status] ?? subscription.status
@@ -61,7 +61,7 @@ export function SubscriptionTab() {
 
         {!isPro && (
           <>
-            <p className="text-sm text-muted mb-4">Перейдите на Pro чтобы разблокировать все возможности HabitForge.</p>
+            <p className="text-sm text-muted mb-4">Перейдите на Pro чтобы разблокировать все возможности GetGrip.</p>
             <div className="flex gap-2 flex-wrap">
               <Button
                 className="bg-primary text-white gap-2"

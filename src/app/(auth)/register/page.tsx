@@ -47,7 +47,7 @@ export default function RegisterPage() {
       className="glass p-8"
     >
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary mb-2">HabitForge</h1>
+        <h1 className="text-3xl font-bold text-primary mb-2">GetGrip</h1>
         <p className="text-muted text-sm">Создайте свой аккаунт</p>
       </div>
 

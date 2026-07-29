@@ -84,7 +84,7 @@ export function OnboardingBanner({ show }: OnboardingBannerProps) {
               <Sparkles size={14} className="text-primary" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-text">Добро пожаловать в HabitForge!</p>
+              <p className="text-sm font-semibold text-text">Добро пожаловать в GetGrip!</p>
               <p className="text-xs text-muted">Начните с трёх простых шагов</p>
             </div>
           </div>

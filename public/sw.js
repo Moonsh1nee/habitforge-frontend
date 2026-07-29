@@ -6,7 +6,7 @@ self.addEventListener("push", (event) => {
       ? [{ action: "snooze", title: "Отложить на 15 мин" }]
       : [];
   event.waitUntil(
-    self.registration.showNotification(data.title ?? "HabitForge", {
+    self.registration.showNotification(data.title ?? "GetGrip", {
       body: data.body ?? "",
       icon: "/icon.svg",
       badge: "/icon.svg",

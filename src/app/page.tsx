@@ -21,7 +21,7 @@ function Navbar() {
         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
           <Zap size={14} className="text-white" />
         </div>
-        <span className="font-bold text-base text-primary">HabitForge</span>
+        <span className="font-bold text-base text-primary">GetGrip</span>
       </div>
       <div className="flex items-center gap-3">
         <Link href="/login" className="text-sm text-muted hover:text-text transition-colors px-3 py-1.5">
@@ -65,11 +65,11 @@ export default function LandingPage() {
             Всё для роста — в одном месте
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold text-text leading-tight mb-6">
-            Стань лучшей версией<br />
-            <span className="text-primary">себя каждый день</span>
+            Контроль над жизнью<br />
+            <span className="text-primary">начинается здесь</span>
           </h1>
           <p className="text-lg text-muted max-w-xl mx-auto mb-10">
-            HabitForge объединяет задачи, привычки, финансы, тренировки и питание в одном приложении. Больше никаких переключений между десятками сервисов.
+            GetGrip объединяет задачи, привычки, финансы, тренировки и питание в одном приложении. Больше никаких переключений между десятками сервисов.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/register"
@@ -250,9 +250,9 @@ export default function LandingPage() {
           <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
             <Zap size={12} className="text-white" />
           </div>
-          <span className="font-bold text-sm text-primary">HabitForge</span>
+          <span className="font-bold text-sm text-primary">GetGrip</span>
         </div>
-        <p className="text-xs text-muted">© 2025 HabitForge. Все права защищены.</p>
+        <p className="text-xs text-muted">© 2026 GetGrip. Все права защищены.</p>
       </footer>
     </div>
   );

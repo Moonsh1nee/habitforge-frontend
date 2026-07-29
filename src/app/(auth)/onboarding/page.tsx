@@ -34,7 +34,7 @@ function StepWelcome({ name, onNext }: { name: string; onNext: () => void }) {
         Привет, {name}! 👋
       </h1>
       <p className="text-muted text-base max-w-sm mx-auto">
-        Давай настроим HabitForge под тебя — займёт не больше минуты
+        Давай настроим GetGrip под тебя — займёт не больше минуты
       </p>
       <div className="flex justify-center gap-1.5 mt-8">
         {[0, 1, 2].map((i) => (
@@ -147,7 +147,7 @@ function StepDone({ name, onOpen }: { name: string; onOpen: () => void }) {
         Всё готово, {name}!
       </h2>
       <p className="text-muted mb-8 max-w-xs mx-auto">
-        Твой HabitForge настроен. Время начинать!
+        Твой GetGrip настроен. Время начинать!
       </p>
       <Button onClick={onOpen} className="bg-primary text-white gap-2 px-8 py-3 text-base">
         Открыть дашборд

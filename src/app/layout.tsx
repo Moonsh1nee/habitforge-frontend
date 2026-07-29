@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HabitForge",
-  description: "Система трекинга привычек, задач и здоровья",
+  title: "GetGrip",
+  description: "GetGrip — контроль над жизнью начинается здесь",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "HabitForge",
+    title: "GetGrip",
   },
   icons: {
     icon: "/icon.svg",

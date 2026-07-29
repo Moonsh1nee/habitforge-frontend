@@ -1,7 +1,7 @@
 {
-  "name": "HabitForge",
-  "short_name": "HabitForge",
-  "description": "Система трекинга привычек, задач и здоровья",
+  "name": "GetGrip",
+  "short_name": "GetGrip",
+  "description": "GetGrip — контроль над жизнью начинается здесь",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0a0f",
