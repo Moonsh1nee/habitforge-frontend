@@ -700,8 +700,8 @@ export interface Achievement {
   category: AchievementCategory;
   isUnlocked: boolean;
   unlockedAt: string | null;
-  progress: number | null;
-  progressTarget: number | null;
+  progress?: number | null;
+  progressTarget?: number | null;
 }
 
 export interface UserAchievements {

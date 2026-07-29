@@ -34,7 +34,7 @@ const FILTER_TABS = [
 
 function AchievementCard({ achievement }: { achievement: Achievement }) {
   const pct =
-    achievement.progress !== null && achievement.progressTarget
+    achievement.progress != null && achievement.progressTarget
       ? Math.min(Math.round((achievement.progress / achievement.progressTarget) * 100), 100)
       : null;
 

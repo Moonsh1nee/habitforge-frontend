@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getTodayString } from "@/lib/utils";
 
 type Phase = "idle" | "work" | "break";
 
@@ -11,16 +12,14 @@ function loadSessionCount(): number {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return 0;
     const { count, date } = JSON.parse(raw);
-    const today = new Date().toISOString().slice(0, 10);
-    return date === today ? (count as number) : 0;
+    return date === getTodayString() ? (count as number) : 0;
   } catch {
     return 0;
   }
 }
 
 function saveSessionCount(count: number) {
-  const today = new Date().toISOString().slice(0, 10);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ count, date: today }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ count, date: getTodayString() }));
 }
 
 interface PomodoroState {
