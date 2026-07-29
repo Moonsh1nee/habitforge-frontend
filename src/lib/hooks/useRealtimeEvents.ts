@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { api } from "@/lib/api/client";
 
 export function useRealtimeEvents() {
   const user = useAuthStore((s) => s.user);
@@ -114,6 +115,16 @@ export function useRealtimeEvents() {
       ws.onclose = () => {
         clearInterval(pingInterval);
         if (!destroyed) {
+          // The access_token cookie the WS handshake relies on expires after
+          // ACCESS_TOKEN_EXPIRE_MINUTES (60min) — unlike regular API calls, a
+          // WS connection has no interceptor to silently refresh it, so once
+          // it expires the socket closes and every retry gets rejected with
+          // 403 forever (confirmed in prod: real users' tabs left open past
+          // an hour stop receiving realtime updates entirely until reload).
+          // Piggyback on the same axios instance whose 401 interceptor
+          // refreshes the token, so the next connect() attempt has a live
+          // cookie again.
+          api.get("/users/me").catch(() => {});
           const delay = Math.min(1_000 * 2 ** retries, 30_000);
           retries++;
           retryTimeout = setTimeout(connect, delay);
