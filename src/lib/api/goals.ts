@@ -28,7 +28,7 @@ export interface UpdateGoalPayload {
 export const goalsApi = {
   getAll: async (status?: GoalStatus): Promise<Goal[]> => {
     const { data } = await api.get<PaginatedResponse<Goal> | Goal[]>("/goals", {
-      params: status ? { status } : undefined,
+      params: status ? { goal_status: status } : undefined,
     });
     return Array.isArray(data) ? data : (data as PaginatedResponse<Goal>).items ?? [];
   },

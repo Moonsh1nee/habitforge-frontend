@@ -677,9 +677,9 @@ export interface XPEvent {
 export interface UserXP {
   totalXp: number;
   level: number;
-  xpInCurrentLevel: number;
-  xpToNextLevel: number;
-  levelProgressPct: number;
+  xpForNextLevel: number;
+  xpProgressPct: number;
+  recentEvents: { source: string; xpAmount: number; createdAt: string }[];
 }
 
 export type AchievementCategory =
@@ -707,8 +707,6 @@ export interface Achievement {
 export interface UserAchievements {
   unlocked: Achievement[];
   locked: Achievement[];
-  totalXpFromAchievements: number;
-  recentUnlock: Achievement | null;
 }
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

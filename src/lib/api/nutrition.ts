@@ -71,7 +71,7 @@ export const nutritionApi = {
   },
 
   searchFood: async (query: string, limit = 20): Promise<FoodItem[]> => {
-    const { data } = await api.get<FoodItem[]>("/nutrition/food/search", {
+    const { data } = await api.get<FoodItem[]>("/nutrition/foods/search", {
       params: { q: query, limit },
     });
     return data ?? [];

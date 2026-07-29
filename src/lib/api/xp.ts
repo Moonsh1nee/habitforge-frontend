@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { UserXP, Achievement, UserAchievements } from "@/types";
+import type { UserXP, UserAchievements } from "@/types";
 
 export const xpApi = {
   getXP: async (): Promise<UserXP> => {
@@ -14,11 +14,6 @@ export const xpApi = {
 
   getAchievements: async (): Promise<UserAchievements> => {
     const { data } = await api.get<UserAchievements>("/users/me/achievements");
-    return data;
-  },
-
-  getAchievement: async (id: string): Promise<Achievement> => {
-    const { data } = await api.get<Achievement>(`/users/me/achievements/${id}`);
     return data;
   },
 };

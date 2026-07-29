@@ -150,11 +150,11 @@ export default function AchievementsPage() {
               <div className="flex-1 h-1.5 bg-white/8 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${xp.levelProgressPct}%` }}
+                  style={{ width: `${xp.xpProgressPct}%` }}
                 />
               </div>
               <span className="text-xs text-muted tabular-nums">
-                {xp.xpInCurrentLevel} / {xp.xpToNextLevel} XP
+                до след. уровня: {xp.xpForNextLevel} XP
               </span>
             </div>
           </div>
