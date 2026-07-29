@@ -15,6 +15,7 @@ export const DEFAULT_WIDGETS: DashboardWidget[] = [
   { id: "macros",        visible: true },
   { id: "finance",       visible: true },
   { id: "shopping",      visible: true },
+  { id: "time-tracking", visible: false },
 ];
 
 interface DashboardState {

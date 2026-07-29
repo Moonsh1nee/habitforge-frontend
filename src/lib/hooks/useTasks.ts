@@ -163,7 +163,15 @@ export function useTaskTimer(taskId: string) {
     queryKey: ["tasks", taskId, "timer"],
     queryFn: () => tasksApi.getTimerStatus(taskId),
     enabled: !!taskId,
-    refetchInterval: (query) => (query.state.data?.isRunning ? 10_000 : false),
+    refetchInterval: (query) => (query.state.data?.running ? 10_000 : false),
+  });
+}
+
+export function useTimeEntries(taskId: string) {
+  return useQuery({
+    queryKey: ["tasks", taskId, "time-entries"],
+    queryFn: () => tasksApi.getTimeEntries(taskId),
+    enabled: !!taskId,
   });
 }
 
@@ -173,6 +181,7 @@ export function useStartTimer() {
     mutationFn: (taskId: string) => tasksApi.startTimer(taskId),
     onSuccess: (_, taskId) => {
       qc.invalidateQueries({ queryKey: ["tasks", taskId, "timer"] });
+      qc.invalidateQueries({ queryKey: ["time-tracking", "today"] });
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => toast.error("Не удалось запустить таймер"),
@@ -185,6 +194,8 @@ export function useStopTimer() {
     mutationFn: (taskId: string) => tasksApi.stopTimer(taskId),
     onSuccess: (_, taskId) => {
       qc.invalidateQueries({ queryKey: ["tasks", taskId, "timer"] });
+      qc.invalidateQueries({ queryKey: ["tasks", taskId, "time-entries"] });
+      qc.invalidateQueries({ queryKey: ["time-tracking", "today"] });
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => toast.error("Не удалось остановить таймер"),

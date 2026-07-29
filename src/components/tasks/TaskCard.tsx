@@ -17,6 +17,8 @@ import { useUpdateTask, useDeleteTask, useSnoozeReminder } from "@/lib/hooks/use
 import { useProjects } from "@/lib/hooks/useProjects";
 import { SubtaskList } from "./SubtaskList";
 import { TaskComments } from "./TaskComments";
+import { TaskTimerPanel } from "./TaskTimerPanel";
+import { useTaskTimer } from "@/lib/hooks/useTasks";
 import type { Task, TaskStatus } from "@/types";
 
 const PRIORITY_ACCENT: Record<number, string> = {
@@ -54,7 +56,9 @@ export function TaskCard({ task, onEdit, onCardClick }: TaskCardProps) {
   const [justCompleted, setJustCompleted] = useState(false);
   const [subtasksOpen, setSubtasksOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [timerOpen, setTimerOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { data: timerStatus } = useTaskTimer(task.id);
   const overdue = task.dueDate && isOverdue(task.dueDate) && !task.completed;
 
   const hasSubtasks = (task.subtasksCount ?? 0) > 0;
@@ -198,14 +202,41 @@ export function TaskCard({ task, onEdit, onCardClick }: TaskCardProps) {
 
               {/* Time */}
               {(estimatedMinutes > 0 || timeSpentMinutes > 0) && (
-                <span className="flex items-center gap-1 text-[10px] text-muted">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setTimerOpen((v) => !v); }}
+                  className={cn(
+                    "flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border transition-all",
+                    timerOpen || timerStatus?.running
+                      ? "border-primary/40 text-primary bg-primary/8"
+                      : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
+                  )}
+                >
                   <Clock size={9} />
                   {timeSpentMinutes > 0 && estimatedMinutes > 0
                     ? `${timeSpentMinutes}м / ${estimatedMinutes}м`
                     : estimatedMinutes > 0
                     ? `~${estimatedMinutes}м`
                     : `${timeSpentMinutes}м`}
-                </span>
+                  {timerStatus?.running && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+                  )}
+                </button>
+              )}
+              {!(estimatedMinutes > 0 || timeSpentMinutes > 0) && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setTimerOpen((v) => !v); }}
+                  className={cn(
+                    "flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border transition-all",
+                    timerOpen || timerStatus?.running
+                      ? "border-primary/40 text-primary bg-primary/8"
+                      : "opacity-0 group-hover:opacity-100 border-border text-muted hover:border-primary/40 hover:text-primary"
+                  )}
+                >
+                  <Clock size={9} />
+                  {timerStatus?.running && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+                  )}
+                </button>
               )}
 
               {/* Project chip */}
@@ -290,6 +321,11 @@ export function TaskCard({ task, onEdit, onCardClick }: TaskCardProps) {
         {/* Comments expandable */}
         <AnimatePresence>
           {commentsOpen && <TaskComments taskId={task.id} />}
+        </AnimatePresence>
+
+        {/* Timer expandable */}
+        <AnimatePresence>
+          {timerOpen && <TaskTimerPanel taskId={task.id} />}
         </AnimatePresence>
       </motion.div>
 

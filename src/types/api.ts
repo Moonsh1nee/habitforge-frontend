@@ -500,28 +500,31 @@ export interface TimeEntry {
   startedAt: string;
   endedAt: string | null;
   durationMinutes: number | null;
-  note: string | null;
-  createdAt: string;
 }
 
 export interface TimerStatus {
-  isRunning: boolean;
-  currentEntry: TimeEntry | null;
-  taskId: string | null;
-  elapsedMinutes: number;
+  running: boolean;
+  started_at?: string;
+  elapsed_seconds?: number;
+}
+
+export interface RunningTaskInfo {
+  task_id: string;
+  title: string;
+  started_at: string;
 }
 
 export interface TimeTrackingToday {
-  totalMinutes: number;
+  total_minutes: number;
+  running_task: RunningTaskInfo | null;
   entries: TimeEntry[];
-  byTask: { taskId: string; taskTitle: string; minutes: number }[];
 }
 
 export interface TimeTrackingSummary {
-  period: string;
-  totalMinutes: number;
-  byDay: { date: string; minutes: number }[];
-  topTasks: { taskId: string; taskTitle: string; minutes: number }[];
+  total_minutes: number;
+  by_project: { project_id: string; project_name: string; minutes: number }[];
+  by_day: { date: string; minutes: number }[];
+  running_task: RunningTaskInfo | null;
 }
 
 // ─── Task Activity ────────────────────────────────────────────────────────────

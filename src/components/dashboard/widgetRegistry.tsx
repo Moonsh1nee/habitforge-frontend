@@ -11,6 +11,7 @@ import { WeeklyStats } from "./WeeklyStats";
 import { MacroBar } from "./MacroBar";
 import { FinanceWidget } from "./FinanceWidget";
 import { ShoppingWidget } from "./ShoppingWidget";
+import { TimeTrackingWidget } from "./TimeTrackingWidget";
 
 // ─── Self-contained wrappers ───────────────────────────────────────────────────
 
@@ -116,6 +117,12 @@ export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {
     label: "Покупки",
     desc: "Активные списки покупок",
     component: ShoppingWidget,
+    span: "half",
+  },
+  "time-tracking": {
+    label: "Учёт времени",
+    desc: "Затраченное время на задачи сегодня",
+    component: TimeTrackingWidget,
     span: "half",
   },
 };

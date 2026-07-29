@@ -132,23 +132,34 @@ export const tasksApi = {
     await api.post("/tasks/bulk", { ids, action: "set_status", payload: { status } });
   },
 
-  startTimer: async (taskId: string): Promise<TimeEntry> => {
-    const { data } = await api.post<TimeEntry>(`/tasks/${taskId}/timer/start`);
+  startTimer: async (taskId: string): Promise<{ task_id: string; started_at: string }> => {
+    const { data } = await api.post<{ task_id: string; started_at: string }>(
+      `/tasks/${taskId}/timer/start`
+    );
     return data;
   },
 
-  stopTimer: async (taskId: string): Promise<TimeEntry> => {
-    const { data } = await api.post<TimeEntry>(`/tasks/${taskId}/timer/stop`);
+  stopTimer: async (
+    taskId: string
+  ): Promise<{ duration_minutes: number; time_spent_minutes_total: number }> => {
+    const { data } = await api.post<{ duration_minutes: number; time_spent_minutes_total: number }>(
+      `/tasks/${taskId}/timer/stop`
+    );
     return data;
   },
 
   getTimerStatus: async (taskId: string): Promise<TimerStatus> => {
-    const { data } = await api.get<TimerStatus>(`/tasks/${taskId}/timer`);
+    const { data } = await api.get<TimerStatus>(`/tasks/${taskId}/timer/status`);
     return data;
   },
 
+  getTimeEntries: async (taskId: string): Promise<TimeEntry[]> => {
+    const { data } = await api.get<TimeEntry[]>(`/tasks/${taskId}/time-entries`);
+    return Array.isArray(data) ? data : [];
+  },
+
   getTimeTracking: async (): Promise<TimeTrackingToday> => {
-    const { data } = await api.get<TimeTrackingToday>("/tasks/time-tracking/today");
+    const { data } = await api.get<TimeTrackingToday>("/time-tracking/today");
     return data;
   },
 
