@@ -562,18 +562,19 @@ export interface TaskActivity {
 
 // ─── Calendar ────────────────────────────────────────────────────────────────
 
-export type CalendarEventType = "task" | "habit" | "workout" | "journal" | "reminder";
+export type CalendarEventSource = "task" | "habit" | "workout" | "journal";
 
 export interface CalendarEvent {
   id: string;
-  type: CalendarEventType;
+  source: CalendarEventSource;
+  source_id: string;
   title: string;
   date: string;
-  startTime: string | null;
-  endTime: string | null;
+  time?: string | null;
+  duration_minutes?: number | null;
+  completed?: boolean;
+  priority?: number | null;
   color: string | null;
-  completed: boolean;
-  entityId: string;
   url: string | null;
 }
 

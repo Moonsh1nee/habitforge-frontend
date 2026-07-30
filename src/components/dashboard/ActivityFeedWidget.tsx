@@ -2,25 +2,23 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Activity, CheckSquare, Repeat2, Dumbbell, BookOpen, Bell } from "lucide-react";
+import { Activity, CheckSquare, Repeat2, Dumbbell, BookOpen } from "lucide-react";
 import { useCalendarEvents } from "@/lib/hooks/useCalendar";
 import { formatDate, getTodayString, dateNDaysAgoString } from "@/lib/utils";
-import type { CalendarEventType } from "@/types";
+import type { CalendarEventSource } from "@/types";
 
-const TYPE_ICON: Record<CalendarEventType, React.ElementType> = {
+const TYPE_ICON: Record<CalendarEventSource, React.ElementType> = {
   task: CheckSquare,
   habit: Repeat2,
   workout: Dumbbell,
   journal: BookOpen,
-  reminder: Bell,
 };
 
-const TYPE_LABEL: Record<CalendarEventType, string> = {
+const TYPE_LABEL: Record<CalendarEventSource, string> = {
   task: "Задача",
   habit: "Привычка",
   workout: "Тренировка",
   journal: "Дневник",
-  reminder: "Напоминание",
 };
 
 export function ActivityFeedWidget() {
@@ -51,7 +49,7 @@ export function ActivityFeedWidget() {
       ) : (
         <div className="space-y-2.5">
           {recent.map((e) => {
-            const Icon = TYPE_ICON[e.type];
+            const Icon = TYPE_ICON[e.source];
             const inner = (
               <div className="flex items-center gap-2.5 text-xs">
                 <Icon size={13} className="text-muted shrink-0" />
@@ -60,11 +58,11 @@ export function ActivityFeedWidget() {
               </div>
             );
             return e.url ? (
-              <Link key={e.id} href={e.url} title={TYPE_LABEL[e.type]} className="block hover:text-primary">
+              <Link key={e.id} href={e.url} title={TYPE_LABEL[e.source]} className="block hover:text-primary">
                 {inner}
               </Link>
             ) : (
-              <div key={e.id} title={TYPE_LABEL[e.type]}>{inner}</div>
+              <div key={e.id} title={TYPE_LABEL[e.source]}>{inner}</div>
             );
           })}
         </div>
