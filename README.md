@@ -82,7 +82,7 @@
 
 ```bash
 git clone <repo-url>
-cd getgrip-frontend
+cd habitforge-frontend
 npm install
 ```
 
