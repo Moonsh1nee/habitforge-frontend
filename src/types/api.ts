@@ -603,12 +603,17 @@ export interface Budget {
   createdAt: string;
 }
 
-export interface BudgetStatus extends Budget {
+export interface BudgetStatus {
+  budgetId: string;
+  categoryId: string | null;
+  categoryName: string;
+  categoryIcon: string | null;
+  limit: number;
   spent: number;
   remaining: number;
-  percentUsed: number;
-  categoryName: string | null;
-  categoryColor: string | null;
+  pct: number;
+  transactionsCount: number;
+  overBudget: boolean;
 }
 
 // ─── Exercise Library & PRs ──────────────────────────────────────────────────
