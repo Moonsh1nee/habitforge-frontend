@@ -1,6 +1,23 @@
 # GetGrip
 
+[![CI](https://github.com/Moonsh1nee/habitforge-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/Moonsh1nee/habitforge-frontend/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/demo-getgrip.ru-7c3aed)](https://getgrip.ru)
+
 **GetGrip** — персональная система трекинга привычек, задач и здоровья ("второй мозг"). Объединяет в одном интерфейсе управление задачами, отслеживание привычек, тренировки, питание, финансы, цели и ежедневный дневник.
+
+**[→ Живая версия: getgrip.ru](https://getgrip.ru)** — можно зарегистрироваться бесплатно и посмотреть всё вживую.
+
+---
+
+## Скриншоты
+
+| Лендинг | Дашборд |
+|---|---|
+| ![Лендинг](public/screenshots/landing.png) | ![Дашборд](public/screenshots/dashboard.png) |
+
+| Тарифы |
+|---|
+| ![Тарифы](public/screenshots/upgrade.png) |
 
 ---
 
@@ -102,6 +119,34 @@ npm run start    # production server
 ```
 
 Приложение автоматически перенаправит на `/login` при первом посещении.
+
+---
+
+## Тестирование
+
+### CI (на каждый push/PR)
+
+`.github/workflows/ci.yml` прогоняет **lint** (ESLint), **type check** (`tsc --noEmit`) и **production build** — без внешних зависимостей (backend/БД не нужны), так что проходит быстро и надёжно на каждый коммит.
+
+### E2E-тесты (Playwright)
+
+`e2e/` покрывает три критичных флоу: **регистрацию** (успех, слабый пароль, дубликат email), **логин** (успех, неверный пароль, редирект неавторизованного с защищённых страниц) и **биллинг/апгрейд** (просмотр тарифов, отклик CTA, редирект без авторизации).
+
+Требуют реально работающий бэкенд (Postgres + Redis), поэтому не входят в обязательный CI-пайплайн — гоняются локально/вручную:
+
+```bash
+npx playwright install chromium   # один раз
+npm run test:e2e                  # headless прогон (поднимет npm run dev сам)
+npm run test:e2e:ui               # интерактивный UI-режим Playwright
+```
+
+По умолчанию тесты стартуют dev-сервер сами и бьют в `http://localhost:8000` (см. `NEXT_PUBLIC_API_URL`). Чтобы прогнать против уже запущенного окружения:
+
+```bash
+E2E_BASE_URL=https://getgrip.ru npx playwright test
+```
+
+> Оплата (Stripe Checkout) пока не подключена (см. `src/app/(app)/upgrade/page.tsx`) — тест на биллинг проверяет то, что реально есть сегодня (тарифы, CTA), и должен быть обновлён вместе с интеграцией.
 
 ---
 

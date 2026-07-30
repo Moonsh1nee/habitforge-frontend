@@ -6,7 +6,11 @@
     "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "node scripts/start.mjs",
-    "seed": "node scripts/seed-user.mjs"
+    "seed": "node scripts/seed-user.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -38,13 +42,17 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^16.2.12",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^10.8.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.65.0"
   }
 }
