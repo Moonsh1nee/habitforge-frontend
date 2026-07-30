@@ -27,14 +27,14 @@ export interface UpdateGoalPayload {
 
 export const goalsApi = {
   getAll: async (status?: GoalStatus): Promise<Goal[]> => {
-    const { data } = await api.get<PaginatedResponse<Goal> | Goal[]>("/goals", {
+    const { data } = await api.get<PaginatedResponse<Goal> | Goal[]>("/goals/", {
       params: status ? { goal_status: status } : undefined,
     });
     return Array.isArray(data) ? data : (data as PaginatedResponse<Goal>).items ?? [];
   },
 
   create: async (payload: CreateGoalPayload): Promise<Goal> => {
-    const { data } = await api.post<Goal>("/goals", payload);
+    const { data } = await api.post<Goal>("/goals/", payload);
     return data;
   },
 

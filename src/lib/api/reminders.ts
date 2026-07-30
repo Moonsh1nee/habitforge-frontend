@@ -13,12 +13,12 @@ export interface CreateReminderPayload {
 
 export const remindersApi = {
   getAll: async (): Promise<Reminder[]> => {
-    const { data } = await api.get<Reminder[]>("/reminders");
+    const { data } = await api.get<Reminder[]>("/reminders/");
     return data ?? [];
   },
 
   create: async (payload: CreateReminderPayload): Promise<Reminder> => {
-    const { data } = await api.post<Reminder>("/reminders", payload);
+    const { data } = await api.post<Reminder>("/reminders/", payload);
     return data;
   },
 
