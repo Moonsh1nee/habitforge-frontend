@@ -31,7 +31,7 @@ export function DataTab({ user }: { user: User }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `habitforge-export.${format}`;
+      a.download = `getgrip-export.${format}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {

@@ -76,13 +76,13 @@
 
 - Node.js 20+
 - npm 10+
-- Запущенный бэкенд HabitForge на `http://localhost:8000`
+- Запущенный бэкенд GetGrip на `http://localhost:8000`
 
 ### Установка
 
 ```bash
 git clone <repo-url>
-cd habitforge-frontend
+cd getgrip-frontend
 npm install
 ```
 

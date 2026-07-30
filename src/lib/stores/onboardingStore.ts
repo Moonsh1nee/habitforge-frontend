@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 import {
   CheckSquare, Repeat2, Wallet, Dumbbell, Apple,
   BookOpen, ShoppingCart, BarChart2, Target, Trophy,
@@ -13,6 +14,8 @@ export const ALL_MODULES = [
 ] as const;
 
 export type AppModule = (typeof ALL_MODULES)[number];
+
+migrateStorageKey("habitforge-modules", "getgrip-modules");
 
 export const MODULES: {
   id: AppModule;
@@ -57,7 +60,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       setModules: (modules) => set({ modules }),
     }),
     {
-      name: "habitforge-modules",
+      name: "getgrip-modules",
       partialize: (s) => ({ modules: s.modules }),
     }
   )

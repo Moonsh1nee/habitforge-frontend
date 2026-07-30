@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -24,9 +24,12 @@ import { TaskCard } from "./TaskCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { tasksApi } from "@/lib/api/tasks";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 import type { Task } from "@/types";
 
-const STORAGE_KEY = "habitforge-task-order";
+const STORAGE_KEY = "getgrip-task-order";
+
+migrateStorageKey("habitforge-task-order", STORAGE_KEY);
 
 function loadOrder(): string[] {
   try {

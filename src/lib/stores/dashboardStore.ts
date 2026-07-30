@@ -2,7 +2,10 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 import type { DashboardWidgetConfig, WidgetSpan } from "@/types";
+
+migrateStorageKey("habitforge-dashboard", "getgrip-dashboard");
 
 export type DashboardWidget = DashboardWidgetConfig;
 
@@ -89,7 +92,7 @@ export const useDashboardStore = create<DashboardState>()(
       reset: () => set({ widgets: DEFAULT_WIDGETS }),
     }),
     {
-      name: "habitforge-dashboard",
+      name: "getgrip-dashboard",
       // Only cache widgets locally for instant first paint before the
       // backend-sourced user record arrives — hydrated flag is intentionally
       // NOT persisted, so DashboardHydrator always re-syncs from the server.

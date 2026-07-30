@@ -1,4 +1,4 @@
-# HabitForge — Backend Tasks
+# GetGrip — Backend Tasks
 
 Стек: FastAPI + SQLModel + PostgreSQL + Alembic + APScheduler
 Все модели наследуют SQLModel, все id — uuid.UUID, все даты — datetime UTC.
@@ -261,7 +261,7 @@ async def send_deadline_reminders():
                     "keys": {"p256dh": sub.p256dh, "auth": sub.auth}
                 },
                 data=json.dumps({
-                    "title": "HabitForge",
+                    "title": "GetGrip",
                     "body": f"⏰ Задача «{task.title}» через 30 минут",
                     "icon": "/icon.svg"
                 }),

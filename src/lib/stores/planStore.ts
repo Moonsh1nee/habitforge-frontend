@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
+
+migrateStorageKey("habitforge-plan", "getgrip-plan");
 
 export type UserPlan = "free" | "pro";
 
@@ -25,6 +28,6 @@ export const usePlanStore = create<PlanState>()(
       limits: FREE_LIMITS,
       setPlan: (plan) => set({ plan, limits: plan === "pro" ? PRO_LIMITS : FREE_LIMITS }),
     }),
-    { name: "habitforge-plan" }
+    { name: "getgrip-plan" }
   )
 );

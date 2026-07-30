@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
+
+migrateStorageKey("habitforge-task-view", "getgrip-task-view");
 
 type TaskView = "list" | "kanban" | "matrix";
 type KanbanGroupBy = "project" | "priority" | "status";
@@ -19,6 +22,6 @@ export const useTaskViewStore = create<TaskViewState>()(
       setView: (view) => set({ view }),
       setKanbanGroupBy: (kanbanGroupBy) => set({ kanbanGroupBy }),
     }),
-    { name: "habitforge-task-view" }
+    { name: "getgrip-task-view" }
   )
 );

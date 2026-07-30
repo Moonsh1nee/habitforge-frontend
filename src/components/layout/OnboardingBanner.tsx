@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { X, CheckSquare, Repeat2, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 
-const STORAGE_KEY = "habitforge-onboarding-dismissed";
+const STORAGE_KEY = "getgrip-onboarding-dismissed";
+
+migrateStorageKey("habitforge-onboarding-dismissed", STORAGE_KEY);
 
 const STEPS = [
   {

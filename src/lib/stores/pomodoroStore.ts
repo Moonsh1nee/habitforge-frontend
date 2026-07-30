@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { getTodayString } from "@/lib/utils";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 
 type Phase = "idle" | "work" | "break";
 
 const WORK_SECONDS = 25 * 60;
 const BREAK_SECONDS = 5 * 60;
-const STORAGE_KEY = "habitforge-pomodoro-sessions";
+const STORAGE_KEY = "getgrip-pomodoro-sessions";
+
+migrateStorageKey("habitforge-pomodoro-sessions", STORAGE_KEY);
 
 function loadSessionCount(): number {
   try {

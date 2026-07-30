@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { BellRing, X } from "lucide-react";
+import { migrateStorageKey } from "@/lib/migrateStorageKey";
 
-const STORAGE_KEY = "habitforge-reminder-migration-dismissed";
+const STORAGE_KEY = "getgrip-reminder-migration-dismissed";
+
+migrateStorageKey("habitforge-reminder-migration-dismissed", STORAGE_KEY);
 
 interface ReminderMigrationBannerProps {
   show: boolean;

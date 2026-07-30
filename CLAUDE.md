@@ -1,4 +1,4 @@
-# HabitForge Frontend — Контекст для Claude
+# GetGrip Frontend — Контекст для Claude
 
 ## Стек (точные версии)
 

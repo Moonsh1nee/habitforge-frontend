@@ -1,4 +1,4 @@
-# HabitForge API Reference
+# GetGrip API Reference
 
 > Base URL: `http://localhost:8000`  
 > Версия бекенда: **0.4.0**  
