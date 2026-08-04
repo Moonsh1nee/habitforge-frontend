@@ -78,8 +78,6 @@ src/
 │   │   ├── workouts/page.tsx
 │   │   ├── nutrition/page.tsx
 │   │   ├── journal/page.tsx
-│   │   ├── finance/page.tsx
-│   │   ├── shopping/page.tsx
 │   │   ├── stats/page.tsx
 │   │   ├── calendar/page.tsx
 │   │   ├── goals/page.tsx
@@ -107,9 +105,7 @@ src/
 │   ├── tasks/               ← TaskCard (subtasks, project, tags), TaskList (DnD), TaskForm, ProjectsManager, ViewSwitcher
 │   ├── habits/              ← HabitCard (freeze btn), HabitForm, HabitCalendar
 │   ├── workouts/            ← LogCard, PlanCard, LogForm, PlanForm, ExerciseForm
-│   ├── finance/             ← EmojiPicker, CategoryManager, TransactionDialog, TransactionList, ExpensePieChart
 │   ├── nutrition/           ← AddFoodForm, NutritionPlanForm, MealTemplateForm, NutritionPlanCard
-│   ├── shopping/            ← ShoppingListCard, ListFormDialog, CompleteDialog, AddItemForm, ListDetailSheet, helpers.ts
 │   ├── profile/             ← ProfileTab, SecurityTab, PushNotificationsCard, DataTab, SubscriptionTab, ModulesTab
 │   ├── stats/               ← MetricCard, HabitStreakRow, MoodEnergyChart, WorkoutHistoryChart, WeightTrendChart
 │   ├── billing/             ← PricingCard, FeatureComparisonTable, UpgradePrompt
@@ -120,11 +116,11 @@ src/
 │   ├── api/
 │   │   ├── client.ts        ← Axios instance + withCredentials:true + 401 refresh (cookie-based)
 │   │   ├── auth.ts, tasks.ts, habits.ts, workouts.ts
-│   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts, finance.ts, shopping.ts
+│   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts
 │   │   ├── projects.ts      ← CRUD /projects
 │   │   ├── tags.ts          ← CRUD /tags + POST /tasks/{id}/tags
 │   │   └── push.ts          ← VAPID key + subscribe /push/*
-│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, useNutrition, useShopping, usePlan, useWorkouts, useInsights
+│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, useNutrition, usePlan, useWorkouts, useInsights
 │   ├── stores/
 │   │   ├── authStore.ts     ← Zustand + persist (user объект; cookies держат сессию)
 │   │   ├── pomodoroStore.ts ← Zustand: phase, timeLeft, selectedTaskId, sessionCount
@@ -137,7 +133,7 @@ src/
 │   ├── schemas/             ← Zod v4 схемы; всегда z.input<> для типов форм (не z.infer)
 │   └── utils.ts             ← cn(), formatDate(), getGreeting(), getPriorityColor(), getTodayString()
 ├── types/
-│   └── api.ts               ← все TypeScript-типы (User, Task, Habit, Project, Tag, FoodLog, DailySummary, ShoppingList, ...)
+│   └── api.ts               ← все TypeScript-типы (User, Task, Habit, Project, Tag, FoodLog, DailySummary, ...)
 └── public/
     ├── sw.js                ← Service Worker для Web Push уведомлений
     └── icon.svg             ← логотип (используется в sw.js для уведомлений)

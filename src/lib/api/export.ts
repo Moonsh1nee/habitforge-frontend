@@ -2,7 +2,6 @@ import { api } from "./client";
 
 export type ExportType =
   | "tasks"
-  | "finance"
   | "nutrition"
   | "habits"
   | "goals"
@@ -10,7 +9,6 @@ export type ExportType =
   | "journal"
   | "projects"
   | "tags"
-  | "shopping"
   | "reminders";
 
 export const exportApi = {

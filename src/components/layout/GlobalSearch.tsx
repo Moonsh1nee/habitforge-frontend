@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Search, CheckSquare, Repeat2, BookOpen, Wallet, Tag, Target, Loader2 } from "lucide-react";
+import { Search, CheckSquare, Repeat2, BookOpen, Target, Loader2 } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -20,8 +20,6 @@ const TYPE_ICON: Record<SearchResultItem["type"], React.ReactNode> = {
   task: <CheckSquare size={14} className="shrink-0" />,
   habit: <Repeat2 size={14} className="shrink-0" />,
   journal: <BookOpen size={14} className="shrink-0" />,
-  finance_transaction: <Wallet size={14} className="shrink-0" />,
-  finance_category: <Tag size={14} className="shrink-0" />,
   goal: <Target size={14} className="shrink-0" />,
 };
 
@@ -29,12 +27,10 @@ const TYPE_LABEL: Record<SearchResultItem["type"], string> = {
   task: "Задачи",
   habit: "Привычки",
   journal: "Журнал",
-  finance_transaction: "Транзакции",
-  finance_category: "Категории",
   goal: "Цели",
 };
 
-const ALL_TYPES = ["task", "habit", "journal", "finance_transaction", "finance_category", "goal"] as const;
+const ALL_TYPES = ["task", "habit", "journal", "goal"] as const;
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false);

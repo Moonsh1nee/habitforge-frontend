@@ -298,7 +298,7 @@ interface WeekStats {
 // ─── Search ───────────────────────────────────────────────────────────────────
 
 interface SearchResultItem {
-  type:            "task" | "habit" | "journal" | "finance_transaction" | "finance_category"
+  type:            "task" | "habit" | "journal"
   id:              UUID
   title:           string
   description?:    string | null
@@ -309,61 +309,12 @@ interface SearchResultItem {
   // journal-specific
   date?:           ISODate
   notes?:          string
-  // finance_transaction-specific
-  amount?:         number | null
-  transactionType?: TransactionType | null
 }
 
 interface SearchResponse {
   results: SearchResultItem[]
   total:   number
   query:   string
-}
-
-// ─── Finance ──────────────────────────────────────────────────────────────────
-
-type TransactionType = "income" | "expense"
-
-interface FinanceCategory {
-  id:        UUID
-  userId:    UUID
-  name:      string
-  icon:      string | null   // emoji, макс 50 символов
-  color:     string          // hex, default "#6366f1"
-  createdAt: ISODatetime
-  updatedAt: ISODatetime
-}
-
-interface FinanceTransaction {
-  id:          UUID
-  userId:      UUID
-  categoryId:  UUID | null
-  type:        TransactionType
-  amount:      number         // >= 0
-  description: string | null
-  date:        ISODate
-  createdAt:   ISODatetime
-  updatedAt:   ISODatetime
-}
-
-interface CategorySummary {
-  categoryId:    UUID | null
-  categoryName:  string       // "Uncategorized" если null
-  categoryIcon:  string | null
-  categoryColor: string | null
-  type:          TransactionType
-  total:         number
-  count:         number
-}
-
-interface FinanceSummary {
-  period_start:       ISODate
-  period_end:         ISODate
-  total_income:       number
-  total_expense:      number
-  balance:            number  // income - expense
-  transactions_count: number
-  by_category:        CategorySummary[]
 }
 
 // ─── Health ───────────────────────────────────────────────────────────────────
@@ -567,7 +518,7 @@ const { data } = await api.post("/users/me/avatar", formData, {
 // json → application/json, filename: habitforge-export.json
 // csv  → application/zip,  filename: habitforge-export.zip
 //        содержит: tasks.csv, habits.csv, habit_logs.csv, food_logs.csv,
-//                  journal.csv, finance_categories.csv, finance_transactions.csv
+//                  journal.csv
 ```
 
 ### `DELETE /users/me`
@@ -1055,7 +1006,7 @@ interface ReminderCreateRequest {
 ```typescript
 interface SearchParams {
   q:      string     // мин 2, макс 100 символов; % и _ экранируются автоматически
-  types?: string[]   // допустимые значения: "tasks" | "habits" | "journal" | "finance"
+  types?: string[]   // допустимые значения: "tasks" | "habits" | "journal"
                      // default: ["tasks", "habits", "journal"]
   limit?: number     // default: 20, max: 50
 }
@@ -1065,8 +1016,6 @@ interface SearchParams {
 //   tasks:               title, description
 //   habits:              title, description
 //   journal:             notes, wins, improvements
-//   finance (transactions): description → тип результата "finance_transaction"
-//   finance (categories):   name        → тип результата "finance_category"
 ```
 
 ```typescript
@@ -1075,116 +1024,6 @@ const { data } = await api.get<SearchResponse>("/search", {
   params: { q: "бег", types: ["tasks", "habits"] },
   // Axios сериализует как ?types=tasks&types=habits
 })
-
-// Поиск по всем доменам включая финансы:
-const { data } = await api.get<SearchResponse>("/search", {
-  params: { q: "кофе", types: ["finance", "tasks"] },
-})
-// Результат может содержать items с type="finance_transaction" (amount, transactionType)
-// и type="finance_category" (только title)
-```
-
----
-
-## FINANCE `/finance`
-
-### `POST /finance/categories`
-
-```typescript
-interface FinanceCategoryCreateRequest {
-  name:   string          // мин 1, макс 100
-  icon?:  string | null   // emoji
-  color?: string          // hex, default "#6366f1", макс 7
-}
-
-// Response 201: FinanceCategory
-```
-
-### `GET /finance/categories`  →  `200: FinanceCategory[]`  (сортировка по name)
-
-### `GET /finance/categories/{id}`  →  `200: FinanceCategory | 404`
-
-### `PATCH /finance/categories/{id}`
-
-```typescript
-// Те же поля что у Create, все опциональны
-// Response 200: FinanceCategory | 404
-```
-
-### `DELETE /finance/categories/{id}`  →  `204 | 404`
-> Транзакции не удаляются — `categoryId` становится `null` (ON DELETE SET NULL)
-
----
-
-### `POST /finance/transactions`
-
-```typescript
-interface FinanceTransactionCreateRequest {
-  type:         TransactionType   // обязательно: "income" | "expense"
-  amount:       number            // >= 0
-  date?:        ISODate           // default: сегодня UTC
-  description?: string            // макс 500
-  categoryId?:  UUID | null
-}
-
-// Response 201: FinanceTransaction
-// Response 404: категория не найдена или чужая
-// Response 422: type не "income"/"expense"
-```
-
-### `GET /finance/transactions`
-
-```typescript
-interface FinanceTransactionListParams extends PaginationParams {
-  type?:        TransactionType   // фильтр по типу
-  category_id?: UUID              // фильтр по категории
-  date?:        ISODate           // конкретная дата (приоритет над start/end)
-  start?:       ISODate           // начало диапазона
-  end?:         ISODate           // конец диапазона
-}
-
-// Response 200: FinanceTransaction[]  (сортировка по date DESC)
-```
-
-### `GET /finance/transactions/{id}`  →  `200: FinanceTransaction | 404`
-
-### `PATCH /finance/transactions/{id}`
-
-```typescript
-// Те же поля что у Create, все опциональны
-// Response 200: FinanceTransaction | 404
-// Response 422: type не "income"/"expense"
-```
-
-### `DELETE /finance/transactions/{id}`  →  `204 | 404`
-
----
-
-### `GET /finance/summary`
-
-```typescript
-// Вариант 1 — именованный период:
-interface FinanceSummaryByPeriod {
-  period: "day" | "week" | "month" | "year"
-  date?:  ISODate   // опорная дата для расчёта диапазона; default: сегодня UTC
-}
-
-// Вариант 2 — произвольный диапазон:
-interface FinanceSummaryByRange {
-  start: ISODate   // обязательно
-  end:   ISODate   // обязательно
-}
-
-// Response 200: FinanceSummary
-// Response 400: не передан ни period, ни start+end
-```
-
-```typescript
-// Примеры запросов:
-GET /finance/summary?period=month&date=2026-06-01   // весь июнь 2026
-GET /finance/summary?period=week&date=2026-06-03    // неделя пн..вс, содержащая 2026-06-03
-GET /finance/summary?period=year&date=2026-01-01    // весь 2026 год
-GET /finance/summary?start=2026-01-01&end=2026-03-31  // Q1 2026
 ```
 
 ---
@@ -1345,7 +1184,3 @@ api.interceptors.response.use(
 | Невалидный cron | `422` | Использовать 5-field формат: `"0 9 * * *"` |
 | Не передан `firstName` при регистрации | `422` | Обязательное поле |
 | Пароль без цифры или заглавной буквы | `422` | Мин 8 символов + 1 цифра + 1 заглавная |
-| Тип транзакции не "income"/"expense" | `422` | Допустимые значения: "income", "expense" |
-| Удалённая категория | транзакции не удаляются | `categoryId` становится `null` |
-| `GET /finance/summary` без period и без start+end | `400` | Передай `period` или оба `start` и `end` |
-| Поиск по финансам | результат содержит разные `type` | Различай `"finance_transaction"` (есть `amount`) и `"finance_category"` (только `title`) |

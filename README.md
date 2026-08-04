@@ -166,7 +166,6 @@ habitforge-frontend/
 │   │   │   ├── habits/               ← трекер привычек, heatmap, прогресс за сегодня
 │   │   │   ├── workouts/             ← тренировки и планы
 │   │   │   ├── nutrition/            ← КБЖУ, лог питания
-│   │   │   ├── finance/              ← транзакции, баланс, категории
 │   │   │   ├── journal/              ← дневник с mood emoji, стриком, chart 30 дней
 │   │   │   ├── stats/                ← аналитика: графики, стрики привычек
 │   │   │   ├── calendar/             ← месячный/недельный вид задач
@@ -191,12 +190,12 @@ habitforge-frontend/
 │   │   │   ├── HabitProgressRing.tsx ← прогресс привычек
 │   │   │   ├── MacroBar.tsx          ← макросы питания
 │   │   │   ├── WeeklyStats.tsx       ← статистика недели
-│   │   │   └── ...                   ← GoalsWidget, JournalTrendWidget, WorkoutsWidget, AchievementsWidget, RemindersWidget, MiniCalendarWidget, BudgetsWidget, ActivityFeedWidget, HabitStreaksWidget
+│   │   │   └── ...                   ← GoalsWidget, JournalTrendWidget, WorkoutsWidget, AchievementsWidget, RemindersWidget, MiniCalendarWidget, ActivityFeedWidget, HabitStreaksWidget
 │   │   ├── tasks/                    ← TaskCard, TaskList, TaskForm
 │   │   ├── habits/                   ← HabitCard, HabitCalendar, HabitForm
 │   │   └── shared/                   ← GlassCard, AnimatedNumber, ProgressRing, EmptyState, LoadingSkeleton
 │   ├── lib/
-│   │   ├── api/                      ← Axios-модули по доменам (auth, tasks, habits, finance...)
+│   │   ├── api/                      ← Axios-модули по доменам (auth, tasks, habits...)
 │   │   ├── hooks/                    ← TanStack Query хуки + useRealtimeEvents (WebSocket)
 │   │   ├── stores/                   ← Zustand хранилища (authStore, dashboardStore — синк с бэкендом, onboardingStore — видимость модулей)
 │   │   ├── schemas/                  ← Zod схемы для валидации форм
@@ -223,7 +222,7 @@ habitforge-frontend/
 
 ## Real-time
 
-WebSocket-соединение устанавливается автоматически после авторизации (`useRealtimeEvents`). Обновления по задачам, тренировкам и финансам инвалидируют соответствующие TanStack Query кэши — данные обновляются без перезагрузки страницы.
+WebSocket-соединение устанавливается автоматически после авторизации (`useRealtimeEvents`). Обновления по задачам и тренировкам инвалидируют соответствующие TanStack Query кэши — данные обновляются без перезагрузки страницы.
 
 ---
 
@@ -232,7 +231,6 @@ WebSocket-соединение устанавливается автоматич
 - [x] Глобальный поиск `Ctrl/⌘ K`
 - [x] Повторяющиеся задачи (daily / weekly / monthly)
 - [x] Страница аналитики `/stats`
-- [x] Финансовый трекер `/finance`
 - [x] Плавающая кнопка быстрого создания (FAB)
 - [x] WebSocket real-time обновления
 - [x] Мобильная навигация (hamburger menu)
@@ -241,11 +239,11 @@ WebSocket-соединение устанавливается автоматич
 - [x] Pomodoro-таймер в сайдбаре
 - [x] Web Push уведомления (VAPID + service worker)
 - [x] Drag-and-drop сортировка задач
-- [x] Delete confirmations (Finance, Nutrition)
+- [x] Delete confirmations (Nutrition)
 - [x] Loading states / skeletons на всех страницах
 - [x] Onboarding для новых пользователей (выбор модулей)
 - [x] Экспорт данных (CSV + PDF-отчёт)
-- [x] Цели, Покупки, Достижения/геймификация
+- [x] Цели, Достижения/геймификация
 - [x] Тайм-трекинг задач (таймер на карточке + сводный виджет)
 - [x] Google Calendar интеграция
 - [x] Кастомизируемый дашборд (18 виджетов, drag-and-drop, гибкая ширина 1/3-1/2-1/1, синк с бэкендом)

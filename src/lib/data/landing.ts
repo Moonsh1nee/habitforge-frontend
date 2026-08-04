@@ -1,16 +1,14 @@
 import {
-  CheckSquare, Repeat2, Wallet, Dumbbell, Apple,
-  BookOpen, ShoppingCart, BarChart2,
+  CheckSquare, Repeat2, Dumbbell, Apple,
+  BookOpen, BarChart2,
 } from "lucide-react";
 
 export const FEATURES = [
   { icon: CheckSquare,  label: "Задачи",     desc: "Подзадачи, проекты, теги, приоритеты и DnD-сортировка",  color: "#7c3aed" },
   { icon: Repeat2,      label: "Привычки",   desc: "Стрики, заморозки, трекер выполнения и годовой хитмап",  color: "#06b6d4" },
-  { icon: Wallet,       label: "Финансы",    desc: "Доходы, расходы, категории и визуализация трат",         color: "#22c55e" },
   { icon: Dumbbell,     label: "Тренировки", desc: "Планы упражнений, логи тренировок, прогресс по весам",   color: "#f59e0b" },
   { icon: Apple,        label: "Питание",    desc: "Калории, макросы, план питания и журнал приёмов пищи",   color: "#ef4444" },
   { icon: BookOpen,     label: "Дневник",    desc: "Настроение, энергия, сон, вес и личные заметки",         color: "#8b5cf6" },
-  { icon: ShoppingCart, label: "Покупки",    desc: "Списки покупок с автоматическим созданием транзакции",   color: "#0ea5e9" },
   { icon: BarChart2,    label: "Аналитика",  desc: "Хитмапы, графики, статистика по всем модулям сразу",    color: "#ec4899" },
 ] as const;
 

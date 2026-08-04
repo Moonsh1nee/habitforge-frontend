@@ -325,7 +325,7 @@ export interface WeekStats {
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export interface SearchResultItem {
-  type: "task" | "habit" | "journal" | "finance_transaction" | "finance_category" | "goal";
+  type: "task" | "habit" | "journal" | "goal";
   id: string;
   title: string;
   subtitle: string | null;
@@ -336,101 +336,12 @@ export interface SearchResultItem {
   dueDate?: string | null;
   date?: string;
   notes?: string;
-  amount?: number | null;
-  transactionType?: TransactionType | null;
 }
 
 export interface SearchResponse {
   results: SearchResultItem[];
   total: number;
   query: string;
-}
-
-// ─── Finance ──────────────────────────────────────────────────────────────────
-
-export type TransactionType = "income" | "expense";
-
-export interface FinanceCategory {
-  id:        string;
-  userId:    string;
-  name:      string;
-  icon:      string | null;
-  color:     string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FinanceTransaction {
-  id:          string;
-  userId:      string;
-  categoryId:  string | null;
-  type:        TransactionType;
-  amount:      number;
-  description: string | null;
-  date:        string;
-  createdAt:   string;
-  updatedAt:   string;
-}
-
-export interface CategorySummary {
-  categoryId:    string | null;
-  categoryName:  string;
-  categoryIcon:  string | null;
-  categoryColor: string | null;
-  type:          TransactionType;
-  total:         number;
-  count:         number;
-}
-
-export interface FinanceSummary {
-  period_start:       string;
-  period_end:         string;
-  total_income:       number;
-  total_expense:      number;
-  balance:            number;
-  transactions_count: number;
-  by_category:        CategorySummary[];
-}
-
-// ─── Shopping ────────────────────────────────────────────────────────────────
-
-export type ShoppingListStatus = "active" | "completed" | "cancelled";
-
-export interface ShoppingList {
-  id:            string;
-  name:          string;
-  store:         string | null;
-  plannedDate:   string | null;
-  plannedTime:   string | null;
-  status:        ShoppingListStatus;
-  notes:         string | null;
-  transactionId: string | null;
-  totalPlanned:  number;
-  totalActual:   number;
-  itemsCount:    number;
-  itemsChecked:  number;
-  createdAt:     string;
-  updatedAt:     string;
-}
-
-export interface ShoppingItem {
-  id:           string;
-  listId:       string;
-  name:         string;
-  quantity:     number;
-  unit:         string | null;
-  plannedPrice: number | null;
-  actualPrice:  number | null;
-  categoryId:   string | null;
-  checked:      boolean;
-  sortOrder:    number;
-  notes:        string | null;
-  createdAt:    string;
-  updatedAt:    string;
-}
-
-export interface ShoppingListWithItems extends ShoppingList {
-  items: ShoppingItem[];
 }
 
 // ─── Goals ───────────────────────────────────────────────────────────────────
@@ -587,33 +498,6 @@ export interface Session {
   createdAt: string;
   lastActiveAt: string | null;
   isCurrent: boolean;
-}
-
-// ─── Budgets ─────────────────────────────────────────────────────────────────
-
-export interface Budget {
-  id: string;
-  userId: string;
-  categoryId: string | null;
-  name: string;
-  amount: number;
-  period: "monthly" | "weekly" | "yearly";
-  startDate: string;
-  endDate: string | null;
-  createdAt: string;
-}
-
-export interface BudgetStatus {
-  budgetId: string;
-  categoryId: string | null;
-  categoryName: string;
-  categoryIcon: string | null;
-  limit: number;
-  spent: number;
-  remaining: number;
-  pct: number;
-  transactionsCount: number;
-  overBudget: boolean;
 }
 
 // ─── Exercise Library & PRs ──────────────────────────────────────────────────

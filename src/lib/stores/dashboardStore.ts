@@ -16,8 +16,6 @@ export const DEFAULT_WIDGETS: DashboardWidget[] = [
   { id: "habit-rings",   visible: true,  span: "half" },
   { id: "weekly-stats",  visible: true,  span: "full" },
   { id: "macros",        visible: true,  span: "half" },
-  { id: "finance",       visible: true,  span: "half" },
-  { id: "shopping",      visible: true,  span: "half" },
   { id: "time-tracking", visible: false, span: "half" },
   { id: "goals",         visible: false, span: "half" },
   { id: "journal-trend", visible: false, span: "half" },
@@ -25,7 +23,6 @@ export const DEFAULT_WIDGETS: DashboardWidget[] = [
   { id: "achievements",  visible: false, span: "half" },
   { id: "reminders",     visible: false, span: "half" },
   { id: "mini-calendar", visible: false, span: "full" },
-  { id: "budgets",       visible: false, span: "half" },
   { id: "activity-feed", visible: false, span: "half" },
   { id: "habit-streaks", visible: false, span: "half" },
 ];

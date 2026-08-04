@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { LayoutDashboard, CheckSquare, Repeat2, Wallet, BookOpen } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Repeat2, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDashboardToday } from "@/lib/hooks/useDashboard";
 
@@ -11,7 +11,6 @@ const NAV = [
   { href: "/dashboard",  icon: LayoutDashboard, label: "Главная" },
   { href: "/tasks",      icon: CheckSquare,      label: "Задачи"  },
   { href: "/habits",     icon: Repeat2,          label: "Привычки"},
-  { href: "/finance",    icon: Wallet,           label: "Финансы" },
   { href: "/journal",    icon: BookOpen,         label: "Дневник" },
 ];
 

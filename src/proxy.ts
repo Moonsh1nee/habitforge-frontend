@@ -18,7 +18,6 @@ export function proxy(req: NextRequest) {
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/tasks") ||
       pathname.startsWith("/habits") || pathname.startsWith("/workouts") ||
       pathname.startsWith("/nutrition") || pathname.startsWith("/journal") ||
-      pathname.startsWith("/finance") || pathname.startsWith("/shopping") ||
       pathname.startsWith("/stats") || pathname.startsWith("/calendar") ||
       pathname.startsWith("/profile") || pathname.startsWith("/goals") ||
       pathname.startsWith("/achievements") || pathname.startsWith("/upgrade") ||

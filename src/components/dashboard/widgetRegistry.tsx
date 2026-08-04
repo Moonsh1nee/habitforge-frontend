@@ -9,8 +9,6 @@ import { TodayCard } from "./TodayCard";
 import { HabitProgressRing } from "./HabitProgressRing";
 import { WeeklyStats } from "./WeeklyStats";
 import { MacroBar } from "./MacroBar";
-import { FinanceWidget } from "./FinanceWidget";
-import { ShoppingWidget } from "./ShoppingWidget";
 import { TimeTrackingWidget } from "./TimeTrackingWidget";
 import { GoalsWidget } from "./GoalsWidget";
 import { JournalTrendWidget } from "./JournalTrendWidget";
@@ -18,7 +16,6 @@ import { WorkoutsWidget } from "./WorkoutsWidget";
 import { AchievementsWidget } from "./AchievementsWidget";
 import { RemindersWidget } from "./RemindersWidget";
 import { MiniCalendarWidget } from "./MiniCalendarWidget";
-import { BudgetsWidget } from "./BudgetsWidget";
 import { ActivityFeedWidget } from "./ActivityFeedWidget";
 import { HabitStreaksWidget } from "./HabitStreaksWidget";
 import type { WidgetSpan } from "@/types";
@@ -117,18 +114,6 @@ export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {
     component: MacroBarWidget,
     span: "half",
   },
-  "finance": {
-    label: "Финансы",
-    desc: "Баланс за текущую неделю",
-    component: FinanceWidget,
-    span: "half",
-  },
-  "shopping": {
-    label: "Покупки",
-    desc: "Активные списки покупок",
-    component: ShoppingWidget,
-    span: "half",
-  },
   "time-tracking": {
     label: "Учёт времени",
     desc: "Затраченное время на задачи сегодня",
@@ -170,12 +155,6 @@ export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {
     desc: "Месяц с отметками событий",
     component: MiniCalendarWidget,
     span: "full",
-  },
-  "budgets": {
-    label: "Бюджеты",
-    desc: "Использование лимитов по категориям",
-    component: BudgetsWidget,
-    span: "half",
   },
   "activity-feed": {
     label: "Лента активности",

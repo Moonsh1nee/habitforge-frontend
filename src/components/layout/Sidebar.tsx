@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
-  Apple, BookOpen, User, Zap, Wallet, CalendarDays,
-  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, ShoppingCart, Settings, Trophy,
+  Apple, BookOpen, User, Zap, CalendarDays,
+  BarChart2, CheckCircle2, ListTodo, Sparkles, Target, Settings, Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -26,8 +26,6 @@ const MODULE_MAP: Record<string, string> = {
   "/achievements": "achievements",
   "/workouts":     "workouts",
   "/nutrition":    "nutrition",
-  "/finance":      "finance",
-  "/shopping":     "shopping",
   "/journal":      "journal",
 };
 
@@ -41,8 +39,6 @@ const navItems = [
   { href: "/achievements", icon: Trophy, label: "Достижения" },
   { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
   { href: "/nutrition", icon: Apple, label: "Питание" },
-  { href: "/finance", icon: Wallet, label: "Финансы" },
-  { href: "/shopping", icon: ShoppingCart, label: "Покупки" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
   { href: "/upgrade", icon: Sparkles, label: "Pro", highlight: true },
   { href: "/settings", icon: Settings, label: "Настройки" },

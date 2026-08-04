@@ -58,13 +58,6 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["nutrition-plan-meals"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
-            case "finance.updated":
-              qc.invalidateQueries({ queryKey: ["finance-categories"] });
-              qc.invalidateQueries({ queryKey: ["finance-transactions"] });
-              qc.invalidateQueries({ queryKey: ["finance-summary"] });
-              qc.invalidateQueries({ queryKey: ["budgets"] });
-              qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
-              break;
             case "workout.updated":
               qc.invalidateQueries({ queryKey: ["workout-plans"] });
               qc.invalidateQueries({ queryKey: ["workout-logs"] });
