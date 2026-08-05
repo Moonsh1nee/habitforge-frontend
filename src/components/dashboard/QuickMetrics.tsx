@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { CheckSquare, Flame, Utensils, Dumbbell } from "lucide-react";
+import { CheckSquare, Flame } from "lucide-react";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
 import type { TodayDashboard } from "@/types";
 
@@ -33,24 +33,6 @@ export function QuickMetrics({ today }: QuickMetricsProps) {
       color: doneHabits === totalHabits && totalHabits > 0 ? "text-success" : "text-warning",
       bg: doneHabits === totalHabits && totalHabits > 0 ? "bg-success/10" : "bg-warning/10",
       sub: totalHabits === 0 ? "Нет привычек" : `выполнено сегодня`,
-    },
-    {
-      icon: Utensils,
-      label: "Калории",
-      value: today.nutrition_calories,
-      suffix: " ккал",
-      color: "text-accent",
-      bg: "bg-accent/10",
-      sub: "за сегодня",
-    },
-    {
-      icon: Dumbbell,
-      label: "Тренировка",
-      value: today.workout?.durationMinutes ?? 0,
-      suffix: " мин",
-      color: today.workout ? "text-success" : "text-muted",
-      bg: today.workout ? "bg-success/10" : "bg-white/5",
-      sub: today.workout ? "выполнено" : "не начата",
     },
   ];
 

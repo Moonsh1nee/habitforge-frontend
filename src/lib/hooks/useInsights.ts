@@ -1,51 +1,24 @@
 "use client";
 
 import { useMemo } from "react";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import type { Insight } from "@/components/stats/InsightCard";
-import type { DailyEntry, WorkoutLog } from "@/types";
+import type { DailyEntry } from "@/types";
 
 interface UseInsightsParams {
   entries: DailyEntry[];
   moodEntries: DailyEntry[];
-  workoutsInPeriod: WorkoutLog[];
-  workoutLogs: WorkoutLog[];
-  days: number;
   isLoading: boolean;
 }
 
 export function useInsights({
   entries,
   moodEntries,
-  workoutsInPeriod,
-  workoutLogs,
-  days,
   isLoading,
 }: UseInsightsParams): Insight[] {
   return useMemo<Insight[]>(() => {
     const result: Insight[] = [];
 
-    // 1. Workout ↔ mood correlation
-    const workoutDates = new Set(workoutsInPeriod.map((w) => w.date));
-    const moodOnWorkoutDays = moodEntries.filter((e) => workoutDates.has(e.date));
-    const moodOnRestDays = moodEntries.filter((e) => !workoutDates.has(e.date));
-    if (moodOnWorkoutDays.length >= 2 && moodOnRestDays.length >= 2) {
-      const avgW = moodOnWorkoutDays.reduce((s, e) => s + e.mood!, 0) / moodOnWorkoutDays.length;
-      const avgR = moodOnRestDays.reduce((s, e) => s + e.mood!, 0) / moodOnRestDays.length;
-      const diff = avgW - avgR;
-      if (diff >= 0.5) {
-        result.push({
-          id: "workout-mood",
-          variant: "success",
-          emoji: "💪",
-          title: `В дни тренировок настроение выше на ${diff.toFixed(1)} балла`,
-          description: `Наблюдение по ${moodOnWorkoutDays.length} дням с тренировками`,
-        });
-      }
-    }
-
-    // 2. Sleep ↔ mood correlation
+    // 1. Sleep ↔ mood correlation
     const goodSleepMood = entries.filter((e) => e.sleepHours != null && e.sleepHours >= 7 && e.mood != null);
     const poorSleepMood = entries.filter((e) => e.sleepHours != null && e.sleepHours < 7 && e.mood != null);
     if (goodSleepMood.length >= 2 && poorSleepMood.length >= 2) {
@@ -63,7 +36,7 @@ export function useInsights({
       }
     }
 
-    // 3. Mood trend (first half vs second half of period)
+    // 2. Mood trend (first half vs second half of period)
     if (moodEntries.length >= 4) {
       const half = Math.floor(moodEntries.length / 2);
       const avgFirst = moodEntries.slice(0, half).reduce((s, e) => s + e.mood!, 0) / half;
@@ -87,41 +60,7 @@ export function useInsights({
       }
     }
 
-    // 4. Workout frequency
-    if (workoutsInPeriod.length > 0) {
-      const perWeek = workoutsInPeriod.length / (days / 7);
-      if (perWeek >= 3) {
-        result.push({
-          id: "workout-freq",
-          variant: "success",
-          emoji: "🏆",
-          title: `${perWeek.toFixed(1)} тренировок в неделю — отличный ритм!`,
-          description: "Продолжай в том же духе",
-        });
-      }
-    }
-
-    // 5. No workouts recently
-    if (workoutLogs.length > 0) {
-      const last = [...workoutLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
-      if (last) {
-        const daysSince = Math.floor(
-          (Date.now() - new Date(last.date).getTime()) / 86_400_000
-        );
-        if (daysSince >= 5) {
-          const label = daysSince === 1 ? "день" : daysSince < 5 ? "дня" : "дней";
-          result.push({
-            id: "no-workouts",
-            variant: "warning",
-            emoji: "⚠️",
-            title: `Ты не записывал тренировки ${daysSince} ${label}`,
-            description: `Последняя: ${format(new Date(last.date), "d MMMM", { locale: ru })}`,
-          });
-        }
-      }
-    }
-
-    // 6. No journal entries in period
+    // 3. No journal entries in period
     if (entries.length === 0 && !isLoading) {
       result.push({
         id: "no-journal",
@@ -133,5 +72,5 @@ export function useInsights({
     }
 
     return result.slice(0, 4);
-  }, [entries, moodEntries, workoutsInPeriod, workoutLogs, days, isLoading]);
+  }, [entries, moodEntries, isLoading]);
 }

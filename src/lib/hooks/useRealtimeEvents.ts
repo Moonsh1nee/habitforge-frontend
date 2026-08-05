@@ -51,18 +51,6 @@ export function useRealtimeEvents() {
               qc.invalidateQueries({ queryKey: ["journal"] });
               qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
               break;
-            case "nutrition.logged":
-            case "nutrition.updated":
-              qc.invalidateQueries({ queryKey: ["nutrition"] });
-              qc.invalidateQueries({ queryKey: ["nutrition-plans"] });
-              qc.invalidateQueries({ queryKey: ["nutrition-plan-meals"] });
-              qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
-              break;
-            case "workout.updated":
-              qc.invalidateQueries({ queryKey: ["workout-plans"] });
-              qc.invalidateQueries({ queryKey: ["workout-logs"] });
-              qc.invalidateQueries({ queryKey: ["dashboard", "today"] });
-              break;
             case "goal.updated":
               qc.invalidateQueries({ queryKey: ["goals"] });
               break;

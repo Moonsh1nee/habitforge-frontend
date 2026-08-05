@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
-  LayoutDashboard, CheckSquare, Repeat2, Dumbbell,
-  Apple, BookOpen, User, Zap, CalendarDays,
+  LayoutDashboard, CheckSquare, Repeat2,
+  BookOpen, User, Zap, CalendarDays,
   BarChart2, CheckCircle2, ListTodo, Sparkles, Target, Settings, Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,8 +24,6 @@ const MODULE_MAP: Record<string, string> = {
   "/goals":        "goals",
   "/stats":        "stats",
   "/achievements": "achievements",
-  "/workouts":     "workouts",
-  "/nutrition":    "nutrition",
   "/journal":      "journal",
 };
 
@@ -37,8 +35,6 @@ const navItems = [
   { href: "/goals", icon: Target, label: "Цели" },
   { href: "/stats", icon: BarChart2, label: "Аналитика" },
   { href: "/achievements", icon: Trophy, label: "Достижения" },
-  { href: "/workouts", icon: Dumbbell, label: "Тренировки" },
-  { href: "/nutrition", icon: Apple, label: "Питание" },
   { href: "/journal", icon: BookOpen, label: "Дневник" },
   { href: "/upgrade", icon: Sparkles, label: "Pro", highlight: true },
   { href: "/settings", icon: Settings, label: "Настройки" },

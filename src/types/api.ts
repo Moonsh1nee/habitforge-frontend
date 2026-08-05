@@ -149,114 +149,6 @@ export interface HabitStats {
   end_date: string | null;
 }
 
-// ─── Workouts ─────────────────────────────────────────────────────────────────
-
-export interface WorkoutPlan {
-  id: string;
-  userId: string;
-  name: string;
-  description: string | null;
-  daysPerWeek: number | null;
-  isArchived: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PlanExercise {
-  id: string;
-  planId: string;
-  name: string;
-  muscleGroup: string | null;
-  sets: number | null;
-  repsPerSet: number | null;
-  weightKg: number | null;
-  orderInPlan: number;
-  notes: string | null;
-}
-
-export interface WorkoutPlanWithExercises extends WorkoutPlan {
-  exercises: PlanExercise[];
-}
-
-export interface WorkoutLog {
-  id: string;
-  userId: string;
-  planId: string | null;
-  date: string;
-  durationMinutes: number | null;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ExerciseLog {
-  id: string;
-  workoutLogId: string;
-  name: string;
-  muscleGroup: string | null;
-  sets: number | null;
-  repsPerSet: number | null;
-  weightKg: number | null;
-  notes: string | null;
-}
-
-export interface WorkoutLogWithExercises extends WorkoutLog {
-  exercises: ExerciseLog[];
-}
-
-// ─── Nutrition ────────────────────────────────────────────────────────────────
-
-export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
-
-export interface NutritionPlan {
-  id: string;
-  userId: string;
-  name: string;
-  description: string | null;
-  targetCalories: number | null;
-  targetProtein: number | null;
-  targetCarbs: number | null;
-  targetFat: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FoodLog {
-  id: string;
-  userId: string;
-  date: string;
-  mealType: MealType;
-  name: string;
-  calories: number | null;
-  protein: number | null;
-  carbs: number | null;
-  fat: number | null;
-  notes: string | null;
-  createdAt: string;
-}
-
-export interface MealTemplate {
-  id: string;
-  planId: string;
-  name: string;
-  mealType: MealType;
-  calories: number | null;
-  protein: number | null;
-  carbs: number | null;
-  fat: number | null;
-  notes: string | null;
-  createdAt: string;
-}
-
-export interface DailySummary {
-  date: string;
-  total_calories: number;
-  total_protein: number;
-  total_carbs: number;
-  total_fat: number;
-  entries_count: number;
-}
-
 // ─── Journal ─────────────────────────────────────────────────────────────────
 
 export interface DailyEntry {
@@ -304,8 +196,6 @@ export interface TodayDashboard {
   tasks_pending: Task[];
   tasks_overdue: Task[];
   habits: HabitToday[];
-  workout: WorkoutLog | null;
-  nutrition_calories: number;
   journal_entry: DailyEntry | null;
 }
 
@@ -315,8 +205,6 @@ export interface WeekStats {
   tasks_completed: number;
   tasks_total: number;
   habits_completion_rate: number;
-  workouts_count: number;
-  avg_calories: number;
   avg_mood: number | null;
   avg_energy: number | null;
   avg_sleep_hours: number | null;
@@ -473,7 +361,7 @@ export interface TaskActivity {
 
 // ─── Calendar ────────────────────────────────────────────────────────────────
 
-export type CalendarEventSource = "task" | "habit" | "workout" | "journal";
+export type CalendarEventSource = "task" | "habit" | "journal";
 
 export interface CalendarEvent {
   id: string;
@@ -500,59 +388,6 @@ export interface Session {
   isCurrent: boolean;
 }
 
-// ─── Exercise Library & PRs ──────────────────────────────────────────────────
-
-export type MuscleGroup =
-  | "chest"
-  | "back"
-  | "shoulders"
-  | "biceps"
-  | "triceps"
-  | "legs"
-  | "glutes"
-  | "core"
-  | "cardio"
-  | "full_body"
-  | "other";
-
-export type Equipment = "barbell" | "dumbbell" | "machine" | "bodyweight" | "cable" | "other";
-export type RecordType = "max_weight" | "max_reps" | "max_volume";
-
-export interface ExerciseTemplate {
-  id: string;
-  name: string;
-  muscleGroup: MuscleGroup;
-  equipment: Equipment;
-  description: string | null;
-  isPublic: boolean;
-  userId: string | null;
-}
-
-export interface PersonalRecord {
-  id: string;
-  userId: string;
-  exerciseName: string;
-  recordType: RecordType;
-  value: number;
-  unit: string;
-  achievedAt: string;
-  workoutLogId: string | null;
-  notes: string | null;
-}
-
-// ─── Food Search ─────────────────────────────────────────────────────────────
-
-export interface FoodItem {
-  id: string;
-  name: string;
-  brand: string | null;
-  caloriesPer100g: number | null;
-  proteinPer100g: number | null;
-  carbsPer100g: number | null;
-  fatPer100g: number | null;
-  servingSizeG: number | null;
-  source: "openfoodfacts" | "custom";
-}
 
 // ─── XP & Achievements ───────────────────────────────────────────────────────
 
@@ -560,7 +395,6 @@ export type XPSource =
   | "task_completed"
   | "habit_completed"
   | "journal_entry"
-  | "workout_logged"
   | "goal_progress"
   | "goal_completed"
   | "streak_bonus"

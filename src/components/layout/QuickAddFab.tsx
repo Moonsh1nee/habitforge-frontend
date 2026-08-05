@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, CheckSquare, Repeat2, Apple, Dumbbell, BookOpen } from "lucide-react";
+import { Plus, CheckSquare, Repeat2, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { TaskForm } from "@/components/tasks/TaskForm";
@@ -32,20 +32,6 @@ const ACTIONS = [
     label: "Дневник",
     className: "text-accent hover:bg-accent/10",
     navigate: "/journal",
-  },
-  {
-    id: "workout",
-    icon: Dumbbell,
-    label: "Тренировка",
-    className: "text-success hover:bg-success/10",
-    navigate: "/workouts",
-  },
-  {
-    id: "food",
-    icon: Apple,
-    label: "Питание",
-    className: "text-orange-400 hover:bg-orange-500/10",
-    navigate: "/nutrition",
   },
 ] as const;
 

@@ -96,112 +96,6 @@ interface HabitStats {
   end_date:        ISODate | null
 }
 
-// ─── Workouts ─────────────────────────────────────────────────────────────────
-
-interface WorkoutPlan {
-  id:          UUID
-  userId:      UUID
-  name:        string
-  description: string | null
-  daysPerWeek: number | null   // 1..7
-  isArchived:  boolean
-  createdAt:   ISODatetime
-  updatedAt:   ISODatetime
-}
-
-interface PlanExercise {
-  id:          UUID
-  planId:      UUID
-  name:        string
-  muscleGroup: string | null
-  sets:        number | null
-  repsPerSet:  number | null
-  weightKg:    number | null
-  orderInPlan: number
-  notes:       string | null
-}
-
-interface WorkoutPlanWithExercises extends WorkoutPlan {
-  exercises: PlanExercise[]
-}
-
-interface WorkoutLog {
-  id:              UUID
-  userId:          UUID
-  planId:          UUID | null
-  date:            ISODate
-  durationMinutes: number | null
-  notes:           string | null
-  createdAt:       ISODatetime
-  updatedAt:       ISODatetime
-}
-
-interface ExerciseLog {
-  id:           UUID
-  workoutLogId: UUID
-  name:         string
-  muscleGroup:  string | null
-  sets:         number | null
-  repsPerSet:   number | null
-  weightKg:     number | null
-  notes:        string | null
-}
-
-interface WorkoutLogWithExercises extends WorkoutLog {
-  exercises: ExerciseLog[]
-}
-
-// ─── Nutrition ────────────────────────────────────────────────────────────────
-
-type MealType = "breakfast" | "lunch" | "dinner" | "snack"
-
-interface NutritionPlan {
-  id:             UUID
-  userId:         UUID
-  name:           string
-  description:    string | null
-  targetCalories: number | null
-  targetProtein:  number | null
-  targetCarbs:    number | null
-  targetFat:      number | null
-  createdAt:      ISODatetime
-  updatedAt:      ISODatetime
-}
-
-interface MealTemplate {
-  id:       UUID
-  planId:   UUID
-  mealType: MealType
-  name:     string
-  calories: number | null
-  protein:  number | null
-  carbs:    number | null
-  fat:      number | null
-}
-
-interface FoodLog {
-  id:        UUID
-  userId:    UUID
-  date:      ISODate
-  mealType:  MealType
-  name:      string
-  calories:  number | null
-  protein:   number | null
-  carbs:     number | null
-  fat:       number | null
-  notes:     string | null
-  createdAt: ISODatetime
-}
-
-interface DailySummary {
-  date:           ISODate
-  total_calories: number
-  total_protein:  number
-  total_carbs:    number
-  total_fat:      number
-  entries_count:  number
-}
-
 // ─── Journal ──────────────────────────────────────────────────────────────────
 
 interface DailyEntry {
@@ -277,8 +171,6 @@ interface TodayDashboard {
   tasks_pending:      Task[]
   tasks_overdue:      Task[]
   habits:             HabitToday[]
-  workout:            WorkoutLog | null
-  nutrition_calories: number
   journal_entry:      DailyEntry | null
 }
 
@@ -288,8 +180,6 @@ interface WeekStats {
   tasks_completed:        number   // задачи с dueDate в текущей неделе, отмеченные выполненными
   tasks_total:            number   // задачи с dueDate в текущей неделе (независимо от статуса)
   habits_completion_rate: number   // процент, 0..100, 1 знак после запятой
-  workouts_count:         number
-  avg_calories:           number   // среднее за дни с хотя бы одной записью о еде; 0 если нет данных
   avg_mood:               number | null
   avg_energy:             number | null
   avg_sleep_hours:        number | null
@@ -709,160 +599,6 @@ interface HabitLogBulkRequest {
 
 ---
 
-## WORKOUTS `/workouts`
-
-### `POST /workouts/plans`
-
-```typescript
-{ name: string, description?: string, daysPerWeek?: number }
-// Response 201: WorkoutPlan
-```
-
-### `GET /workouts/plans`  →  `200: WorkoutPlan[]`  (`PaginationParams + { archived?: boolean }`)
-
-### `GET /workouts/plans/{plan_id}`  →  `200: WorkoutPlanWithExercises`
-
-### `PATCH /workouts/plans/{plan_id}`
-
-```typescript
-{ name?: string, description?: string, daysPerWeek?: number | null, isArchived?: boolean }
-// Response 200: WorkoutPlan
-```
-
-### `DELETE /workouts/plans/{plan_id}`  →  `204`
-
-### `POST /workouts/plans/{plan_id}/exercises`
-
-```typescript
-{
-  name: string, muscleGroup?: string, sets?: number,
-  repsPerSet?: number, weightKg?: number, orderInPlan?: number, notes?: string
-}
-// Response 201: PlanExercise
-```
-
-### `PATCH /workouts/plans/{plan_id}/exercises/{exercise_id}`
-
-```typescript
-// Те же поля что у Create, все опциональны
-// Response 200: PlanExercise
-```
-
-### `DELETE /workouts/plans/{plan_id}/exercises/{exercise_id}`  →  `204`
-
-### `POST /workouts/logs`
-
-```typescript
-{ date: ISODate, planId?: UUID, durationMinutes?: number, notes?: string }
-// Response 201: WorkoutLog
-```
-
-### `GET /workouts/logs`  →  `200: WorkoutLog[]`  (`PaginationParams + { start?, end? }`)
-
-### `GET /workouts/logs/{log_id}`  →  `200: WorkoutLogWithExercises`
-
-### `PATCH /workouts/logs/{log_id}`
-
-```typescript
-{ planId?: UUID | null, date?: ISODate, durationMinutes?: number | null, notes?: string }
-// Response 200: WorkoutLog
-```
-
-### `DELETE /workouts/logs/{log_id}`  →  `204`
-
-### `POST /workouts/logs/{log_id}/exercises`
-
-```typescript
-{ name: string, muscleGroup?: string, sets?: number, repsPerSet?: number, weightKg?: number, notes?: string }
-// Response 201: ExerciseLog
-```
-
-### `PATCH /workouts/logs/{log_id}/exercises/{exercise_id}`  →  `200: ExerciseLog`
-
-### `DELETE /workouts/logs/{log_id}/exercises/{exercise_id}`  →  `204`
-
----
-
-## NUTRITION `/nutrition`
-
-### `POST /nutrition/plans`
-
-```typescript
-{
-  name: string, description?: string,
-  targetCalories?: number, targetProtein?: number, targetCarbs?: number, targetFat?: number
-}
-// Response 201: NutritionPlan
-```
-
-### `GET /nutrition/plans`  →  `200: NutritionPlan[]`
-
-### `GET /nutrition/plans/{plan_id}`  →  `200: NutritionPlan`
-
-### `PATCH /nutrition/plans/{plan_id}`  →  `200: NutritionPlan`  (те же поля что у Create)
-
-### `DELETE /nutrition/plans/{plan_id}`  →  `204`
-
-### `POST /nutrition/plans/{plan_id}/meals`
-
-```typescript
-{ mealType: MealType, name: string, calories?: number, protein?: number, carbs?: number, fat?: number }
-// Response 201: MealTemplate
-```
-
-### `GET /nutrition/plans/{plan_id}/meals`  →  `200: MealTemplate[]`
-
-### `PATCH /nutrition/plans/{plan_id}/meals/{meal_id}`  →  `200: MealTemplate`
-
-### `DELETE /nutrition/plans/{plan_id}/meals/{meal_id}`  →  `204`
-
-### `POST /nutrition/logs`
-
-```typescript
-interface FoodLogCreateRequest {
-  mealType:  MealType
-  name:      string     // что ел, мин 1, макс 200
-  date?:     ISODate    // default: сегодня
-  calories?: number
-  protein?:  number
-  carbs?:    number
-  fat?:      number
-  notes?:    string
-}
-
-// Response 201: FoodLog
-// Генерирует WS-событие nutrition.logged + инвалидирует dashboard-кэш
-```
-
-### `GET /nutrition/logs`
-
-```typescript
-interface FoodLogListParams extends PaginationParams {
-  date?:  ISODate   // конкретная дата (приоритет над start/end)
-  start?: ISODate
-  end?:   ISODate
-}
-// Response 200: FoodLog[]  (по date DESC, затем createdAt ASC)
-```
-
-### `GET /nutrition/logs/summary`
-
-```typescript
-{ date: ISODate }   // обязательно!
-// Response 200: DailySummary
-```
-
-### `PATCH /nutrition/logs/{log_id}`
-
-```typescript
-{ mealType?: MealType, name?: string, calories?: number, protein?: number, carbs?: number, fat?: number, notes?: string }
-// Response 200: FoodLog
-```
-
-### `DELETE /nutrition/logs/{log_id}`  →  `204`
-
----
-
 ## JOURNAL `/journal`
 
 ### `POST /journal/entries`
@@ -1069,7 +805,6 @@ interface WSEvent {
 // "task.deleted"      → { id: UUID }
 // "habit.checked"     → { habitId: UUID, date: ISODate }
 // "journal.updated"   → { date: ISODate }
-// "nutrition.logged"  → { date: ISODate, calories: number | null }
 ```
 
 ```typescript
@@ -1087,7 +822,6 @@ ws.onmessage = (e) => {
       queryClient.invalidateQueries({ queryKey: ["dashboard", "today"] })
       break
     case "journal.updated":
-    case "nutrition.logged":
       queryClient.invalidateQueries({ queryKey: ["dashboard", "today"] })
       break
   }

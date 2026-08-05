@@ -16,8 +16,7 @@ export function proxy(req: NextRequest) {
 
   // Unauthenticated user trying to access a protected route → /login
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/tasks") ||
-      pathname.startsWith("/habits") || pathname.startsWith("/workouts") ||
-      pathname.startsWith("/nutrition") || pathname.startsWith("/journal") ||
+      pathname.startsWith("/habits") || pathname.startsWith("/journal") ||
       pathname.startsWith("/stats") || pathname.startsWith("/calendar") ||
       pathname.startsWith("/profile") || pathname.startsWith("/goals") ||
       pathname.startsWith("/achievements") || pathname.startsWith("/upgrade") ||

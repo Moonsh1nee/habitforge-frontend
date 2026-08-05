@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { GlassCard } from "@/components/shared/GlassCard";
-import { CheckSquare, Flame, Dumbbell, Smile, Moon, Zap } from "lucide-react";
+import { CheckSquare, Flame, Smile, Moon, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WeekStats } from "@/types";
 
@@ -80,16 +80,6 @@ export function WeeklyStats({ week }: WeeklyStatsProps) {
       color: "amber",
       barColor: "bg-warning",
       delay: 0.1,
-    },
-    {
-      icon: Dumbbell,
-      label: "Тренировки",
-      value: week.workouts_count,
-      maxValue: 7,
-      display: `${week.workouts_count} раз`,
-      color: "cyan",
-      barColor: "bg-accent",
-      delay: 0.15,
     },
     ...(week.avg_mood !== null && week.avg_mood !== undefined ? [{
       icon: Smile,

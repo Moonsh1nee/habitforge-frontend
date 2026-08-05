@@ -5,10 +5,9 @@ import { useQueries } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { format, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Dumbbell, Flame, Heart, Moon, Zap, BarChart2, BookOpen, Lightbulb } from "lucide-react";
+import { Flame, Heart, Moon, Zap, BarChart2, BookOpen, Lightbulb } from "lucide-react";
 import { staggerContainer, fadeUpItem } from "@/lib/constants/motionVariants";
 import { useJournalEntries } from "@/lib/hooks/useJournal";
-import { useWorkoutLogs } from "@/lib/hooks/useWorkouts";
 import { useHabits } from "@/lib/hooks/useHabits";
 import { habitsApi } from "@/lib/api/habits";
 import { usePlan } from "@/lib/hooks/usePlan";
@@ -22,7 +21,6 @@ import { InsightCard } from "@/components/stats/InsightCard";
 import { MetricCard } from "@/components/stats/MetricCard";
 import { HabitStreakRow } from "@/components/stats/HabitStreakRow";
 import { MoodEnergyChart } from "@/components/stats/MoodEnergyChart";
-import { WorkoutHistoryChart } from "@/components/stats/WorkoutHistoryChart";
 import { WeightTrendChart } from "@/components/stats/WeightTrendChart";
 import { getTodayString } from "@/lib/utils";
 
@@ -36,7 +34,6 @@ export default function StatsPage() {
   const start = format(subDays(new Date(), days - 1), "yyyy-MM-dd");
 
   const { data: entries = [], isLoading: loadingEntries } = useJournalEntries({ start, end: today, limit: 100 });
-  const { data: workoutLogs = [], isLoading: loadingWorkouts } = useWorkoutLogs({ limit: 50 });
   const { data: habitsData, isLoading: loadingHabits } = useHabits({ archived: false });
   const habits = habitsData?.items ?? [];
 
@@ -48,12 +45,7 @@ export default function StatsPage() {
     })),
   });
 
-  const isLoading = loadingEntries || loadingWorkouts || loadingHabits;
-
-  const workoutsInPeriod = useMemo(
-    () => workoutLogs.filter((l) => l.date >= start && l.date <= today),
-    [workoutLogs, start, today]
-  );
+  const isLoading = loadingEntries || loadingHabits;
 
   const moodEntries = useMemo(() => entries.filter((e) => e.mood != null), [entries]);
   const energyEntries = useMemo(() => entries.filter((e) => e.energy != null), [entries]);
@@ -71,15 +63,6 @@ export default function StatsPage() {
     [entries, days]
   );
 
-  const workoutChartData = useMemo(
-    () =>
-      workoutsInPeriod
-        .slice(0, 20)
-        .reverse()
-        .map((w) => ({ date: format(new Date(w.date), "d.MM"), duration: w.durationMinutes ?? 0 })),
-    [workoutsInPeriod]
-  );
-
   const weightData = useMemo(
     () =>
       entries
@@ -88,7 +71,7 @@ export default function StatsPage() {
     [entries]
   );
 
-  const insights = useInsights({ entries, moodEntries, workoutsInPeriod, workoutLogs, days, isLoading });
+  const insights = useInsights({ entries, moodEntries, isLoading });
 
   const avgMood = moodEntries.length > 0 ? moodEntries.reduce((s, e) => s + e.mood!, 0) / moodEntries.length : null;
   const avgEnergy = energyEntries.length > 0 ? energyEntries.reduce((s, e) => s + e.energy!, 0) / energyEntries.length : null;
@@ -165,11 +148,10 @@ export default function StatsPage() {
 
       {!isLoading && (
         <motion.div key={period} variants={staggerContainer} initial="hidden" animate="visible" className="space-y-4">
-          <motion.div variants={fadeUpItem} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <motion.div variants={fadeUpItem} className="grid grid-cols-3 gap-3">
             <MetricCard icon={Heart} label="Ср. настроение" value={avgMood} suffix="/10" colorClass="text-primary" />
             <MetricCard icon={Zap} label="Ср. энергия" value={avgEnergy} suffix="/10" colorClass="text-accent" />
             <MetricCard icon={Moon} label="Ср. сон (ч)" value={avgSleep} colorClass="text-warning" />
-            <MetricCard icon={Dumbbell} label="Тренировок" value={workoutsInPeriod.length} decimals={0} colorClass="text-success" />
           </motion.div>
 
           {moodChartData.length > 1 && (
@@ -178,8 +160,7 @@ export default function StatsPage() {
             </motion.div>
           )}
 
-          <motion.div variants={fadeUpItem} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <WorkoutHistoryChart data={workoutChartData} />
+          <motion.div variants={fadeUpItem}>
             <GlassCard>
               <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
                 <Flame size={14} className="text-warning" />
@@ -205,7 +186,7 @@ export default function StatsPage() {
             </GlassCard>
           </motion.div>
 
-          {moodChartData.length === 0 && habits.length === 0 && workoutsInPeriod.length === 0 && (
+          {moodChartData.length === 0 && habits.length === 0 && (
             <motion.div variants={fadeUpItem}>
               <GlassCard className="text-center py-12">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -213,7 +194,7 @@ export default function StatsPage() {
                 </div>
                 <p className="text-base font-semibold text-text mb-2">Данных пока нет</p>
                 <p className="text-sm text-muted max-w-xs mx-auto">
-                  Начните вести дневник, отмечать привычки и записывать тренировки — здесь появится ваш прогресс
+                  Начните вести дневник и отмечать привычки — здесь появится ваш прогресс
                 </p>
               </GlassCard>
             </motion.div>

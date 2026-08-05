@@ -4,12 +4,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { migrateStorageKey } from "@/lib/migrateStorageKey";
 import {
-  CheckSquare, Repeat2, Dumbbell, Apple,
+  CheckSquare, Repeat2,
   BookOpen, BarChart2, Target, Trophy,
 } from "lucide-react";
 
 export const ALL_MODULES = [
-  "tasks", "habits", "workouts", "nutrition", "journal", "stats",
+  "tasks", "habits", "journal", "stats",
   "goals", "achievements",
 ] as const;
 
@@ -27,8 +27,6 @@ export const MODULES: {
   { id: "tasks",        label: "Задачи",      desc: "Проекты, теги, дедлайны",       icon: CheckSquare,  color: "#7c3aed" },
   { id: "habits",       label: "Привычки",    desc: "Стрики, хитмап, заморозки",     icon: Repeat2,      color: "#06b6d4" },
   { id: "goals",        label: "Цели",        desc: "Целевые значения, прогресс",    icon: Target,       color: "#a855f7" },
-  { id: "workouts",     label: "Тренировки",  desc: "Планы упражнений, логи",        icon: Dumbbell,     color: "#f59e0b" },
-  { id: "nutrition",    label: "Питание",     desc: "Калории, макросы, план",        icon: Apple,        color: "#ef4444" },
   { id: "journal",      label: "Дневник",     desc: "Настроение, сон, заметки",      icon: BookOpen,     color: "#8b5cf6" },
   { id: "stats",        label: "Аналитика",   desc: "Графики по всем модулям",       icon: BarChart2,    color: "#ec4899" },
   { id: "achievements", label: "Достижения",  desc: "XP, уровни, ачивменты",         icon: Trophy,       color: "#f97316" },

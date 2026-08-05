@@ -25,7 +25,7 @@
 
 | Модуль | Возможности |
 |---|---|
-| **Дашборд** | Полностью модульный и кастомизируемый: 18 виджетов (Daily Score, быстрые метрики, задачи, привычки, статистика недели, макросы, финансы, покупки, тайм-трекинг, цели, тренд настроения, тренировки, достижения/XP, напоминания, мини-календарь, бюджеты, лента активности, стрики привычек), каждый можно включить/выключить, задать ширину (1/3, 1/2, 1/1) и порядок drag-and-drop — layout синхронизируется с бэкендом (`PATCH /users/me`) и переживает вход с другого устройства |
+| **Дашборд** | Полностью модульный и кастомизируемый: 13 виджетов (Daily Score, быстрые метрики, задачи, привычки, статистика недели, тайм-трекинг, цели, тренд настроения, достижения/XP, напоминания, мини-календарь, лента активности, стрики привычек), каждый можно включить/выключить, задать ширину (1/3, 1/2, 1/1) и порядок drag-and-drop — layout синхронизируется с бэкендом (`PATCH /users/me`) и переживает вход с другого устройства |
 | **Задачи** | Создание / редактирование / удаление, приоритеты, дедлайны, подзадачи, проекты, теги, повторяющиеся задачи (ежедневно / еженедельно / ежемесячно), фильтры по статусу / приоритету / тегу / проекту, drag-and-drop сортировка |
 | **Привычки** | Ежедневная отметка, стрики, streak freeze (заморозка стрика), calendar heatmap за 52 недели, сводка прогресса за сегодня |
 | **Тренировки** | Логирование тренировок, шаблоны-планы с упражнениями |
@@ -164,8 +164,6 @@ habitforge-frontend/
 │   │   │   ├── dashboard/            ← DailyScore, QuickMetrics, TodayCard, WeeklyStats
 │   │   │   ├── tasks/                ← список задач с фильтрами, TaskForm с повторением
 │   │   │   ├── habits/               ← трекер привычек, heatmap, прогресс за сегодня
-│   │   │   ├── workouts/             ← тренировки и планы
-│   │   │   ├── nutrition/            ← КБЖУ, лог питания
 │   │   │   ├── journal/              ← дневник с mood emoji, стриком, chart 30 дней
 │   │   │   ├── stats/                ← аналитика: графики, стрики привычек
 │   │   │   ├── calendar/             ← месячный/недельный вид задач
@@ -182,15 +180,14 @@ habitforge-frontend/
 │   │   │   ├── QuickAddFab.tsx       ← плавающая кнопка быстрого создания (5 действий)
 │   │   │   └── GlobalSearch.tsx      ← Ctrl/⌘K поиск по всему контенту
 │   │   ├── dashboard/
-│   │   │   ├── widgetRegistry.tsx    ← реестр всех 18 виджетов (id, label, компонент, span)
+│   │   │   ├── widgetRegistry.tsx    ← реестр всех 13 виджетов (id, label, компонент, span)
 │   │   │   ├── DashboardCustomizer.tsx ← сайдшит: вкл/выкл виджет + выбор ширины (1/3, 1/2, 1/1)
 │   │   │   ├── DailyScore.tsx        ← анимированное SVG-кольцо прогресса дня
 │   │   │   ├── QuickMetrics.tsx      ← 2×2 сетка ключевых метрик
 │   │   │   ├── TodayCard.tsx         ← задачи на сегодня
 │   │   │   ├── HabitProgressRing.tsx ← прогресс привычек
-│   │   │   ├── MacroBar.tsx          ← макросы питания
 │   │   │   ├── WeeklyStats.tsx       ← статистика недели
-│   │   │   └── ...                   ← GoalsWidget, JournalTrendWidget, WorkoutsWidget, AchievementsWidget, RemindersWidget, MiniCalendarWidget, ActivityFeedWidget, HabitStreaksWidget
+│   │   │   └── ...                   ← GoalsWidget, JournalTrendWidget, AchievementsWidget, RemindersWidget, MiniCalendarWidget, ActivityFeedWidget, HabitStreaksWidget
 │   │   ├── tasks/                    ← TaskCard, TaskList, TaskForm
 │   │   ├── habits/                   ← HabitCard, HabitCalendar, HabitForm
 │   │   └── shared/                   ← GlassCard, AnimatedNumber, ProgressRing, EmptyState, LoadingSkeleton
@@ -239,14 +236,13 @@ WebSocket-соединение устанавливается автоматич
 - [x] Pomodoro-таймер в сайдбаре
 - [x] Web Push уведомления (VAPID + service worker)
 - [x] Drag-and-drop сортировка задач
-- [x] Delete confirmations (Nutrition)
 - [x] Loading states / skeletons на всех страницах
 - [x] Onboarding для новых пользователей (выбор модулей)
 - [x] Экспорт данных (CSV + PDF-отчёт)
 - [x] Цели, Достижения/геймификация
 - [x] Тайм-трекинг задач (таймер на карточке + сводный виджет)
 - [x] Google Calendar интеграция
-- [x] Кастомизируемый дашборд (18 виджетов, drag-and-drop, гибкая ширина 1/3-1/2-1/1, синк с бэкендом)
+- [x] Кастомизируемый дашборд (13 виджетов, drag-and-drop, гибкая ширина 1/3-1/2-1/1, синк с бэкендом)
 - [x] Модульная мобильная кастомизация дашборда (отдельный backend-эндпоинт `mobileDashboardWidgets`)
 - [ ] Kanban-вид задач
 - [ ] PWA / полноценный оффлайн-режим

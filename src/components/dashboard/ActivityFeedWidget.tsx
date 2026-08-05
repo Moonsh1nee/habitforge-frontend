@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Activity, CheckSquare, Repeat2, Dumbbell, BookOpen } from "lucide-react";
+import { Activity, CheckSquare, Repeat2, BookOpen } from "lucide-react";
 import { useCalendarEvents } from "@/lib/hooks/useCalendar";
 import { formatDate, getTodayString, dateNDaysAgoString } from "@/lib/utils";
 import type { CalendarEventSource } from "@/types";
@@ -10,14 +10,12 @@ import type { CalendarEventSource } from "@/types";
 const TYPE_ICON: Record<CalendarEventSource, React.ElementType> = {
   task: CheckSquare,
   habit: Repeat2,
-  workout: Dumbbell,
   journal: BookOpen,
 };
 
 const TYPE_LABEL: Record<CalendarEventSource, string> = {
   task: "Задача",
   habit: "Привычка",
-  workout: "Тренировка",
   journal: "Дневник",
 };
 

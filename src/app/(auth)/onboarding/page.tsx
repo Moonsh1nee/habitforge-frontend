@@ -175,8 +175,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [selected, setSelected] = useState<Set<AppModule>>(
     new Set([
-      "tasks", "habits", "goals", "workouts",
-      "nutrition", "journal", "stats", "achievements",
+      "tasks", "habits", "goals",
+      "journal", "stats", "achievements",
     ])
   );
   const [loading, setLoading] = useState(false);

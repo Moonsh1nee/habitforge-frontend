@@ -75,8 +75,6 @@ src/
 │   │   ├── dashboard/page.tsx
 │   │   ├── tasks/page.tsx
 │   │   ├── habits/page.tsx
-│   │   ├── workouts/page.tsx
-│   │   ├── nutrition/page.tsx
 │   │   ├── journal/page.tsx
 │   │   ├── stats/page.tsx
 │   │   ├── calendar/page.tsx
@@ -101,13 +99,11 @@ src/
 │   │   ├── QuickAddFab.tsx  ← плавающая кнопка быстрого создания
 │   │   ├── GlobalSearch.tsx ← Ctrl/⌘K поиск
 │   │   └── PomodoroWidget.tsx ← экспортирует PomodoroTicker (null-render, в layout) + PomodoroSidebarSection (UI, в Sidebar)
-│   ├── dashboard/           ← TodayCard, HabitProgressRing, MacroBar, WeeklyStats
+│   ├── dashboard/           ← TodayCard, HabitProgressRing, WeeklyStats
 │   ├── tasks/               ← TaskCard (subtasks, project, tags), TaskList (DnD), TaskForm, ProjectsManager, ViewSwitcher
 │   ├── habits/              ← HabitCard (freeze btn), HabitForm, HabitCalendar
-│   ├── workouts/            ← LogCard, PlanCard, LogForm, PlanForm, ExerciseForm
-│   ├── nutrition/           ← AddFoodForm, NutritionPlanForm, MealTemplateForm, NutritionPlanCard
 │   ├── profile/             ← ProfileTab, SecurityTab, PushNotificationsCard, DataTab, SubscriptionTab, ModulesTab
-│   ├── stats/               ← MetricCard, HabitStreakRow, MoodEnergyChart, WorkoutHistoryChart, WeightTrendChart
+│   ├── stats/               ← MetricCard, HabitStreakRow, MoodEnergyChart, WeightTrendChart
 │   ├── billing/             ← PricingCard, FeatureComparisonTable, UpgradePrompt
 │   ├── gamification/        ← XpBar, AchievementCard, AchievementGrid
 │   ├── goals/               ← GoalCard, GoalForm
@@ -115,12 +111,12 @@ src/
 ├── lib/
 │   ├── api/
 │   │   ├── client.ts        ← Axios instance + withCredentials:true + 401 refresh (cookie-based)
-│   │   ├── auth.ts, tasks.ts, habits.ts, workouts.ts
-│   │   ├── nutrition.ts, journal.ts, dashboard.ts, users.ts
+│   │   ├── auth.ts, tasks.ts, habits.ts
+│   │   ├── journal.ts, dashboard.ts, users.ts
 │   │   ├── projects.ts      ← CRUD /projects
 │   │   ├── tags.ts          ← CRUD /tags + POST /tasks/{id}/tags
 │   │   └── push.ts          ← VAPID key + subscribe /push/*
-│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, useNutrition, usePlan, useWorkouts, useInsights
+│   ├── hooks/               ← useAuth, useTasks, useHabits, useDashboard, useProjects, useTags, usePlan, useInsights
 │   ├── stores/
 │   │   ├── authStore.ts     ← Zustand + persist (user объект; cookies держат сессию)
 │   │   ├── pomodoroStore.ts ← Zustand: phase, timeLeft, selectedTaskId, sessionCount
@@ -282,8 +278,7 @@ uvicorn src.main:app --reload
 
 ## Известные особенности бэкенда
 - Поля в ответе могут отсутствовать (null/undefined) даже если они есть в TypeScript-типах — всегда защищать `??`
-- `GET /dashboard/week` возвращает `tasks`, `habits`, `workouts`, `nutrition`, `journal` — но некоторые могут быть пустыми объектами без ожидаемых полей
-- `GET /nutrition/logs/summary` возвращает объект, но `entries` может отсутствовать если записей нет
+- `GET /dashboard/week` возвращает `tasks`, `habits`, `journal` — но некоторые могут быть пустыми объектами без ожидаемых полей
 
 ## Подключённые backend-эндпоинты
 

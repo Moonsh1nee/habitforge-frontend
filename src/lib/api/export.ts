@@ -2,10 +2,8 @@ import { api } from "./client";
 
 export type ExportType =
   | "tasks"
-  | "nutrition"
   | "habits"
   | "goals"
-  | "workouts"
   | "journal"
   | "projects"
   | "tags"
