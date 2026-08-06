@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth.schema";
 import { useLogin } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const login = useLogin();
 

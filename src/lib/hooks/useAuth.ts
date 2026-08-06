@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import { authApi } from "@/lib/api/auth";
@@ -29,6 +29,7 @@ export function clearAuthSentinel() {
 
 export function useLogin() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setUser } = useAuthStore();
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
@@ -36,6 +37,16 @@ export function useLogin() {
     onSuccess: (data) => {
       setUser(data.user);
       setAuthSentinel();
+      // ?next= is set when the login page was reached via a redirect from
+      // GET /oauth/authorize (a third-party app's "Sign in with GetGrip"
+      // flow) — it's a fully-qualified backend URL (settings.PUBLIC_API_URL
+      // based), so this must be a real navigation, not router.push, since
+      // it may point at a different origin than this frontend.
+      const next = searchParams.get("next");
+      if (next) {
+        window.location.href = next;
+        return;
+      }
       router.push("/dashboard");
     },
     onError: () => toast.error("Неверный email или пароль"),
